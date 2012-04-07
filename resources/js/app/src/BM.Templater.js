@@ -12,3 +12,9 @@ BM.Templater.Directories = {
 		return $('.directories-list-holder');
 	}
 };
+
+BM.Templater.Categories = {
+	ddCategoryHolder : function() {
+		return $('.categories-dropdown');
+	}
+};

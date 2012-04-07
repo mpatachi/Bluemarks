@@ -80,7 +80,9 @@
 						<li>
 							<div class="btn-group toolbar-item">
 							  <button class="btn">categories</button>
-							  <button class="btn"><i class='icon-plus'></i></button>
+							  <button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-plus'></i></button>
+							  <ul class='dropdown-menu categories-dropdown'>
+							  </ul>
 							</div>
 						</li>
 						<!-- end type buttons -->

@@ -19,6 +19,7 @@
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.View.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.View.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.AppBoot.js" />
         </concat>
         <echo message="${JS} built." />

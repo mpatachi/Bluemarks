@@ -14,7 +14,7 @@ BM.Categories = {
 	init : function() {
 		var me = this;
 		me.getCategories(function() {
-			console.log(BM.Storage.g().categories);
+			BM.Categories.View.init();
 		});
 	}
 };
