@@ -1,0 +1,30 @@
+<project name="Build example" default="all" basedir=".">
+    <!-- Setup -->
+    <property name="SRC_DIR" value="src" description="Source folder" />
+    <property name="SRC_JS_DIR" value="${SRC_DIR}" description="JavaScript source folder" />
+    <property name="DIST_DIR" value="../" description="Output folder for build targets" />
+    <property name="DIST_JS_DIR" value="${DIST_DIR}" description="Output folder for JavaScript files" />
+
+    <!-- Files names for distribution -->
+    <property name="JS" value="${DIST_JS_DIR}app-all.js" />
+
+    <target name="js" description="Concatenate JavaScript source files">
+        <echo message="Building ${JS}" />
+        <concat destfile="${JS}">
+            <fileset dir="${SRC_JS_DIR}" includes="init.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Templater.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="BM.Storage.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Entities.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.View.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.AppBoot.js" />
+        </concat>
+        <echo message="${JS} built." />
+    </target>
+
+    <target name="all" depends="js">
+        <echo message="Build complete." />
+    </target>
+</project>
