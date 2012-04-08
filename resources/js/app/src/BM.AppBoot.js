@@ -22,6 +22,7 @@ BM.AppBoot = {
 		me.getInfo();
 		BM.Directories.init();
 		BM.Categories.init();
+		BM.Bookmarks.init();
 	},
 	end : function() {
 		

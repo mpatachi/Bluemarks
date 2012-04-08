@@ -19,6 +19,9 @@ BM.Categories.View = {
 		
 		BM.e(callback);
 	},
+	bindHandlers : function() {
+		
+	},
 	init : function() {
 		var me = this;
 		

@@ -4,9 +4,23 @@
 
 BM.Entities = {};
 
-BM.Entities.Bookmark = {
+BM.Entities.Bookmark = (function() {
+	var Bookmark = function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		this.id = id;
+		this.name = name;
+		this.directoryId = dirId;
+		this.categoriesId = catIds;
+		this.typeId = typeId;
+		this.noteId = noteId;
+		this.description = description;
+		this.url = url;
+		this.image = img;
+	};
 	
-};
+	return function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		return new Bookmark(id, name, dirId, catIds, typeId, noteId, description, url, img);
+	};
+})();
 
 BM.Entities.Category = (function() {
 	var Category = function(id, name) {

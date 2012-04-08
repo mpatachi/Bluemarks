@@ -19,7 +19,7 @@ BM.Directories = {
 	},
 	getDirectories : function(callback, limit) {
 		BM.p('directories/list_all', function(response) {
-			if (response.status === "ok") {
+			if (response.status === 'ok') {
 				BM.Storage.g().storeAllDirectories(response.data);
 				BM.e(callback);
 			}

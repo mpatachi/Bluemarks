@@ -22,7 +22,7 @@ class Bookmarks extends REST_Controller
 		}
 	}
 	
-	function list_all_get() {
+	function list_all_post() {
 		$bookmarks = $this
 						->bookmark_model
 						->getAllBookmarks();
@@ -30,7 +30,7 @@ class Bookmarks extends REST_Controller
 		if($bookmarks) {
 			$this->response(array('status' => 'ok', 'data' => $bookmarks), 200); // 200 being the HTTP response code
 		} else {
-			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t find any bookmarks!'), 404);
+			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t find any bookmarks!'), 200);
 		}
 	}
 	

@@ -4,9 +4,11 @@ class Bookmark_model extends CI_Model {
 	
 	private $userId = null;
 	
-	function __construc() {
-		$userId = $this->session->userdata('id');	
+	function __construct() {
+		parent::__construct();
+		$this->userId = $this->session->userdata('id');	
 	}
+	
 	/**
 	 * Get Category
 	 * 
@@ -19,7 +21,7 @@ class Bookmark_model extends CI_Model {
 		$query = $this
 					->db
 					->select('id, directoryId, userId, typeId, noteId, name, description, url, image')
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->limit(1)
 					->get('bookmarks');
@@ -34,11 +36,10 @@ class Bookmark_model extends CI_Model {
 	 * @return categories list
 	 */
 	public function getAllBookmarks() {
-		//$userId = $this->session->userdata('id');
 		$query = $this
 					->db
-					->select('id, directoryId, userId, typeId, noteId, name, description, url, image')
-					->where('userId', $userId)
+					->select('id, directoryId, categoriesId, typeId, noteId, name, description, url, image')
+					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->get('bookmarks');
 		
@@ -53,7 +54,7 @@ class Bookmark_model extends CI_Model {
 	 * @return bool
 	 */
 	public function createBookmark($name, $description, $url, $image, $typeId, $directoryId, $noteId) {
-		$newBookmark = array('name' => $name, 'userId' => $userId, 'description' => $description, 
+		$newBookmark = array('name' => $name, 'userId' => $this->userId, 'description' => $description, 
 							 'url' => $url, 'image' => $image, 'typeId' => $typeId,
 							 'directoryId' => $directoryId, 'noteId' => $noteId);
 		$action = $this
@@ -80,7 +81,7 @@ class Bookmark_model extends CI_Model {
 		$action = $this
 					->db
 					->where('id', $bId)
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->update('bookmarks', $newData);
 		
@@ -102,7 +103,7 @@ class Bookmark_model extends CI_Model {
 		$query = $this
 					->db
 					->select('id')
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('LOWER(url)=', strtolower($url))
 					->limit(1)
 					->get('bookmarks');

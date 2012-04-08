@@ -5,6 +5,7 @@
 
 BM.Storage = (function() {
 	var instantiated = false;
+	var bookmarkCount = 0;
 	
 	function init() {
 		/**
@@ -47,16 +48,39 @@ BM.Storage = (function() {
 		}
 		
 		return {
-			bookmarks : [],
+			bookmarks : {
+					
+			},
 			categories : [],
 			directories : [],
 			directoriesRef : [],
 			
-			storeBookmark : function($bookmark) {
-				this.bookmarks.push($bookmark);
+			storeBookmark : function($b) {
+				//this.bookmarks.push($bookmark);
+				bookmarkCount++;
+				//(id, name, dirId, catIds, typeId, noteId, description, url, img)
+				var bookmark = new BM.Entities.Bookmark(
+					$b.id, 
+					$b.name, 
+					$b.directoryId, 
+					$b.categoriesId, 
+					$b.typeId, 
+					$b.noteId,
+					$b.description,
+					$b.url,
+					$b.image
+				);
+				this.bookmarks[bookmarkCount] = {
+					bookmark : bookmark
+				};			
 			},
 			storeAllBookmarks : function($list) {
-				
+				var me = this;
+				var l = $list.length;
+				for (var i =0; i< l; i++) {
+					me.storeBookmark($list[i]);
+				}
+				console.log(me.bookmarks);
 			},
 			storeCategory : function($category) {
 				this.categories.push($category);
