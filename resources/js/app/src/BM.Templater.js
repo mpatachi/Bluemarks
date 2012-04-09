@@ -18,3 +18,19 @@ BM.Templater.Categories = {
 		return $('.categories-dropdown');
 	}
 };
+
+BM.Templater.Bookmarks = {
+	bookmarksList : function() {
+		return $('.bookmarks-list');
+	},
+	bookmarkTemplate : function(id, name, image) {
+		var li = $("<li class='span2' bookmarkd-id='" + id + "'></li>");
+		var link = $("<a href='#' class='thumbnail'></a>");
+		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
+		var title = $("<h5>" + name + "</h5>");
+		link.append(img, title);
+		li.append(link);
+		
+		return li; 
+	}
+};

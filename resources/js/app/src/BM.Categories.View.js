@@ -11,9 +11,8 @@ BM.Categories.View = {
 	listCategories : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
-		
-		_(storage.categories).each(function(obj) {
-			var itemTample = me.ddItemTemplate(obj.name, obj.id);
+		_(storage.categories).each(function(obj, key) {
+			var itemTample = me.ddItemTemplate(obj.category.name, key);
 			BM.Templater.Categories.ddCategoryHolder().append(itemTample);
 		});
 		

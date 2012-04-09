@@ -113,6 +113,22 @@ BM.Templater.Categories = {
 		return $('.categories-dropdown');
 	}
 };
+
+BM.Templater.Bookmarks = {
+	bookmarksList : function() {
+		return $('.bookmarks-list');
+	},
+	bookmarkTemplate : function(id, name, image) {
+		var li = $("<li class='span2' bookmarkd-id='" + id + "'></li>");
+		var link = $("<a href='#' class='thumbnail'></a>");
+		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
+		var title = $("<h5>" + name + "</h5>");
+		link.append(img, title);
+		li.append(link);
+		
+		return li; 
+	}
+};
 /**
  * @author Robert
  * Storage.js
@@ -121,6 +137,7 @@ BM.Templater.Categories = {
 BM.Storage = (function() {
 	var instantiated = false;
 	var bookmarkCount = 0;
+	var categoryCount = 0;
 	
 	function init() {
 		/**
@@ -166,7 +183,9 @@ BM.Storage = (function() {
 			bookmarks : {
 					
 			},
-			categories : [],
+			categories : {
+				
+			},
 			directories : [],
 			directoriesRef : [],
 			
@@ -197,26 +216,25 @@ BM.Storage = (function() {
 				}
 				console.log(me.bookmarks);
 			},
-			storeCategory : function($category) {
-				this.categories.push($category);
-			},
 			storeDirectory : function($directory) {
 				this.directories.push($directory);
 			},
-			/* Stores all categories into an internal data structure
-			 * TODO: need to implement some sort of internatl id for each element 
-			 */
+			storeCategory : function($c) {
+				categoryCount++;
+				var category = new BM.Entities.Category(
+					$c.id, 
+					$c.name
+				);
+				this.categories[categoryCount] = {
+					category : category
+				};
+			},			
 			storeAllCategories : function($list) {
 				var me = this;
 				var l = $list.length;
 				var entity = BM.Entities;
 				for (var i = 0; i < l; i++) {
-					var cat = new entity.Category(
-						$list[i].id,
-						$list[i].name
-					);
-					
-					me.categories.push(cat);
+					me.storeCategory($list[i]);
 				}
 			},
 			/*
@@ -540,9 +558,8 @@ BM.Categories.View = {
 	listCategories : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
-		
-		_(storage.categories).each(function(obj) {
-			var itemTample = me.ddItemTemplate(obj.name, obj.id);
+		_(storage.categories).each(function(obj, key) {
+			var itemTample = me.ddItemTemplate(obj.category.name, key);
 			BM.Templater.Categories.ddCategoryHolder().append(itemTample);
 		});
 		
@@ -575,7 +592,33 @@ BM.Bookmarks = {
 	init : function() {
 		var me = this;
 		me.getBookmarks(function() {
-			
+			BM.Bookmarks.View.init();
+		});
+	}
+};
+/**
+ * @author Robert
+ */
+
+BM.Bookmarks.View = {
+	listBookmarks : function(callback) {
+		var me = this;
+		var storage = BM.Storage.g();
+		var t = BM.Templater.Bookmarks;
+		_(storage.bookmarks).each(function(obj, key) {
+			var itemTemplate = t.bookmarkTemplate(key, obj.bookmark.url);
+			console.log(itemTemplate);
+			console.log(t.bookmarksList());
+			t.bookmarksList().append(itemTemplate); 
+		});
+		
+		BM.e(callback);
+	},
+	init : function() {
+		var me = this;
+		
+		me.listBookmarks(function() {
+			console.log('done listing bookmarks');
 		});
 	}
 };

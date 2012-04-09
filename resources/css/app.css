@@ -157,6 +157,14 @@
 	position: relative;
 	margin-top: 51px;
 }
+.wall .bookmarks-list {
+	padding-top: 20px;
+	margin-left: 0px;
+}
+.wall .bookmarks-list > li {
+	margin-left: 20px;
+	height: 150px;
+}
 /* branding */
 .branding .logo {
 	width: 239px;

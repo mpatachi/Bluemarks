@@ -97,7 +97,18 @@
 					</ul>					
 				</div>
 				<div class='wall'>
-					
+					<ul class='thumbnails bookmarks-list'>
+						<li class='span2'>
+							<a href='#' class="thumbnail">
+								<img src="../resources/img/160x120.gif" alt="">
+								<h5>www.samplepage.com</h5>
+							</a>
+						</li>
+						<li class='span2'><a href="#" class="thumbnail"><img src="../resources/img/160x120.gif" alt=""></a></li>
+						<li class='span2'><a href="#" class="thumbnail"><img src="../resources/img/160x120.gif" alt=""></a></li>
+						<li class='span2'><a href="#" class="thumbnail"><img src="../resources/img/160x120.gif" alt=""></a></li>
+						<li class='span2'><a href="#" class="thumbnail"><img src="../resources/img/160x120.gif" alt=""></a></li>
+					</ul>
 				</div>
 			</div>
 		</div>

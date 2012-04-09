@@ -6,6 +6,7 @@
 BM.Storage = (function() {
 	var instantiated = false;
 	var bookmarkCount = 0;
+	var categoryCount = 0;
 	
 	function init() {
 		/**
@@ -51,7 +52,9 @@ BM.Storage = (function() {
 			bookmarks : {
 					
 			},
-			categories : [],
+			categories : {
+				
+			},
 			directories : [],
 			directoriesRef : [],
 			
@@ -82,26 +85,25 @@ BM.Storage = (function() {
 				}
 				console.log(me.bookmarks);
 			},
-			storeCategory : function($category) {
-				this.categories.push($category);
-			},
 			storeDirectory : function($directory) {
 				this.directories.push($directory);
 			},
-			/* Stores all categories into an internal data structure
-			 * TODO: need to implement some sort of internatl id for each element 
-			 */
+			storeCategory : function($c) {
+				categoryCount++;
+				var category = new BM.Entities.Category(
+					$c.id, 
+					$c.name
+				);
+				this.categories[categoryCount] = {
+					category : category
+				};
+			},			
 			storeAllCategories : function($list) {
 				var me = this;
 				var l = $list.length;
 				var entity = BM.Entities;
 				for (var i = 0; i < l; i++) {
-					var cat = new entity.Category(
-						$list[i].id,
-						$list[i].name
-					);
-					
-					me.categories.push(cat);
+					me.storeCategory($list[i]);
 				}
 			},
 			/*

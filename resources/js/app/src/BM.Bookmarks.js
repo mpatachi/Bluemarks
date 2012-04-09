@@ -14,7 +14,7 @@ BM.Bookmarks = {
 	init : function() {
 		var me = this;
 		me.getBookmarks(function() {
-			
+			BM.Bookmarks.View.init();
 		});
 	}
 };
