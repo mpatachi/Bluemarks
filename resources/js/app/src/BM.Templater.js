@@ -23,8 +23,8 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
-	bookmarkTemplate : function(id, name, image) {
-		var li = $("<li class='span2' bookmarkd-id='" + id + "'></li>");
+	bookmarkTemplate : function(id, name, category, image) {
+		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-category='" + category + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");

@@ -57,16 +57,28 @@ BM.Storage = (function() {
 			},
 			directories : [],
 			directoriesRef : [],
+			categoriesRef : [],
 			
 			storeBookmark : function($b) {
+				var me = this;
 				//this.bookmarks.push($bookmark);
 				bookmarkCount++;
+				var catIds = [];
+				//TODO to myself: review this please it was late :))
+				var categories = $b.categoriesId.split(' ');
+				_(categories).each(function(cat) {
+					_(me.categoriesRef).each(function(obj) {
+						if (obj.realId == cat) {
+							catIds.push(obj.id);
+						}
+					});
+				});
 				//(id, name, dirId, catIds, typeId, noteId, description, url, img)
 				var bookmark = new BM.Entities.Bookmark(
 					$b.id, 
 					$b.name, 
 					$b.directoryId, 
-					$b.categoriesId, 
+					catIds, 
 					$b.typeId, 
 					$b.noteId,
 					$b.description,
@@ -83,7 +95,7 @@ BM.Storage = (function() {
 				for (var i =0; i< l; i++) {
 					me.storeBookmark($list[i]);
 				}
-				console.log(me.bookmarks);
+				//console.log(me.bookmarks);
 			},
 			storeDirectory : function($directory) {
 				this.directories.push($directory);
@@ -97,6 +109,11 @@ BM.Storage = (function() {
 				this.categories[categoryCount] = {
 					category : category
 				};
+				var cr = {
+					id : categoryCount,
+					realId : $c.id 
+				};
+				this.categoriesRef.push(cr);
 			},			
 			storeAllCategories : function($list) {
 				var me = this;
@@ -154,18 +171,19 @@ BM.Storage = (function() {
 				};
 				me.directoriesRef.push(root);
 			},
-			getBookmark : function($id) {
-				var r = search(this.bookmarks, function(obj) {
-					return obj.id == $id;
-				}, false, true);
-				if (-1 !== r) {
-					return r;
-				}
-				
-				return null;
+			getBookmark : function(id) {
+				// var r = search(this.bookmarks, function(obj) {
+					// return obj.id == $id;
+				// }, false, true);
+				// if (-1 !== r) {
+					// return r;
+				// }
+// 				
+				// return null;
+				return this.bookmarks[id];
 			},
-			getCategory : function() {
-				
+			getCategory : function(id) {
+				return this.categories[id];
 			},
 			getDirectory : function(id) {
 				var r = search(this.directories, function(obj) {
