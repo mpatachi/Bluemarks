@@ -10,7 +10,17 @@ BM.Templater.Directories = {
 	},
 	directoriesListHolder : function() {
 		return $('.directories-list-holder');
-	}
+	},
+	itemTemplate : function(name, id, target, parent) {
+		var it = $("<li><a href='#' class='directory-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
+
+		return it;
+	},
+	listTemplate : function(name) {
+		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
+		
+		return holder;
+	},	
 };
 
 BM.Templater.Categories = {

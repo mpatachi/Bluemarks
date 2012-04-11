@@ -8,39 +8,40 @@ BM.Directories.View = {
 	activeDirectory : null,
 	activeList : [],
 	
-	itemTemplate : function(name, id, target, parent) {
-		var it = $("<li><a href='#' class='directory-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
-
-		return it;
-	},
-	listTemplate : function(name) {
-		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
-		
-		return holder;
-	},
-	
 	getDirectoriesHolder : function() {
 		return $(this.directoryHolder);
 	},
 	listDirectories : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
+		var t = BM.Templater.Directories;
 		
-		_(storage.directoriesRef).each(function(obj) {
-			var listTemplate = me.listTemplate(obj.ref);
+		// _(storage.directoriesRef).each(function(obj) {
+			// var listTemplate = t.listTemplate(obj.ref);
+// 			
+			// _(obj.children).each(function(index) {
+				// var item = storage.getDirectory(index);
+				// var listItem = t.itemTemplate(item.name, item.id, 'directory-' + item.id, obj.ref);
+				// listTemplate.append(listItem);
+			// });
+// 			
+			// /*
+			 // * add the templates to the DOM
+			 // * TODO: the items are added directly should run through a templating
+			 // * 		 system.
+			 // */
+			// t.directoriesListHolder().append(listTemplate);
+		// });
+		_(storage.directoryTree).each(function(obj) {
+			var listTemplate = t.listTemplate(obj.ref);
 			
 			_(obj.children).each(function(index) {
-				var item = storage.getDirectory(index);
-				var listItem = me.itemTemplate(item.name, item.id, 'directory-' + item.id, obj.ref);
+				var item = storage.getDirectory(index).directory;
+				var listItem = t.itemTemplate(item.name, item.id, 'directory-' + item.id, obj.ref);
 				listTemplate.append(listItem);
-			});
+			})
 			
-			/*
-			 * add the templates to the DOM
-			 * TODO: the items are added directly should run through a templating
-			 * 		 system.
-			 */
-			BM.Templater.Directories.directoriesListHolder().append(listTemplate);
+			t.directoriesListHolder().append(listTemplate);
 		});
 		
 		BM.e(callback);

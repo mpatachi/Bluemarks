@@ -7,6 +7,7 @@ BM.Storage = (function() {
 	var instantiated = false;
 	var bookmarkCount = 0;
 	var categoryCount = 0;
+	var directoryCount = 0;
 	
 	function init() {
 		/**
@@ -55,10 +56,14 @@ BM.Storage = (function() {
 			categories : {
 				
 			},
-			directories : [],
+			directories : {
+				
+			},
+			bookmarkRef : [],
 			directoriesRef : [],
 			categoriesRef : [],
-			
+			directoryTree : [],
+						
 			storeBookmark : function($b) {
 				var me = this;
 				//this.bookmarks.push($bookmark);
@@ -95,10 +100,6 @@ BM.Storage = (function() {
 				for (var i =0; i< l; i++) {
 					me.storeBookmark($list[i]);
 				}
-				//console.log(me.bookmarks);
-			},
-			storeDirectory : function($directory) {
-				this.directories.push($directory);
 			},
 			storeCategory : function($c) {
 				categoryCount++;
@@ -109,11 +110,11 @@ BM.Storage = (function() {
 				this.categories[categoryCount] = {
 					category : category
 				};
-				var cr = {
+				var ref = {
 					id : categoryCount,
 					realId : $c.id 
 				};
-				this.categoriesRef.push(cr);
+				this.categoriesRef.push(ref);
 			},			
 			storeAllCategories : function($list) {
 				var me = this;
@@ -123,53 +124,114 @@ BM.Storage = (function() {
 					me.storeCategory($list[i]);
 				}
 			},
-			/*
-			 * Stores all the bookmarks into an internal data structure
-			 * @param object list
-			 * TODO: need to implement some sort of internal id for each element
-			 * 		  the server id will be too long in the future
-			 */
+			storeDirectory : function($directory, $id) {
+				var dir = new BM.Entities.Directory(
+							$directory.id,
+							$directory.name,
+							$directory.parentId
+					);
+				if ($id == undefined) {
+					directoryCount++;					
+					this.directories[directoryCount] = {
+						directory : dir
+					};
+					var ref = {
+						id : directoryCount,
+						realId : $directory.id
+					};
+					this.directoriesRef.push(ref);
+				} else {
+					this.directories[$id] = {
+						directory : dir
+					};
+				}
+			},
 			storeAllDirectories : function($list) {
 				var me = this;
 				var l = $list.length;
 				var root = new BM.Entities.Relationer('root', []);
+				var check = false;
+				
 				/*
 				 * for each item in the list create a new directory entity and pass
 				 * the values of the properties after that add it into the internal data
 				 * structure
 				 */
 				for (var i = 0; i < l; i++) {
-					var dir = new BM.Entities.Directory(
-						$list[i].id,
-						$list[i].name,
-						$list[i].parentId
-					);
+					var item = $list[i];
+					var pId = item.parentId;
+					
+					if (false === check) {
+						me.storeDirectory(item);
+					} else {
+						var di = search(me.directoriesRef, function(obj) {
+							return obj.realId == item.id;
+						}, false, true);
+						
+						if (-1 !== di) {
+							me.storeDirectory(item, di.id);
+						} else {
+							me.storeDirectory(item);
+						}
+					}
+					
+					var intId = directoryCount;
+					
 					/*
-					 * create the node realtion between the directories and store them
-					 * in a data structure we use a 'skeleton' entity for the item
+					 * if the parent id of the item is null add it to root
 					 */
-					if ($list[i].parentId == null) {
-						root.children.push($list[i].id);
+					if (pId == null) {
+						root.children.push(intId);
 					} else {
 						/*
-						 * check if there is a referance to the items parent id in the
-						 * data structure if returns -1 then there is no referance so we
-						 * create that referance, if there is one then we add the current item
-						 * to that referance
+						 * else if the parent id is set then search in the
+						 * directories reference for the existence of the directory
 						 */
+						var refId;
 						var r = search(me.directoriesRef, function(obj) {
-							return obj.ref == 'directory-' + $list[i].parentId;
-						}, true);
-						if (-1 !== r) {
-							me.directoriesRef[r].children.push($list[i].id);
+							return obj.realId == pId;
+						}, false, true);
+						
+						if (-1 == r) {
+							/*
+							 * if the directory does not exist yet then 
+							 * create a temporary holder for it 
+							 * we just set the id of the directory 
+							 */
+							check = true;	//we set the check value to search later for existing references
+							var temp = {
+								id : pId,
+								name : null,
+								parentId : null
+							};
+							me.storeDirectory(temp);
+							refId = directoryCount; //set the reference id to the latest directory
 						} else {
-							var item = new BM.Entities.Relationer('directory-' + $list[i].parentId, [$list[i].id]);
-							me.directoriesRef.push(item);
-						}						
+							refId = r.id;	//if there is a reference the we se only the reference id
+						}
+
+						/*
+						 * we search for an existing instance in the directory tree
+						 */
+						var rs = search(me.directoryTree, function(obj) {
+							return obj.ref == 'directory-' + refId;
+						}, true);
+						/*
+						 * if there is an instance then we add the internal id of the item
+						 * to it's children
+						 * 
+						 * if not then we create a new instance and we add the internal id of the item
+						 * to it's children 
+						 */
+						if (-1 !== rs) {
+							me.directoryTree[rs].children.push(intId);
+						} else {
+							var item = new BM.Entities.Relationer('directory-' + refId, [intId]);
+							me.directoryTree.push(item);
+						}
 					}
-					me.directories.push(dir);
-				};
-				me.directoriesRef.push(root);
+				}
+				me.directoryTree.push(root);
 			},
 			getBookmark : function(id) {
 				// var r = search(this.bookmarks, function(obj) {
@@ -186,17 +248,18 @@ BM.Storage = (function() {
 				return this.categories[id];
 			},
 			getDirectory : function(id) {
-				var r = search(this.directories, function(obj) {
-					if (obj.id == id) {
-						return obj;	
-					}
-				}, false, true);
-				
-				if (-1 !== r) {
-					return r;
-				}
-				
-				return null;
+				// var r = search(this.directories, function(obj) {
+					// if (obj.id == id) {
+						// return obj;	
+					// }
+				// }, false, true);
+// 				
+				// if (-1 !== r) {
+					// return r;
+				// }
+// 				
+				// return null;
+				return this.directories[id];
 			}
 		}
 	}
