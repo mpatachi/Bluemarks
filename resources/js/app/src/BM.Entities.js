@@ -34,16 +34,16 @@ BM.Entities.Category = (function() {
 })();
 
 BM.Entities.Directory = (function() {
-	var Directory = function(id, name, parentId) {
+	var Directory = function(id, name, parentId, intId) {
 		this.id = id;
 		this.name = name;
 		this.parentId = parentId;
-		//this.realId = realId;
+		this.intId = intId;
 		//this.realParentId = realParentId;
 	};
 	
-	return function(id, name, parentId) {
-		return new Directory(id, name, parentId);
+	return function(id, name, parentId, intId) {
+		return new Directory(id, name, parentId, intId);
 	};
 })();
 

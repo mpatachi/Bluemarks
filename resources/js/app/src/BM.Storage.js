@@ -125,6 +125,7 @@ BM.Storage = (function() {
 				}
 			},
 			storeDirectory : function($directory, $id) {
+				var returnId;
 				var dir = new BM.Entities.Directory(
 							$directory.id,
 							$directory.name,
@@ -132,26 +133,32 @@ BM.Storage = (function() {
 					);
 				if ($id == undefined) {
 					directoryCount++;					
-					this.directories[directoryCount] = {
-						directory : dir
-					};
 					var ref = {
 						id : directoryCount,
 						realId : $directory.id
 					};
+					dir.intId = directoryCount;
+					this.directories[directoryCount] = {
+						directory : dir
+					};					
 					this.directoriesRef.push(ref);
+					returnId = directoryCount;
 				} else {
+					dir.intId = $id;
 					this.directories[$id] = {
 						directory : dir
 					};
+					returnId = $id;
 				}
+				
+				return this.directories[returnId];
 			},
 			storeAllDirectories : function($list) {
 				var me = this;
 				var l = $list.length;
 				var root = new BM.Entities.Relationer('root', []);
 				var check = false;
-				
+				var currentItem;
 				/*
 				 * for each item in the list create a new directory entity and pass
 				 * the values of the properties after that add it into the internal data
@@ -162,20 +169,20 @@ BM.Storage = (function() {
 					var pId = item.parentId;
 					
 					if (false === check) {
-						me.storeDirectory(item);
+						currentItem = me.storeDirectory(item);
 					} else {
 						var di = search(me.directoriesRef, function(obj) {
 							return obj.realId == item.id;
 						}, false, true);
 						
 						if (-1 !== di) {
-							me.storeDirectory(item, di.id);
+							currentItem = me.storeDirectory(item, di.id);
 						} else {
-							me.storeDirectory(item);
+							currentItem = me.storeDirectory(item);
 						}
 					}
-					
-					var intId = directoryCount;
+
+					var intId = currentItem.directory.intId;
 					
 					/*
 					 * if the parent id of the item is null add it to root
@@ -231,6 +238,7 @@ BM.Storage = (function() {
 						}
 					}
 				}
+				console.log(me.directoryTree);
 				me.directoryTree.push(root);
 			},
 			getBookmark : function(id) {

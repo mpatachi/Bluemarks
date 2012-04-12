@@ -266,6 +266,7 @@ BM.Storage = (function() {
 				}
 			},
 			storeDirectory : function($directory, $id) {
+				var returnId;
 				var dir = new BM.Entities.Directory(
 							$directory.id,
 							$directory.name,
@@ -273,26 +274,32 @@ BM.Storage = (function() {
 					);
 				if ($id == undefined) {
 					directoryCount++;					
-					this.directories[directoryCount] = {
-						directory : dir
-					};
 					var ref = {
 						id : directoryCount,
 						realId : $directory.id
 					};
+					dir.intId = directoryCount;
+					this.directories[directoryCount] = {
+						directory : dir
+					};					
 					this.directoriesRef.push(ref);
+					returnId = directoryCount;
 				} else {
+					dir.intId = $id;
 					this.directories[$id] = {
 						directory : dir
 					};
+					returnId = $id;
 				}
+				
+				return this.directories[returnId];
 			},
 			storeAllDirectories : function($list) {
 				var me = this;
 				var l = $list.length;
 				var root = new BM.Entities.Relationer('root', []);
 				var check = false;
-				
+				var currentItem;
 				/*
 				 * for each item in the list create a new directory entity and pass
 				 * the values of the properties after that add it into the internal data
@@ -303,20 +310,20 @@ BM.Storage = (function() {
 					var pId = item.parentId;
 					
 					if (false === check) {
-						me.storeDirectory(item);
+						currentItem = me.storeDirectory(item);
 					} else {
 						var di = search(me.directoriesRef, function(obj) {
 							return obj.realId == item.id;
 						}, false, true);
 						
 						if (-1 !== di) {
-							me.storeDirectory(item, di.id);
+							currentItem = me.storeDirectory(item, di.id);
 						} else {
-							me.storeDirectory(item);
+							currentItem = me.storeDirectory(item);
 						}
 					}
-					
-					var intId = directoryCount;
+
+					var intId = currentItem.directory.intId;
 					
 					/*
 					 * if the parent id of the item is null add it to root
@@ -372,6 +379,7 @@ BM.Storage = (function() {
 						}
 					}
 				}
+				console.log(me.directoryTree);
 				me.directoryTree.push(root);
 			},
 			getBookmark : function(id) {
@@ -456,16 +464,16 @@ BM.Entities.Category = (function() {
 })();
 
 BM.Entities.Directory = (function() {
-	var Directory = function(id, name, parentId) {
+	var Directory = function(id, name, parentId, intId) {
 		this.id = id;
 		this.name = name;
 		this.parentId = parentId;
-		//this.realId = realId;
+		this.intId = intId;
 		//this.realParentId = realParentId;
 	};
 	
-	return function(id, name, parentId) {
-		return new Directory(id, name, parentId);
+	return function(id, name, parentId, intId) {
+		return new Directory(id, name, parentId, intId);
 	};
 })();
 
@@ -532,7 +540,7 @@ BM.Directories.View = {
 		var me = this;
 		var storage = BM.Storage.g();
 		var t = BM.Templater.Directories;
-		
+		var utils = BM.utils;
 		// _(storage.directoriesRef).each(function(obj) {
 			// var listTemplate = t.listTemplate(obj.ref);
 // 			
@@ -551,16 +559,23 @@ BM.Directories.View = {
 		// });
 		_(storage.directoryTree).each(function(obj) {
 			var listTemplate = t.listTemplate(obj.ref);
-			
+
 			_(obj.children).each(function(index) {
 				var item = storage.getDirectory(index).directory;
-				var listItem = t.itemTemplate(item.name, item.id, 'directory-' + item.id, obj.ref);
+				var dirRef = 'directory-' + item.intId;
+				var r = utils.search(storage.directoryTree, function(it) {
+					return it.ref == dirRef;
+				});
+				if (-1 === r) {
+					dirRef = 'none';
+				}
+				var listItem = t.itemTemplate(item.name, item.intId, dirRef, obj.ref);
 				listTemplate.append(listItem);
-			})
+			});
 			
 			t.directoriesListHolder().append(listTemplate);
 		});
-		
+		console.log(storage.directories);
 		BM.e(callback);
 	},
 	showDirectories : function(item) {
