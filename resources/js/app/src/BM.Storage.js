@@ -238,7 +238,6 @@ BM.Storage = (function() {
 						}
 					}
 				}
-				console.log(me.directoryTree);
 				me.directoryTree.push(root);
 			},
 			getBookmark : function(id) {

@@ -18,6 +18,7 @@
 		<div class="top-toolbar-fixed">
 			<div class='toolbar-inner'>
 				<div class='container'>
+					<!-- top toolbar -->
 					<ul class='toolbar top-toolbar'>
 						<!-- logo -->
 						<li class="branding">
@@ -52,7 +53,8 @@
 								<button type='submit' class='btn'><i class='icon-cog'></i></button>
 							</div>						
 						</li>
-					</ul>			
+					</ul>
+					<!-- end top toolbar -->			
 				</div>
 			</div>
 		</div>
@@ -61,8 +63,12 @@
 			<div class='left-content'>
 				<div class='left-sidebar'>
 					<div class="directories-group btn-group">
-					  <button class="btn">directories</button>
-					  <button class="btn"><i class='icon-plus'></i></button>
+					  	<button class="btn">directories</button>
+					  	<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>
+						<ul class="directory-action-group dropdown-menu">
+							<li><a href='#add-directory-modal' class='directory-action' role='add-directory' data-toggle="modal"><i class='icon-plus'></i> add directory</a></li>
+							<li><a href='#' class='directory-action' role='edit-directory'><i class='icon-pencil'></i> edit directory</a></li>
+						</ul>	
 					</div>
 					<div class="separator no-select"></div>
 					<div class="directories-breadcum-holder">
@@ -73,7 +79,7 @@
 						<!-- directories list -->
 					</div>
 				</div>
-			</div>
+			</div><!-- end left content -->
 			<div class='right-content'>
 				<div class='top-subtoolbar'>
 					<ul class='toolbar'>
@@ -106,8 +112,27 @@
 						</li> -->					
 					</ul>
 				</div>
-			</div>
-		</div>
-	</div>
+			</div> <!-- end right content -->
+		</div> <!-- end main content -->
+	</div> <!-- end mai app content -->
+	<div class="modal fade" id="add-directory-modal">
+  		<div class="modal-header">
+	    	<a class="close" data-dismiss="modal">×</a>
+	    	<h3>Add directory</h3>
+	  	</div>
+  		<div class="modal-body">
+	    	<label>directory name</label>
+  			<input type="text" class="span3" placeholder="Type something…">
+  			<label>directory parent</label>
+  			<select class='span3'>
+  				<option>asdadas</option>
+  			</select>
+  			<span class="help-inline">not requiered</span>
+	  	</div>
+	  	<div class="modal-footer">
+	    	<a href="#" class="btn" data-dismiss="modal">close</a>
+	    	<a href="#" class="btn btn-primary">add</a>
+	  	</div>
+	</div>	
 </body>
 </html>

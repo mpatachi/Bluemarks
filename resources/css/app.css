@@ -1,9 +1,13 @@
+html, body {
+	height: 100%;
+}
 .show-me {
 	background-color: #E6E6E6;
 }
 /* main app content wrapper */
 .main-app-container {
 	margin: 0 auto;
+	height: 100%;
 }
 .main-app-container:after, 
 .main-app-container:before {
