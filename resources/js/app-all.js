@@ -540,22 +540,7 @@ BM.Directories.View = {
 		var storage = BM.Storage.g();
 		var t = BM.Templater.Directories;
 		var utils = BM.utils;
-		// _(storage.directoriesRef).each(function(obj) {
-			// var listTemplate = t.listTemplate(obj.ref);
-// 			
-			// _(obj.children).each(function(index) {
-				// var item = storage.getDirectory(index);
-				// var listItem = t.itemTemplate(item.name, item.id, 'directory-' + item.id, obj.ref);
-				// listTemplate.append(listItem);
-			// });
-// 			
-			// /*
-			 // * add the templates to the DOM
-			 // * TODO: the items are added directly should run through a templating
-			 // * 		 system.
-			 // */
-			// t.directoriesListHolder().append(listTemplate);
-		// });
+		
 		_(storage.directoryTree).each(function(obj) {
 			var listTemplate = t.listTemplate(obj.ref);
 
