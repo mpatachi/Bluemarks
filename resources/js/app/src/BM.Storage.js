@@ -124,6 +124,23 @@ BM.Storage = (function() {
 					me.storeCategory($list[i]);
 				}
 			},
+			addToDirectoryTree : function(directory) {
+				var me = this;
+				var ref = 'root';
+				if (directory.parentId != 'null') {
+					ref = 'directory-' + directory.parentId;
+				}
+				var rs = search(me.directoryTree, function(obj) {
+					return obj.ref == ref;
+				}, true);
+						
+				if (-1 !== rs) {
+					me.directoryTree[rs].children.push(directory.intId);
+				} else {
+					var item = new BM.Entities.Relationer(ref, [directory.intId]);
+					me.directoryTree.push(item);
+				}				
+			},
 			storeDirectory : function($directory, $id) {
 				var returnId;
 				var dir = new BM.Entities.Directory(
@@ -267,6 +284,12 @@ BM.Storage = (function() {
 // 				
 				// return null;
 				return this.directories[id];
+			},
+			dumpDirectories : function() {
+				directoryCount = 0;
+				this.directories = {};
+				this.directoriesRef = [];
+				this.directoryTree = [];
 			}
 		}
 	}

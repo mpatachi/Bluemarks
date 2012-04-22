@@ -115,7 +115,24 @@ BM.Templater.Directories = {
 		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
 		
 		return holder;
-	},	
+	},
+	getAddModal : function() {
+		var modal = $('#add-directory-modal');
+		var submitBtn = modal.find('.modal-directory-add');
+		var nameField = modal.find('.modal-directory-name');
+		var selector = modal.find('.modal-parent-selector');
+		var nameGroup = modal.find('.modal-name-group');
+		var parentGroup = modal.find('.modal-parent-group');
+		
+		return {
+			el : modal,
+			subtmit : submitBtn,
+			name : nameField,
+			selector : selector,
+			nameGroup : nameGroup,
+			parentGroup : parentGroup
+		};
+	}	
 };
 
 BM.Templater.Categories = {
@@ -265,6 +282,23 @@ BM.Storage = (function() {
 					me.storeCategory($list[i]);
 				}
 			},
+			addToDirectoryTree : function(directory) {
+				var me = this;
+				var ref = 'root';
+				if (directory.parentId != 'null') {
+					ref = 'directory-' + directory.parentId;
+				}
+				var rs = search(me.directoryTree, function(obj) {
+					return obj.ref == ref;
+				}, true);
+						
+				if (-1 !== rs) {
+					me.directoryTree[rs].children.push(directory.intId);
+				} else {
+					var item = new BM.Entities.Relationer(ref, [directory.intId]);
+					me.directoryTree.push(item);
+				}				
+			},
 			storeDirectory : function($directory, $id) {
 				var returnId;
 				var dir = new BM.Entities.Directory(
@@ -408,6 +442,12 @@ BM.Storage = (function() {
 // 				
 				// return null;
 				return this.directories[id];
+			},
+			dumpDirectories : function() {
+				directoryCount = 0;
+				this.directories = {};
+				this.directoriesRef = [];
+				this.directoryTree = [];
 			}
 		}
 	}
@@ -515,10 +555,55 @@ BM.Directories = {
 			/* should place error provider */
 		});
 	},
+	addDirectory : function(name, parentId) {
+		console.log(parentId);
+		var me = this;
+		var storage = BM.Storage.g();
+		var intParentId = parentId;
+		 
+		if (parentId != 'null') {
+			var utils = BM.utils;
+			var r = utils.search(storage.directoriesRef, function(obj) {
+				return obj.id == parentId;
+			});
+			
+			if (-1 !== r) {
+				parentId = storage.directoriesRef[r].realId;
+			}
+		}
+					
+		var params = {
+			name : name,
+			parentId : parentId
+		};
+		BM.p('directories/add', function(response) {
+			if (response.status === 'ok') {
+				var directory = {
+					id : response.data.id,
+					name : name,
+					parentId : parentId
+				};
+				var newDirectory = storage.storeDirectory(directory);
+				newDirectory.directory.parentId = intParentId;
+				storage.addToDirectoryTree(newDirectory.directory);
+				BM.Directories.View.addDirectoryToList(newDirectory.directory);
+				$(document).trigger('add-directory-success', [response.msg]);
+			} else {
+				$(document).trigger('add-directory-error', [response.msg]);
+			}
+		}, params);
+	},
+	updateDirectoriesList : function() {
+		BM.Storage.g().dumpDirectories();
+		this.getDirectories(function() {
+ 			BM.Directories.View.init();
+ 		});		
+	},
 	init : function() {
 		var me = this;
  		me.getDirectories(function() {
  			BM.Directories.View.init();
+ 			BM.Directories.View.AddDirectory.init();
  		});	
 	}
 };
@@ -534,6 +619,43 @@ BM.Directories.View = {
 	
 	getDirectoriesHolder : function() {
 		return $(this.directoryHolder);
+	},
+	addDirectoryToList : function(directory) {
+		var targetNode;
+		var utils = BM.utils;
+		var storage = BM.Storage.g();
+		var t = BM.Templater.Directories;
+		if (directory.parentId != 'null') {
+			// var r = utils.search(storage.directoriesRef, function(i) {
+				// return i.realId == directory.parentId;
+			// });
+			
+			// if (-1 !== r) {
+				// var nodeId = storage.directoriesRef[r].id;
+				// targetNode = 'directory-' + nodeId;
+				// var listTemplate = t.listTemplate(targetNode);
+				// var node = $(".directory-btn[node-id='" + nodeId + "']");
+				// node.attr('node-target', targetNode);
+			// }
+			var nodeId = directory.parentId;	//i have overwriten the parentId with the internal pId
+			targetNode = 'directory-' + nodeId;
+			var listTemplate = t.listTemplate(targetNode);
+			var node = $(".directory-btn[node-id='" + nodeId + "']");
+			node.attr('node-target', targetNode);
+			t.directoriesListHolder().append(listTemplate);
+		} else {
+			targetNode = 'root';
+		}
+		var dirRef = 'directory-' + directory.intId;
+		var r = utils.search(storage.directoryTree, function(it) {
+			return it.ref == dirRef;
+		});
+		if (-1 === r) {
+			dirRef = 'none';
+		}
+		var listItem = t.itemTemplate(directory.name, directory.intId, dirRef, targetNode);
+		var target = $(".directories-list[node='" + targetNode + "']");
+		target.append(listItem);
 	},
 	listDirectories : function(callback) {
 		var me = this;
@@ -610,6 +732,8 @@ BM.Directories.View = {
 	},
 	init : function() {
 		var me = this;
+		$('.directories-list-holder').empty();
+		
 		me.listDirectories(function() {
 			var r = $(".directories-list[node='root']");
 			me.activeList.push(r);
@@ -618,6 +742,44 @@ BM.Directories.View = {
 		});
 	} 
 };	/**
+ * @author Robert
+ * Directories.View.AddDirectory.js
+ */
+
+BM.Directories.View.AddDirectory = {
+	modal : function() {
+		return $('#add-directory-modal');
+	},
+	bindHandlers : function() {
+		var modal = $('#add-directory-modal');
+		var submitBtn = modal.find('.modal-directory-add');
+		var nameField = modal.find('.modal-directory-name');
+		var selector = modal.find('.modal-parent-selector');
+		var d = $(document);
+		
+		submitBtn.on('click', function() {
+			d.trigger('add-directory', [nameField.val(), selector.val()]);
+		});
+	},
+	listParents : function(callback) {
+		var storage = BM.Storage.g().directories;
+		var selector = this.modal().find('.modal-parent-selector');
+
+		_(storage).each(function(obj) {
+			var item = "<option value='" + obj.directory.intId + "'>" + obj.directory.name + "</option>";
+			selector.append(item);
+		});
+		
+		BM.e(callback);
+	},
+	init : function() {
+		var me = this;
+		
+		me.listParents();
+		me.bindHandlers();
+	}
+};
+/**
  * @author Robert
  */
 
@@ -721,6 +883,49 @@ BM.Bookmarks.View = {
 };
 /**
  * @author Robert
+ */
+
+BM.Mediator = {
+	init : function() {
+		BM.Mediator.Directories.provide();
+	}
+};
+
+BM.Mediator.Directories = {
+	provide : function() {
+		var d = $(document);
+		var directories = BM.Directories;
+		var t = BM.Templater;
+		var modal = t.Directories.getAddModal();
+		var nameGroup = modal.nameGroup;
+		var storage = BM.Storage.g();
+		var utils = BM.utils;
+		
+		d.on('add-directory', function(event, name, parentId) {
+			directories.addDirectory(name, parentId);
+		});
+		
+		d.on('add-directory-error', function(event, msg) {
+			nameGroup.removeClass('success'); 
+			nameGroup.addClass('error');
+			nameGroup.children('span').text(msg);
+		});
+		
+		d.on('add-directory-success', function(event, msg) {
+			nameGroup.removeClass('error');
+			nameGroup.addClass('success');
+			nameGroup.children('span').text(msg);
+		});
+		
+		modal.el.on('hide', function() {
+			modal.name.val('');
+			nameGroup.removeClass('error').removeClass('success');
+			modal.selector.val(modal.selector.prop('defaultSelected'));
+		});
+	}
+};
+/**
+ * @author Robert
  * AppBoot.js
  */
 
@@ -744,6 +949,7 @@ BM.AppBoot = {
 		BM.Directories.init();
 		BM.Categories.init();
 		BM.Bookmarks.init();
+		BM.Mediator.init();
 	},
 	end : function() {
 		

@@ -121,17 +121,22 @@
 	    	<h3>Add directory</h3>
 	  	</div>
   		<div class="modal-body">
-	    	<label>directory name</label>
-  			<input type="text" class="span3" placeholder="Type something…">
-  			<label>directory parent</label>
-  			<select class='span3'>
-  				<option>asdadas</option>
-  			</select>
-  			<span class="help-inline">not requiered</span>
+  			<div class='control-group modal-name-group'>
+	    		<label>directory name</label>
+  				<input type="text" class="span3 modal-directory-name" placeholder="Type something…">
+  				<span class='help-inline help-message'></span>
+  			</div>
+  			<div class='control-group modal-parent-group'>
+  				<label>directory parent</label>
+  				<select class='span3 modal-parent-selector' role='modal-parent-selector'>
+  					<option value='null'>no parent...</option>
+  				</select>
+  				<span class='help-inline help-message'></span>
+  			</div>
 	  	</div>
 	  	<div class="modal-footer">
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
-	    	<a href="#" class="btn btn-primary">add</a>
+	    	<a href="#" class="btn btn-primary modal-directory-add">add</a>
 	  	</div>
 	</div>	
 </body>

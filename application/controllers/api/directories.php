@@ -34,16 +34,22 @@ class Directories extends REST_Controller
 		}
 	}
 	
-	function add_post($name, $parentId) {
-		//should check if directory name exists in the database for that parentId	
-		$action = $this
+	function add_post() {
+		$isDirectoryAvailanle = $this
+									->directory_model
+									->checkDirectoryName($this->post('name'));
+		if ($isDirectoryAvailanle) {
+			$action = $this
 					->directory_model
-					->createDirectory($name, $parentId);
+					->createDirectory($this->post('name'), $this->post('parentId'));
 					
-		if($action) {
-			$this->response(array('status' => 'ok', 'msg' => 'Directory created successfuly.'), 200);
+			if (FALSE != $action) {
+				$this->response(array('status' => 'ok', 'msg' => 'Directory created successfuly.', 'data' => $action), 200);
+			} else {
+				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t add directory.'), 200);
+			}
 		} else {
-			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t add directory.'), 404);
+			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t add directory directory name already exists.'), 200);
 		}
 	}
 	

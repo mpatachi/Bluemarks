@@ -11,6 +11,43 @@ BM.Directories.View = {
 	getDirectoriesHolder : function() {
 		return $(this.directoryHolder);
 	},
+	addDirectoryToList : function(directory) {
+		var targetNode;
+		var utils = BM.utils;
+		var storage = BM.Storage.g();
+		var t = BM.Templater.Directories;
+		if (directory.parentId != 'null') {
+			// var r = utils.search(storage.directoriesRef, function(i) {
+				// return i.realId == directory.parentId;
+			// });
+			
+			// if (-1 !== r) {
+				// var nodeId = storage.directoriesRef[r].id;
+				// targetNode = 'directory-' + nodeId;
+				// var listTemplate = t.listTemplate(targetNode);
+				// var node = $(".directory-btn[node-id='" + nodeId + "']");
+				// node.attr('node-target', targetNode);
+			// }
+			var nodeId = directory.parentId;	//i have overwriten the parentId with the internal pId
+			targetNode = 'directory-' + nodeId;
+			var listTemplate = t.listTemplate(targetNode);
+			var node = $(".directory-btn[node-id='" + nodeId + "']");
+			node.attr('node-target', targetNode);
+			t.directoriesListHolder().append(listTemplate);
+		} else {
+			targetNode = 'root';
+		}
+		var dirRef = 'directory-' + directory.intId;
+		var r = utils.search(storage.directoryTree, function(it) {
+			return it.ref == dirRef;
+		});
+		if (-1 === r) {
+			dirRef = 'none';
+		}
+		var listItem = t.itemTemplate(directory.name, directory.intId, dirRef, targetNode);
+		var target = $(".directories-list[node='" + targetNode + "']");
+		target.append(listItem);
+	},
 	listDirectories : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
@@ -86,6 +123,8 @@ BM.Directories.View = {
 	},
 	init : function() {
 		var me = this;
+		$('.directories-list-holder').empty();
+		
 		me.listDirectories(function() {
 			var r = $(".directories-list[node='root']");
 			me.activeList.push(r);

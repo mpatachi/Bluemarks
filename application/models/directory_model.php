@@ -55,14 +55,35 @@ class Directory_model extends CI_Model {
 	 * @return success
 	 */
 	public function createDirectory($name, $parentId) {
-		//$isDirectoryAvailable = $this->checkDirectoryName($name);
-		$newDirectory = array('name' => $name, 'parentId' => $parentId, 'userId' => $userId);
+		// $isDirectoryAvailable = $this->checkDirectoryName($name);
+// 		
+		// if ($isDirectoryAvailable) {	
+			// $newDirectory = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
+			// $action = $this
+						// ->db
+						// ->insert('directories', $newDirectory);
+// 		
+			// if($action) {
+				// return TRUE;
+			// } else {
+				// return FALSE;
+			// }
+		// } else {
+			// return FALSE;
+		// }s
+		if ($parentId == 'null') {
+			$newDirectory = array('name' => $name, 'userId' => $this->userId);
+		} else {
+			$newDirectory = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
+		}
+		
 		$action = $this
 					->db
 					->insert('directories', $newDirectory);
-		
+	
 		if($action) {
-			return TRUE;
+			$returnId = array('id' => $this->db->insert_id());
+			return $returnId;
 		} else {
 			return FALSE;
 		}
@@ -81,7 +102,7 @@ class Directory_model extends CI_Model {
 		$query = $this
 					->db
 					->where('id', $dirId)					
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->update('directories', $newData);
 	}
@@ -97,11 +118,15 @@ class Directory_model extends CI_Model {
 		$query = $this
 					->db
 					->select('id')
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('LOWER(name)=', strtolower($name))
 					->limit(1)
 					->get('directories');
-					
-		return $query->row() == 0;
+		
+		if ($query->num_rows() > 0) {
+			return FALSE;
+		}			
+		
+		return TRUE;
 	}
 }

@@ -23,6 +23,7 @@ BM.AppBoot = {
 		BM.Directories.init();
 		BM.Categories.init();
 		BM.Bookmarks.init();
+		BM.Mediator.init();
 	},
 	end : function() {
 		

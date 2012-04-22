@@ -20,7 +20,24 @@ BM.Templater.Directories = {
 		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
 		
 		return holder;
-	},	
+	},
+	getAddModal : function() {
+		var modal = $('#add-directory-modal');
+		var submitBtn = modal.find('.modal-directory-add');
+		var nameField = modal.find('.modal-directory-name');
+		var selector = modal.find('.modal-parent-selector');
+		var nameGroup = modal.find('.modal-name-group');
+		var parentGroup = modal.find('.modal-parent-group');
+		
+		return {
+			el : modal,
+			subtmit : submitBtn,
+			name : nameField,
+			selector : selector,
+			nameGroup : nameGroup,
+			parentGroup : parentGroup
+		};
+	}	
 };
 
 BM.Templater.Categories = {
