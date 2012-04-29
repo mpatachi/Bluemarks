@@ -34,15 +34,15 @@ class Categories extends REST_Controller
 		}
 	}
 	
-	function add_post($name) {
-		$checkName = $this
-					->category_model
-					->checkCategoryName($name);
+	function add_post() {
+		$isCategoryAvailable = $this
+								->category_model
+								->checkCategoryName($this->post('name'));
 					
-		if($checkName) {
+		if($isCategoryAvailable) {
 			$category = $this
 						->category_model
-						->createCategory($name);
+						->createCategory($this->post('name'));
 			
 			if($category) {
 				$this->response(array('status' => 'ok', 'msg' => 'Category created successfuly.'), 200);

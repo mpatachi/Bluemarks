@@ -21,6 +21,7 @@
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.View.AddDirectory.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.View.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.View.AddCategory.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Bookmarks.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Bookmarks.View.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Mediator.js" />

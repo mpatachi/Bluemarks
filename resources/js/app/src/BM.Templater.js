@@ -43,6 +43,19 @@ BM.Templater.Directories = {
 BM.Templater.Categories = {
 	ddCategoryHolder : function() {
 		return $('.categories-dropdown');
+	},
+	getAddModal : function() {
+		var modal = $('#add-category-modal');
+		var submitBtn = modal.find('.modal-category-add');
+		var nameField = modal.find('.modal-category-name');
+		var nameGroup = modal.find('.modal-name-group');
+		
+		return {
+			el : modal,
+			subtmit : submitBtn,
+			name : nameField,
+			nameGroup : nameGroup,
+		};		
 	}
 };
 

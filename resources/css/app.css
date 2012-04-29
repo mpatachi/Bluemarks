@@ -42,6 +42,7 @@ html, body {
 }
 .top-toolbar {
 	width: 1198px;
+	z-index: 1030;
 	background: #e6e6e6;
 	border-left: 1px solid #d4d4d4;
 	border-right: 1px solid #d4d4d4; 
@@ -76,6 +77,9 @@ html, body {
 .toolbar .account-info {
 	float: right;
 }
+.toolbar .sort-group {
+	float: right;
+}
 .account-group p, .account-group button {
 	float: left;
 }
@@ -83,6 +87,7 @@ html, body {
 	margin-right: 10px;
 }
 .top-subtoolbar {
+	z-index: 1030;
 	position: fixed;
 	width: 959px;
 	background: #e6e6e6;
@@ -90,6 +95,24 @@ html, body {
 	border-right: 1px solid #d4d4d4; 
 	border-bottom: 1px solid #d4d4d4;
 	box-shadow: inset 0px 0px 1px 1px #fff;
+}
+.top-subtoolbar .toolbar {
+	width: 100%;
+}
+.categories-toolbar {
+	z-index: 1020;
+	position: fixed;
+	margin-top: 0;
+	width: 960px;
+
+}
+.categories-toolbar .toolbar {
+	width: 959px;
+	background: #e6e6e6;
+	border-top: 1px solid #d4d4d4;
+	border-right: 1px solid #d4d4d4; 
+	border-bottom: 1px solid #d4d4d4;
+	box-shadow: inset 0px 0px 1px 1px #fff;		
 }
 .categories-group {
 	position: relative;
@@ -134,7 +157,15 @@ html, body {
 	border-top: 1px solid #c6c6c6;
 	border-bottom: 1px solid #ffffff;
 }
+.directories-holder-header {
+	height: 30px;
+	padding: 10px 0 0 10px;
+	color: #909090;
+	text-shadow: 0 1px 0 #ffffff;
+}
 .directories-group {
+	position: fixed;
+	bottom: 0;
 	padding: 10px;
 }
 .directories-breadcum-holder {
@@ -158,6 +189,7 @@ html, body {
 }
 /* wall */
 .wall {
+	z-index: 1010;
 	position: relative;
 	margin-top: 51px;
 }

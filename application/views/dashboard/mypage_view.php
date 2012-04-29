@@ -30,8 +30,8 @@
 								<div class="control-group">
 								    <div class="controls">
 											<div class="input-append">
-											<input class="span2" size="16" type="text"><button class="btn" type="button"><i class='icon-search'></i></button>
-										</div>
+												<input class="span3" size="16" type="text"><button class="btn" type="button"><i class='icon-search'></i></button>
+											</div>
 									</div>
 								</div>							
 							</form>
@@ -62,14 +62,7 @@
 		<div class='main-content'>
 			<div class='left-content'>
 				<div class='left-sidebar'>
-					<div class="directories-group btn-group">
-					  	<button class="btn">directories</button>
-					  	<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>
-						<ul class="directory-action-group dropdown-menu">
-							<li><a href='#add-directory-modal' class='directory-action' role='add-directory' data-toggle="modal"><i class='icon-plus'></i> add directory</a></li>
-							<li><a href='#' class='directory-action' role='edit-directory'><i class='icon-pencil'></i> edit directory</a></li>
-						</ul>	
-					</div>
+					<div class="directories-holder-header">Directories:</div>
 					<div class="separator no-select"></div>
 					<div class="directories-breadcum-holder">
 						<!-- directories breadcum -->
@@ -78,14 +71,42 @@
 					<div class="directories-list-holder">
 						<!-- directories list -->
 					</div>
+					<div class="directories-group btn-group dropup">
+					  	<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>
+						<ul class="directory-action-group dropdown-menu">
+							<li><a href='#add-directory-modal' class='directory-action' role='add-directory' data-toggle="modal"><i class='icon-plus'></i> add directory</a></li>
+							<li><a href='#' class='directory-action' role='edit-directory'><i class='icon-pencil'></i> edit directory</a></li>
+						</ul>	
+					</div>					
 				</div>
 			</div><!-- end left content -->
 			<div class='right-content'>
 				<div class='top-subtoolbar'>
 					<ul class='toolbar'>
 						<li>
+							<form class='form-inline toolbar-item'>
+								<div class="control-group">
+								    <div class="controls">
+										<div class="input-prepend input-append">
+											<span class="add-on">http://</span><input class="span6" size="16" type="text" placeholder="type the address..."><button class="btn" type="button"><i class='icon-star'></i></button>
+										</div>
+									</div>
+								</div>							
+							</form>
+						</li>
+						<li class='sort-group'>
 							<div class="btn-group toolbar-item">
-							  <button class="btn">categories</button>
+							  <button class="btn sort-categories" data-toggle="button">categories</button>
+							  <button class="btn sort-ascending"><i class='icon-chevron-up'></i></button>
+							  <button class="btn sort-descending"><i class='icon-chevron-down'></i></button>
+							</div>							
+						</li>
+					</ul>					
+				</div>
+				<div class='categories-toolbar'>
+					<ul class='toolbar'>
+						<li>
+							<div class="btn-group toolbar-item">
 							  <button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-plus'></i></button>
 							  <ul class='dropdown-menu categories-dropdown'>
 							  </ul>
@@ -101,7 +122,7 @@
 							</ul>						
 						</li>
 					</ul>					
-				</div>
+				</div>				
 				<div class='wall'>
 					<ul class='thumbnails bookmarks-list'>
 <!-- 						<li class='span2'>
@@ -138,6 +159,23 @@
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
 	    	<a href="#" class="btn btn-primary modal-directory-add">add</a>
 	  	</div>
-	</div>	
+	</div><!-- end add directory modal -->	
+	<div class="modal fade" id="add-category-modal">
+  		<div class="modal-header">
+	    	<a class="close" data-dismiss="modal">×</a>
+	    	<h3>Add category</h3>
+	  	</div>
+  		<div class="modal-body">
+  			<div class='control-group modal-name-group'>
+	    		<label>directory name</label>
+  				<input type="text" class="span3 modal-category-name" placeholder="Type something…">
+  				<span class='help-inline help-message'></span>
+  			</div>
+	  	</div>
+	  	<div class="modal-footer">
+	    	<a href="#" class="btn" data-dismiss="modal">close</a>
+	    	<a href="#" class="btn btn-primary modal-category-add">add</a>
+	  	</div>
+	</div>
 </body>
 </html>
