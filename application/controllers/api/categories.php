@@ -10,10 +10,10 @@ class Categories extends REST_Controller
 		$this->load->model('category_model','',TRUE);
 	}
 	
-	function list_get($id) {
+	function list_post() {
 		$category = $this
 						->category_model
-						->getCategory($id);
+						->getCategory($this->post('id'));
 						
 		if($category) {
 			$this->response(array('status' => 'ok', 'data' => $category), 200); // 200 being the HTTP response code
@@ -40,17 +40,17 @@ class Categories extends REST_Controller
 								->checkCategoryName($this->post('name'));
 					
 		if($isCategoryAvailable) {
-			$category = $this
+			$action = $this
 						->category_model
 						->createCategory($this->post('name'));
 			
-			if($category) {
-				$this->response(array('status' => 'ok', 'msg' => 'Category created successfuly.'), 200);
+			if(FALSE != $action) {
+				$this->response(array('status' => 'ok', 'msg' => 'Category created successfuly.', 'data' => $action), 200);
 			} else {
-				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t create category.'), 404);
+				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t create category.'), 200);
 			}									
 		} else {
-			$this->response(array('status' => 'error', 'msg' => 'Category name already exists.'), 404);
+			$this->response(array('status' => 'error', 'msg' => 'Category name already exists.'), 200);
 		}
 	}
 	
@@ -58,6 +58,7 @@ class Categories extends REST_Controller
 		$checkName = $this
 					->category_model
 					->checkCategoryName($name);
+					
 		if($checkName) {
 			$action = $this
 						->category_model

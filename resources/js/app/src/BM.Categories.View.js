@@ -16,7 +16,18 @@ BM.Categories.View = {
 			BM.Templater.Categories.ddCategoryHolder().append(itemTample);
 		});
 		
-		BM.e(callback);
+		if (callback !== undefined) {
+			BM.e(callback);	
+		}
+	},
+	addCategoryToList : function(category, callback) {
+		var me = this;
+		var itemTample = me.ddItemTemplate(category.name, category.intId);
+		BM.Templater.Categories.ddCategoryHolder().append(itemTample);
+		
+		if (callback !== undefined) {
+			BM.e(callback);		
+		}	
 	},
 	bindHandlers : function() {
 		$('.sort-categories').on('click', function(event) {

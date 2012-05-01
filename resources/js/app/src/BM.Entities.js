@@ -23,13 +23,14 @@ BM.Entities.Bookmark = (function() {
 })();
 
 BM.Entities.Category = (function() {
-	var Category = function(id, name) {
+	var Category = function(id, name, intId) {
 		this.id = id;
 		this.name = name;
+		this.intId = intId;
 	};
 	
-	return function(id, name) {
-		return new Category(id, name);
+	return function(id, name, intId) {
+		return new Category(id, name, intId);
 	};
 })();
 

@@ -1,6 +1,101 @@
 html, body {
 	height: 100%;
 }
+/* twitter bootstrat overwrite stuff */
+.btn {
+	-webkit-border-radius: 3px;
+}
+
+.btn-group > .btn:first-child {
+  margin-left: 0;
+  -webkit-border-bottom-left-radius: 3px;
+          border-bottom-left-radius: 3px;
+  -webkit-border-top-left-radius: 3px;
+          border-top-left-radius: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  -moz-border-radius-topleft: 3px;
+}
+.btn-group > .btn:last-child,
+.btn-group > .dropdown-toggle {
+  -webkit-border-top-right-radius: 3px;
+          border-top-right-radius: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+          border-bottom-right-radius: 3px;
+  -moz-border-radius-topright: 3px;
+  -moz-border-radius-bottomright: 3px;
+}
+.btn {
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#e6e6e6), to(#DCDCDE));
+	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.05);
+	border-top-color: rgba(0, 0, 0, 0.18);
+	text-shadow: 0 1px 0 #fff;
+}
+.btn:hover {
+	background-position: 0 -25px;
+	border-top-color: rgba(0, 0, 0, 0.2);
+}
+.btn.active,
+.btn:active {
+  	background-color: #e6e6e6;
+  	background-image: none;
+  	outline: 0;
+  	border: 1px solid rgba(0, 0, 0, 0.3);
+  	-webkit-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+       -moz-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.btn-group.open .dropdown-toggle {
+	background-color: #e6e6e6;
+  	background-image: none;
+  	border: 1px solid rgba(0, 0, 0, 0.3);
+  	-webkit-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+       -moz-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.9), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.btn-group > .dropdown-toggle {
+  	*padding-top: 4px;
+  	padding-right: 8px;
+  	*padding-bottom: 4px;
+  	padding-left: 8px;
+    -webkit-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.05);
+       -moz-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn-primary {
+  background-color: #0074cc;
+  *background-color: #0055cc;
+  text-shadow: 0 1px 0 #0a618c;
+  background-image: -ms-linear-gradient(top, #0088cc, #0055cc);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0055cc));
+  background-image: -webkit-linear-gradient(top, #0088cc, #0055cc);
+  background-image: -o-linear-gradient(top, #0088cc, #0055cc);
+  background-image: -moz-linear-gradient(top, #0088cc, #0055cc);
+  background-image: linear-gradient(top, #0088cc, #0055cc);
+  background-repeat: repeat-x;
+  border-color: #0055cc #0055cc #003580;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  filter: progid:dximagetransform.microsoft.gradient(startColorstr='#0088cc', endColorstr='#0055cc', GradientType=0);
+  filter: progid:dximagetransform.microsoft.gradient(enabled=false);
+  	-webkit-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+       -moz-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);  
+}
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary.active,
+.btn-primary.disabled,
+.btn-primary[disabled] {
+  background-color: #0055cc;
+  *background-color: #004ab3;
+}
+
+.btn-primary:active,
+.btn-primary.active {
+  background-color: #004099 \9;
+	-webkit-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+       -moz-box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 0px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);  
+}
 .show-me {
 	background-color: #E6E6E6;
 }
@@ -43,10 +138,10 @@ html, body {
 .top-toolbar {
 	width: 1198px;
 	z-index: 1030;
-	background: #e6e6e6;
+	background: #DCDCDE url('../img/noise.png');
 	border-left: 1px solid #d4d4d4;
 	border-right: 1px solid #d4d4d4; 
-	box-shadow: inset 0px 0px 1px 1px #fff; 
+	box-shadow: inset 0px 0px 1px 1px #f2f0f1; 
 }
 .toolbar {
 	position: relative;
@@ -60,6 +155,9 @@ html, body {
 .toolbar > li {
 	display: block;
 	float: left;
+}
+.toolbar > li.right {
+	float: right;
 }
 .toolbar .toolbar-text {
 	margin-bottom: 0;
@@ -75,10 +173,8 @@ html, body {
 	margin: 0;
 }
 .toolbar .account-info {
-	float: right;
 }
 .toolbar .sort-group {
-	float: right;
 }
 .account-group p, .account-group button {
 	float: left;
@@ -86,15 +182,18 @@ html, body {
 .account-group p {
 	margin-right: 10px;
 }
+.type-group-holder {
+	margin-left: 40px;
+}
 .top-subtoolbar {
 	z-index: 1030;
 	position: fixed;
 	width: 959px;
-	background: #e6e6e6;
+	background: #dddedf url('../img/noise.png');
 	border-top: 1px solid #d4d4d4;
 	border-right: 1px solid #d4d4d4; 
 	border-bottom: 1px solid #d4d4d4;
-	box-shadow: inset 0px 0px 1px 1px #fff;
+	box-shadow: inset 0px 0px 1px 1px #f2f0f1;
 }
 .top-subtoolbar .toolbar {
 	width: 100%;
@@ -108,7 +207,7 @@ html, body {
 }
 .categories-toolbar .toolbar {
 	width: 959px;
-	background: #e6e6e6;
+	background: #e6e6e6 url('../img/noise.png');
 	border-top: 1px solid #d4d4d4;
 	border-right: 1px solid #d4d4d4; 
 	border-bottom: 1px solid #d4d4d4;
@@ -147,9 +246,9 @@ html, body {
 	position: relative;
 	width: 238px;
 	height: 100%;
-	background: #e6e6e6;
+	background: #DCDCDE url('../img/noise.png');
 	border: 1px solid #d4d4d4;
-	box-shadow: inset 0px 0px 1px 1px #fff;
+	box-shadow: inset 0px 0px 1px 1px #f2f0f1;
 }
 .left-sidebar .separator {
 	margin-left: 5%;
@@ -185,7 +284,24 @@ html, body {
 	display: none;
 }
 .directories-list-holder .directories-list > li {
-	margin: 10px 0 0 0;
+	margin: 5px 0 0 0;
+}
+.directories-list-holder .directories-list > li .directory-btn {
+	display: block;
+	margin: 0 10px 0 0;
+	padding: 5px 5px 5px 5px;
+	color:#595959;
+	text-shadow: 0 1px 0 #ffffff;
+	-webkit-transition: all .1s ease;
+}
+.directories-list-holder .directories-list > li .directory-btn:hover {
+	color:#FFFFFF;
+	background: #0078ff;
+	text-shadow: 0 1px 0 #002DBF;
+	text-decoration: none;
+	-webkit-box-shadow: inset 0px 1px 0px #002DBF;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
 }
 /* wall */
 .wall {

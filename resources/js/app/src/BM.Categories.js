@@ -22,6 +22,7 @@ BM.Categories = {
 					name : name
 				};
 				var newCategory = BM.Storage.g().storeCategory(category);
+				BM.Categories.View.addCategoryToList(newCategory.category);
 				$(document).trigger('add-category-success', [response.msg]);
 			} else {
 				$(document).trigger('add-category-error', [response.msg]);
@@ -32,6 +33,7 @@ BM.Categories = {
 		var me = this;
 		me.getCategories(function() {
 			BM.Categories.View.init();
+			BM.Categories.View.AddCategory.init();
 		});
 	}
 };

@@ -105,7 +105,8 @@ BM.Storage = (function() {
 				categoryCount++;
 				var category = new BM.Entities.Category(
 					$c.id, 
-					$c.name
+					$c.name,
+					categoryCount
 				);
 				this.categories[categoryCount] = {
 					category : category
@@ -115,6 +116,8 @@ BM.Storage = (function() {
 					realId : $c.id 
 				};
 				this.categoriesRef.push(ref);
+				
+				return this.categories[categoryCount];
 			},			
 			storeAllCategories : function($list) {
 				var me = this;

@@ -126,7 +126,7 @@ BM.Templater.Directories = {
 		
 		return {
 			el : modal,
-			subtmit : submitBtn,
+			submit : submitBtn,
 			name : nameField,
 			selector : selector,
 			nameGroup : nameGroup,
@@ -147,7 +147,7 @@ BM.Templater.Categories = {
 		
 		return {
 			el : modal,
-			subtmit : submitBtn,
+			submit : submitBtn,
 			name : nameField,
 			nameGroup : nameGroup,
 		};		
@@ -276,7 +276,8 @@ BM.Storage = (function() {
 				categoryCount++;
 				var category = new BM.Entities.Category(
 					$c.id, 
-					$c.name
+					$c.name,
+					categoryCount
 				);
 				this.categories[categoryCount] = {
 					category : category
@@ -286,6 +287,8 @@ BM.Storage = (function() {
 					realId : $c.id 
 				};
 				this.categoriesRef.push(ref);
+				
+				return this.categories[categoryCount];
 			},			
 			storeAllCategories : function($list) {
 				var me = this;
@@ -505,13 +508,14 @@ BM.Entities.Bookmark = (function() {
 })();
 
 BM.Entities.Category = (function() {
-	var Category = function(id, name) {
+	var Category = function(id, name, intId) {
 		this.id = id;
 		this.name = name;
+		this.intId = intId;
 	};
 	
-	return function(id, name) {
-		return new Category(id, name);
+	return function(id, name, intId) {
+		return new Category(id, name, intId);
 	};
 })();
 
@@ -771,6 +775,8 @@ BM.Directories.View.AddDirectory = {
 		
 		submitBtn.on('click', function() {
 			d.trigger('add-directory', [nameField.val(), selector.val()]);
+			
+			return false;
 		});
 	},
 	listParents : function(callback) {
@@ -815,6 +821,7 @@ BM.Categories = {
 					name : name
 				};
 				var newCategory = BM.Storage.g().storeCategory(category);
+				BM.Categories.View.addCategoryToList(newCategory.category);
 				$(document).trigger('add-category-success', [response.msg]);
 			} else {
 				$(document).trigger('add-category-error', [response.msg]);
@@ -825,6 +832,7 @@ BM.Categories = {
 		var me = this;
 		me.getCategories(function() {
 			BM.Categories.View.init();
+			BM.Categories.View.AddCategory.init();
 		});
 	}
 };
@@ -846,7 +854,18 @@ BM.Categories.View = {
 			BM.Templater.Categories.ddCategoryHolder().append(itemTample);
 		});
 		
-		BM.e(callback);
+		if (callback !== undefined) {
+			BM.e(callback);	
+		}
+	},
+	addCategoryToList : function(category, callback) {
+		var me = this;
+		var itemTample = me.ddItemTemplate(category.name, category.intId);
+		BM.Templater.Categories.ddCategoryHolder().append(itemTample);
+		
+		if (callback !== undefined) {
+			BM.e(callback);		
+		}	
 	},
 	bindHandlers : function() {
 		$('.sort-categories').on('click', function(event) {
@@ -887,7 +906,9 @@ BM.Categories.View.AddCategory = {
 		var d = $(document);
 		
 		modal.submit.on('click', function() {
-			d.trigger('add-directory', [modal.name.val()]);
+			d.trigger('add-category', [modal.name.val()]);
+			
+			return false;
 		});
 	},
 	init : function() {
@@ -971,12 +992,23 @@ BM.Mediator.Categories = {
 		 * bind the add category event to the document
 		 */
 		d.on('add-category', function(event, name) {
+			if (name == '') {
+				return;
+			}
 			categories.addCategory(name);
 		});
+		/*
+		 * displays error message if adding a category fails
+		 */
+		d.on('add-category-error', function(event, msg) {
+			nameGroup.removeClass('success'); 
+			nameGroup.addClass('error');
+			nameGroup.children('span').text(msg);
+		});		
 		/**
 		 * hide the modal if the category is added with success
 		 */
-		d.on('add-category-success', function(event) {
+		d.on('add-category-success', function(event, msg) {
 			modal.el.modal('hide');
 		});
 		/** fires when the modal is hiding
@@ -987,6 +1019,15 @@ BM.Mediator.Categories = {
 			nameGroup.children('span').text('');
 			nameGroup.removeClass('error').removeClass('success');
 		});
+		/**
+		 *  what happens on enter key press on the modal
+		 */
+		modal.el.on('keypress', function(event) {
+			if (event.keyCode !== 13) {
+				return;
+			}
+			d.trigger('add-category', [modal.name.val()]);
+		});		
 	}
 };
 BM.Mediator.Directories = {

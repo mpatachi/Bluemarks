@@ -31,7 +31,7 @@ BM.Templater.Directories = {
 		
 		return {
 			el : modal,
-			subtmit : submitBtn,
+			submit : submitBtn,
 			name : nameField,
 			selector : selector,
 			nameGroup : nameGroup,
@@ -52,7 +52,7 @@ BM.Templater.Categories = {
 		
 		return {
 			el : modal,
-			subtmit : submitBtn,
+			submit : submitBtn,
 			name : nameField,
 			nameGroup : nameGroup,
 		};		

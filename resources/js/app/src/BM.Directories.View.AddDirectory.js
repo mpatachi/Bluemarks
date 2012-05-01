@@ -16,6 +16,8 @@ BM.Directories.View.AddDirectory = {
 		
 		submitBtn.on('click', function() {
 			d.trigger('add-directory', [nameField.val(), selector.val()]);
+			
+			return false;
 		});
 	},
 	listParents : function(callback) {

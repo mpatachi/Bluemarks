@@ -37,8 +37,8 @@
 							</form>
 						</li>
 						<!-- type buttons -->
-						<li>
-							<div class="btn-group toolbar-item">
+						<li class='type-group-holder'>
+							<div class="btn-group type-group toolbar-item">
 							  <button class="btn">videos</button>
 							  <button class="btn">images</button>
 							  <button class="btn">apps</button>
@@ -47,10 +47,10 @@
 							</div>
 						</li>
 						<!-- end type buttons -->
-						<li class='account-info'>
+						<li class='account-info right'>
 							<div class="account-group toolbar-item">
 								<p class="toolbar-text current-user">robert@yahoo.com</p>
-								<button type='submit' class='btn'><i class='icon-cog'></i></button>
+								<button class='btn'><i class='icon-wrench'></i></button>
 							</div>						
 						</li>
 					</ul>
@@ -74,7 +74,7 @@
 					<div class="directories-group btn-group dropup">
 					  	<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>
 						<ul class="directory-action-group dropdown-menu">
-							<li><a href='#add-directory-modal' class='directory-action' role='add-directory' data-toggle="modal"><i class='icon-plus'></i> add directory</a></li>
+							<li><a href='#add-directory-modal' class='directory-action' role='show-add-directory-modal' data-toggle="modal"><i class='icon-plus'></i> add directory</a></li>
 							<li><a href='#' class='directory-action' role='edit-directory'><i class='icon-pencil'></i> edit directory</a></li>
 						</ul>	
 					</div>					
@@ -88,13 +88,13 @@
 								<div class="control-group">
 								    <div class="controls">
 										<div class="input-prepend input-append">
-											<span class="add-on">http://</span><input class="span6" size="16" type="text" placeholder="type the address..."><button class="btn" type="button"><i class='icon-star'></i></button>
+											<span class="add-on">http://</span><input class="span6" size="16" type="text" placeholder="type the address..."><button class="btn" type="button"><i class='icon-bookmark'></i></button>
 										</div>
 									</div>
 								</div>							
 							</form>
 						</li>
-						<li class='sort-group'>
+						<li class='sort-group right'>
 							<div class="btn-group toolbar-item">
 							  <button class="btn sort-categories" data-toggle="button">categories</button>
 							  <button class="btn sort-ascending"><i class='icon-chevron-up'></i></button>
@@ -107,9 +107,9 @@
 					<ul class='toolbar'>
 						<li>
 							<div class="btn-group toolbar-item">
-							  <button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-plus'></i></button>
-							  <ul class='dropdown-menu categories-dropdown'>
-							  </ul>
+								<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-tags'></i></button>
+							  	<ul class='dropdown-menu categories-dropdown'>
+							  	</ul>
 							</div>
 						</li>
 						<!-- end type buttons -->
@@ -120,6 +120,15 @@
 								<li><a href='#communication'>communication</a></li>
 								<li><a href='#tech'>tech</a></li>
 							</ul>						
+						</li>
+						<li class='right'>
+							<div class="btn-group toolbar-item">
+								<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>
+		  						<ul class='dropdown-menu categories-options-dropdown'>
+		  							<li><a href='#add-category-modal' class='category-action' role='show-add-category-modal' data-toggle="modal">add category</a></li>
+		  							<li><a href='#' class='category-action'>edit category</a></li>
+							  	</ul>
+						  	</div>
 						</li>
 					</ul>					
 				</div>				
@@ -167,7 +176,7 @@
 	  	</div>
   		<div class="modal-body">
   			<div class='control-group modal-name-group'>
-	    		<label>directory name</label>
+	    		<label>category name</label>
   				<input type="text" class="span3 modal-category-name" placeholder="Type something…">
   				<span class='help-inline help-message'></span>
   			</div>

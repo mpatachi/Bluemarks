@@ -22,12 +22,23 @@ BM.Mediator.Categories = {
 		 * bind the add category event to the document
 		 */
 		d.on('add-category', function(event, name) {
+			if (name == '') {
+				return;
+			}
 			categories.addCategory(name);
 		});
+		/*
+		 * displays error message if adding a category fails
+		 */
+		d.on('add-category-error', function(event, msg) {
+			nameGroup.removeClass('success'); 
+			nameGroup.addClass('error');
+			nameGroup.children('span').text(msg);
+		});		
 		/**
 		 * hide the modal if the category is added with success
 		 */
-		d.on('add-category-success', function(event) {
+		d.on('add-category-success', function(event, msg) {
 			modal.el.modal('hide');
 		});
 		/** fires when the modal is hiding
@@ -38,6 +49,15 @@ BM.Mediator.Categories = {
 			nameGroup.children('span').text('');
 			nameGroup.removeClass('error').removeClass('success');
 		});
+		/**
+		 *  what happens on enter key press on the modal
+		 */
+		modal.el.on('keypress', function(event) {
+			if (event.keyCode !== 13) {
+				return;
+			}
+			d.trigger('add-category', [modal.name.val()]);
+		});		
 	}
 };
 BM.Mediator.Directories = {

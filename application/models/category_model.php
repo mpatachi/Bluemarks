@@ -55,16 +55,17 @@ class Category_model extends CI_Model {
 	 * @return bool
 	 */
 	public function createCategory($name) {
-		$newCategory = array('name' => $name, 'userId' => $userId);
+		$newCategory = array('name' => $name, 'userId' => $this->userId);
 		$action = $this
 					->db
 					->insert('categories', $newCategory);
 		
 		if($action) {
-			return TRUE;
+			$returnId = array('id' => $this->db->insert_id());
+			return $returnId;
 		} else {
 			return FALSE;
-		}		
+		}	
 	}
 	
 	/**
@@ -96,11 +97,15 @@ class Category_model extends CI_Model {
 		$query = $this
 					->db
 					->select('id')
-					->where('userId', $userId)
+					->where('userId', $this->userId)
 					->where('LOWER(name)=', strtolower($name))
 					->limit(1)
 					->get('categories');
 					
-		return $query->row() == 0;	 	
+		if ($query->num_rows() > 0) {
+			return FALSE;
+		}
+		
+		return TRUE; 	
 	 }
 }

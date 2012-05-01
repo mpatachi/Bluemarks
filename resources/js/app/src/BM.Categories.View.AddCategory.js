@@ -11,7 +11,9 @@ BM.Categories.View.AddCategory = {
 		var d = $(document);
 		
 		modal.submit.on('click', function() {
-			d.trigger('add-directory', [modal.name.val()]);
+			d.trigger('add-category', [modal.name.val()]);
+			
+			return false;
 		});
 	},
 	init : function() {
