@@ -15,8 +15,11 @@ var BM = {};
 BM = {
 	baseUri : function() {
 		var win = window.location;
-		var origin = win.origin;
-
+		//var origin = win.origin;
+		var hostname = win.hostname;
+		var protocol = win.protocol;
+		var origin = protocol + '//' + hostname;
+		
 		return origin;		
 	},
 	apiUri : function() {
@@ -112,7 +115,7 @@ BM.Templater.Directories = {
 		return it;
 	},
 	listTemplate : function(name) {
-		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
+		var holder = $("<ul class='list-for-" + name + " directories-list' node='" + name + "'></ul>");
 		
 		return holder;
 	},
@@ -158,8 +161,8 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
-	bookmarkTemplate : function(id, name, category, image) {
-		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-category='" + category + "' ></li>");
+	bookmarkTemplate : function(id, name, directory, category, type, image) {
+		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-directory='" + directory + "' bookmark-category='" + category + "' bookmark-type='" + type + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");
@@ -237,10 +240,9 @@ BM.Storage = (function() {
 						
 			storeBookmark : function($b) {
 				var me = this;
-				//this.bookmarks.push($bookmark);
+				var dirId;		
 				bookmarkCount++;
 				var catIds = [];
-				//TODO to myself: review this please it was late :))
 				var categories = $b.categoriesId.split(' ');
 				_(categories).each(function(cat) {
 					_(me.categoriesRef).each(function(obj) {
@@ -249,21 +251,48 @@ BM.Storage = (function() {
 						}
 					});
 				});
-				//(id, name, dirId, catIds, typeId, noteId, description, url, img)
+				if ($b.directoryId != null) {
+					var di = search(me.directoriesRef, function(obj) {
+						return obj.realId == $b.directoryId;
+					}, false, true);
+					
+					if (-1 !== di) {
+						dirId = di.id;
+					}					
+				} else {
+					dirId = 0;
+				}
+								
+				var real = {
+					id : $b.id, 
+					name : $b.name, 
+					directoryId : $b.directoryId, 
+					categoriesId : $b.categoriesId, 
+					typeId : $b.typeId, 
+					noteId : $b.noteId,
+					description : $b.description,
+					url : $b.url,
+					image : $b.image					
+				};
+				var proxy = {
+					intId : bookmarkCount,
+					directoryId : dirId,
+					typeId : $b.typeId,
+					categoriesId : catIds,
+					url : $b.url,
+					image : $b.image
+				};
+				//(id, name, dirId, catIds, typeId, noteId, description, url, img) -- old implementation
+				// (proxy, real)
 				var bookmark = new BM.Entities.Bookmark(
-					$b.id, 
-					$b.name, 
-					$b.directoryId, 
-					catIds, 
-					$b.typeId, 
-					$b.noteId,
-					$b.description,
-					$b.url,
-					$b.image
+					proxy,
+					real
 				);
-				this.bookmarks[bookmarkCount] = {
+				me.bookmarks[bookmarkCount] = {
 					bookmark : bookmark
-				};			
+				};
+				
+				return me.bookmarks[bookmarkCount];			
 			},
 			storeAllBookmarks : function($list) {
 				var me = this;
@@ -490,21 +519,28 @@ BM.Storage = (function() {
 BM.Entities = {};
 
 BM.Entities.Bookmark = (function() {
-	var Bookmark = function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
-		this.id = id;
-		this.name = name;
-		this.directoryId = dirId;
-		this.categoriesId = catIds;
-		this.typeId = typeId;
-		this.noteId = noteId;
-		this.description = description;
-		this.url = url;
-		this.image = img;
+	var Bookmark = function(proxy, real) {
+		this.proxy = proxy;
+		this.real = real;
 	};
-	
-	return function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
-		return new Bookmark(id, name, dirId, catIds, typeId, noteId, description, url, img);
-	};
+	// var Bookmark = function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		// this.id = id;
+		// this.name = name;
+		// this.directoryId = dirId;
+		// this.categoriesId = catIds;
+		// this.typeId = typeId;
+		// this.noteId = noteId;
+		// this.description = description;
+		// this.url = url;
+		// this.image = img;
+	// };
+// 	
+	// return function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		// return new Bookmark(id, name, dirId, catIds, typeId, noteId, description, url, img);
+	// };
+	return function(proxy, real) {
+		return new Bookmark(proxy, real);
+	}
 })();
 
 BM.Entities.Category = (function() {
@@ -709,12 +745,15 @@ BM.Directories.View = {
 	},
 	bindHandlers : function() {
 		var me = this;
-		var d = $('.directories-list');
+		var dList = $('.directories-list');
+		var d = $(document);
 		var dirNavigator = $('.directories-breadcum-navigation');
-
-		d.on('click', 'a', function(event) {
+		var dirHolder = $('.directories-list-holder');
+		
+		dirHolder.on('click', '.directory-btn', function(event) {
 			var item = $(this);
 			var targetNode = item.attr('node-target');
+			var nodeId = parseInt(item.attr('node-id'), 10);
 			if (targetNode !== 'none') {
 				var target = $(".directories-list[node='" + targetNode + "']");
 				if(target.length > 0) {
@@ -725,9 +764,15 @@ BM.Directories.View = {
 					dirNavigator.attr('node-target', parentNode);
 					me.activeDirectory = target;	//introduce the active directory
 					me.activeList.push(target);	//introduce the active directory to the active dir list 
+					dirHolder.attr('active-node', nodeId);
 				}
+				
+				d.trigger('sorter-activate-multiple-directories', [nodeId]);
+			} else {
+				d.trigger('sorter-activate-directory', [nodeId]);
 			}
-
+			
+			//BM.Bookmarks.Sorter.g().activateDirectory(nodeId);	
 			return false;
 		});
 		/*
@@ -740,9 +785,59 @@ BM.Directories.View = {
 			if (l > 1) {
 				me.hideDirectories(t[l-1]);
 				me.showDirectories(t[l-2]);
-				me.activeList.splice(l-1, 1);
+				
+				var temp = t[l-1].attr('node').split('-');
+				var diactivate = parseInt(temp[1], 10);
+				temp = t[l-2].attr('node').split('-');
+				var activate = parseInt(temp[1], 10);
+				if (temp[0] == 'root') {
+					active = -1;
+				}
+				d.trigger('sorter-diactivate-multiple-directories', [diactivate]);	
+				d.trigger('sorter-activate-multiple-directories', [activate]);
+				dirHolder.attr('active-node', activate);
+				
+				me.activeList.splice(l-1, 1);			
 			}
 
+			return false;
+		});
+		
+		var addDirInput = $('.add-new-directory');
+		var addDirBtn = $('.add-directory-shortcut-btn');
+		addDirInput.keyup(function(e) {
+			if (e.keyCode == 27) {
+				addDirInput.fadeOut(function() {
+					addDirBtn.fadeIn();
+				});
+			}
+		});
+		addDirInput.on('keypress', function(event) {
+			if (event.keyCode !== 13) {
+				return;
+			}
+			
+			var parent = dirHolder.attr('active-node');
+			if (parent == -1) {
+				parent = 'null';
+			}
+			d.trigger('add-directory', [addDirInput.val(), parent]);
+			addDirInput.val('');
+			addDirInput.fadeOut(function() {
+				addDirBtn.fadeIn();
+			});
+		});
+		addDirInput.blur(function() {
+			addDirInput.fadeOut(function() {
+				addDirBtn.fadeIn();
+			});
+		});
+		addDirBtn.on('click', function() {
+			$(this).fadeOut(function() {
+				addDirInput.fadeIn();
+				addDirInput.focus();
+			});
+			
 			return false;
 		});
 	},
@@ -930,6 +1025,23 @@ BM.Bookmarks = {
 			}
 		});
 	},
+	addBookmark : function(name, url, directoryId, categoriesId, typeId, callback) {
+		var params = {
+			name : name,
+			url : url,
+			directoryId : directoryId,
+			categoriesId : categoriesId,
+			typeId : typeId
+		};
+		
+		BM.p('bookmarks/add', function(response) {
+			if (response.status === 'ok') {
+				
+			} else {
+				
+			}
+		}, params);
+	},
 	init : function() {
 		var me = this;
 		me.getBookmarks(function() {
@@ -941,24 +1053,124 @@ BM.Bookmarks = {
  * @author Robert
  */
 
+BM.Bookmarks.Sorter = (function() {
+	var instantiated = false;
+	var d = $(document);
+	var filters = {
+		active : {
+			directory : [],
+			category : [],
+			type : []
+		},
+		noActive : true
+	};
+	function init() {
+		return {
+			filters : filters,
+			activateDirectory : function(id, callback) {
+				filters.active.directory = [];
+				filters.active.directory.push(id);
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
+				//d.trigger('sort-bookmarks');
+			},
+			activateMultipleDirectory : function(list, callback) {
+				filters.active.directory = list;
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
+				//d.trigger('sort-bookmarks');
+			},
+			diactivateDirectory : function(id) {
+				var r = _.reject(filters.active.directory, function(num) {
+					return num == id;
+				});
+
+				filters.active.directory = r;
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
+				//d.trigger('sort-bookmarks');
+			},
+			diactivateMultipleDirectory : function(list, callback) {
+				var r = _.without(filters.active.directory, list);
+				
+				filters.active.directory = r;
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
+				//d.trigger('sort-bookmarks');
+			},
+			activateCategory : function(id) {
+				filters.active.category.push(id);
+			},
+			diactivateCategory : function(id) {
+				/**
+				 * diactivation code here
+				 */
+			},
+			activateType : function(id) {
+				filters.active.type.push(id);
+			},
+			diactivateType : function(id) {
+				/**
+				 * diactivation code here
+				 */
+			}
+		}
+	}
+	
+	return {
+		getInstace : function() {
+			if (!instantiated) {
+				instantiated = init();
+			}		
+			return instantiated;
+		},
+		g : function() {
+			if (!instantiated) {
+				instantiated = init();
+			}		
+			return instantiated;
+		}
+	}
+})();
+/**
+ * @author Robert
+ */
+
 BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
-		var me = this;
 		var storage = BM.Storage.g();
 		var t = BM.Templater.Bookmarks;
 		_(storage.bookmarks).each(function(obj, key) {
-			var catName = "";
-			_(obj.bookmark.categoriesId).each(function(cat) {
-				var r = storage.getCategory(cat);
-				catName += " " + r.category.name;
-			});
-			var itemTemplate = t.bookmarkTemplate(key, obj.bookmark.url, catName);
-//			console.log(itemTemplate);
-//			console.log(t.bookmarksList());
+			var bookmark = obj.bookmark.proxy;
+			// var catName = "";
+			// _(bookmark.categoriesId).each(function(cat) {
+				// var r = storage.getCategory(cat);
+				// catName += " " + r.category.name;
+			// });
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.directoryId, bookmark.categoriesId, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		
 		BM.e(callback);
+	},
+	showBookmarks : function(filter, callback) {
+		var t = BM.Templater.Bookmarks;
+		t.bookmarksList().empty();
+		var storage = BM.Storage.g();
+		
+		_(storage.bookmarks).each(function(obj, key) {
+			var bookmark = obj.bookmark;
+			
+		});
+		
 	},
 	init : function() {
 		var me = this;
@@ -972,12 +1184,8 @@ BM.Bookmarks.View = {
  * @author Robert
  */
 
-BM.Mediator = {
-	init : function() {
-		BM.Mediator.Categories.provide();
-		BM.Mediator.Directories.provide();
-	}
-};
+BM.Mediator = {};
+
 BM.Mediator.Categories = {
 	provide : function() {
 		var d = $(document);
@@ -1085,6 +1293,58 @@ BM.Mediator.Directories = {
 			d.trigger('add-directory', [modal.name.val(), modal.selector.val()]);
 		});
 	}
+};
+
+BM.Mediator.Bookmarks = {
+	provide : function() {
+		var d = $(document);
+		var bookmarks = BM.Bookmarks;
+		var sorter = bookmarks.Sorter.g();
+		var t = BM.Templater;
+		
+		d.on('sorter-activate-directory', function(event, directoryId) {
+			sorter.activateDirectory(directoryId, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		
+		d.on('sorter-activate-multiple-directories', function(event, directoryId) {
+			var directoriesId = [directoryId];
+			var listHolder = $('.list-for-directory-' + directoryId);
+			var listItems = listHolder.find('.directory-btn');
+			listItems.each(function() {
+				var index = parseInt($(this).attr('node-id'), 10);
+				directoriesId.push(index);
+			});
+			
+			sorter.activateMultipleDirectory(directoriesId, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		
+		d.on('sorter-diactivate-multiple-directories', function(event, directoryId) {
+			var directoriesId = [directoryId];
+			var listHolder = $('.list-for-directory-' + directoryId);
+			var listItems = listHolder.find('.directory-btn');
+			listItems.each(function() {
+				var index = parseInt($(this).attr('node-id'), 10);
+				directoriesId.push(index);
+			});
+			
+			sorter.diactivateMultipleDirectory(directoriesId);
+		});
+		
+		d.on('sort-bookmarks', function(event) {
+			console.log('sorting bookmarks');
+			console.log(sorter.filters);
+		});
+	}
+};
+
+BM.Mediator.init = function() {
+		this.Categories.provide();
+		this.Directories.provide();
+		this.Bookmarks.provide();
 };
 /**
  * @author Robert

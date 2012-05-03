@@ -17,7 +17,7 @@ BM.Templater.Directories = {
 		return it;
 	},
 	listTemplate : function(name) {
-		var holder = $("<ul class='directories-list' node='" + name + "'></ul>");
+		var holder = $("<ul class='list-for-" + name + " directories-list' node='" + name + "'></ul>");
 		
 		return holder;
 	},
@@ -63,8 +63,8 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
-	bookmarkTemplate : function(id, name, category, image) {
-		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-category='" + category + "' ></li>");
+	bookmarkTemplate : function(id, name, directory, category, type, image) {
+		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-directory='" + directory + "' bookmark-category='" + category + "' bookmark-type='" + type + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");

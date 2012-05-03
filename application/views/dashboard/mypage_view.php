@@ -64,12 +64,16 @@
 				<div class='left-sidebar'>
 					<div class="directories-holder-header">Directories:</div>
 					<div class="separator no-select"></div>
-					<div class="directories-breadcum-holder">
+					<div class="sidebar-item directories-breadcum-holder">
 						<!-- directories breadcum -->
 						<i class='icon-chevron-left directories-breadcum-navigation' node-target=''></i>
 					</div>
-					<div class="directories-list-holder">
+					<div class="directories-list-holder" active-node='-1'>
 						<!-- directories list -->
+					</div>
+					<div class='sidebar-item'>
+						<a href='#' class='add-directory-shortcut-btn'>new directory</a>
+						<input class="span2 add-new-directory" size="16" type="text" placeholder="type name...">
 					</div>
 					<div class="directories-group btn-group dropup">
 					  	<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-cog'></i></button>

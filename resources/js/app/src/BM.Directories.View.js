@@ -84,12 +84,15 @@ BM.Directories.View = {
 	},
 	bindHandlers : function() {
 		var me = this;
-		var d = $('.directories-list');
+		var dList = $('.directories-list');
+		var d = $(document);
 		var dirNavigator = $('.directories-breadcum-navigation');
-
-		d.on('click', 'a', function(event) {
+		var dirHolder = $('.directories-list-holder');
+		
+		dirHolder.on('click', '.directory-btn', function(event) {
 			var item = $(this);
 			var targetNode = item.attr('node-target');
+			var nodeId = parseInt(item.attr('node-id'), 10);
 			if (targetNode !== 'none') {
 				var target = $(".directories-list[node='" + targetNode + "']");
 				if(target.length > 0) {
@@ -100,9 +103,15 @@ BM.Directories.View = {
 					dirNavigator.attr('node-target', parentNode);
 					me.activeDirectory = target;	//introduce the active directory
 					me.activeList.push(target);	//introduce the active directory to the active dir list 
+					dirHolder.attr('active-node', nodeId);
 				}
+				
+				d.trigger('sorter-activate-multiple-directories', [nodeId]);
+			} else {
+				d.trigger('sorter-activate-directory', [nodeId]);
 			}
-
+			
+			//BM.Bookmarks.Sorter.g().activateDirectory(nodeId);	
 			return false;
 		});
 		/*
@@ -115,9 +124,59 @@ BM.Directories.View = {
 			if (l > 1) {
 				me.hideDirectories(t[l-1]);
 				me.showDirectories(t[l-2]);
-				me.activeList.splice(l-1, 1);
+				
+				var temp = t[l-1].attr('node').split('-');
+				var diactivate = parseInt(temp[1], 10);
+				temp = t[l-2].attr('node').split('-');
+				var activate = parseInt(temp[1], 10);
+				if (temp[0] == 'root') {
+					active = -1;
+				}
+				d.trigger('sorter-diactivate-multiple-directories', [diactivate]);	
+				d.trigger('sorter-activate-multiple-directories', [activate]);
+				dirHolder.attr('active-node', activate);
+				
+				me.activeList.splice(l-1, 1);			
 			}
 
+			return false;
+		});
+		
+		var addDirInput = $('.add-new-directory');
+		var addDirBtn = $('.add-directory-shortcut-btn');
+		addDirInput.keyup(function(e) {
+			if (e.keyCode == 27) {
+				addDirInput.fadeOut(function() {
+					addDirBtn.fadeIn();
+				});
+			}
+		});
+		addDirInput.on('keypress', function(event) {
+			if (event.keyCode !== 13) {
+				return;
+			}
+			
+			var parent = dirHolder.attr('active-node');
+			if (parent == -1) {
+				parent = 'null';
+			}
+			d.trigger('add-directory', [addDirInput.val(), parent]);
+			addDirInput.val('');
+			addDirInput.fadeOut(function() {
+				addDirBtn.fadeIn();
+			});
+		});
+		addDirInput.blur(function() {
+			addDirInput.fadeOut(function() {
+				addDirBtn.fadeIn();
+			});
+		});
+		addDirBtn.on('click', function() {
+			$(this).fadeOut(function() {
+				addDirInput.fadeIn();
+				addDirInput.focus();
+			});
+			
 			return false;
 		});
 	},

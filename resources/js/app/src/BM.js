@@ -8,8 +8,11 @@ var BM = {};
 BM = {
 	baseUri : function() {
 		var win = window.location;
-		var origin = win.origin;
-
+		//var origin = win.origin;
+		var hostname = win.hostname;
+		var protocol = win.protocol;
+		var origin = protocol + '//' + hostname;
+		
 		return origin;		
 	},
 	apiUri : function() {

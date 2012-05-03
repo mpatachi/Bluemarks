@@ -66,10 +66,9 @@ BM.Storage = (function() {
 						
 			storeBookmark : function($b) {
 				var me = this;
-				//this.bookmarks.push($bookmark);
+				var dirId;		
 				bookmarkCount++;
 				var catIds = [];
-				//TODO to myself: review this please it was late :))
 				var categories = $b.categoriesId.split(' ');
 				_(categories).each(function(cat) {
 					_(me.categoriesRef).each(function(obj) {
@@ -78,21 +77,48 @@ BM.Storage = (function() {
 						}
 					});
 				});
-				//(id, name, dirId, catIds, typeId, noteId, description, url, img)
+				if ($b.directoryId != null) {
+					var di = search(me.directoriesRef, function(obj) {
+						return obj.realId == $b.directoryId;
+					}, false, true);
+					
+					if (-1 !== di) {
+						dirId = di.id;
+					}					
+				} else {
+					dirId = 0;
+				}
+								
+				var real = {
+					id : $b.id, 
+					name : $b.name, 
+					directoryId : $b.directoryId, 
+					categoriesId : $b.categoriesId, 
+					typeId : $b.typeId, 
+					noteId : $b.noteId,
+					description : $b.description,
+					url : $b.url,
+					image : $b.image					
+				};
+				var proxy = {
+					intId : bookmarkCount,
+					directoryId : dirId,
+					typeId : $b.typeId,
+					categoriesId : catIds,
+					url : $b.url,
+					image : $b.image
+				};
+				//(id, name, dirId, catIds, typeId, noteId, description, url, img) -- old implementation
+				// (proxy, real)
 				var bookmark = new BM.Entities.Bookmark(
-					$b.id, 
-					$b.name, 
-					$b.directoryId, 
-					catIds, 
-					$b.typeId, 
-					$b.noteId,
-					$b.description,
-					$b.url,
-					$b.image
+					proxy,
+					real
 				);
-				this.bookmarks[bookmarkCount] = {
+				me.bookmarks[bookmarkCount] = {
 					bookmark : bookmark
-				};			
+				};
+				
+				return me.bookmarks[bookmarkCount];			
 			},
 			storeAllBookmarks : function($list) {
 				var me = this;

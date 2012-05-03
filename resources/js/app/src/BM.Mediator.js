@@ -2,12 +2,8 @@
  * @author Robert
  */
 
-BM.Mediator = {
-	init : function() {
-		BM.Mediator.Categories.provide();
-		BM.Mediator.Directories.provide();
-	}
-};
+BM.Mediator = {};
+
 BM.Mediator.Categories = {
 	provide : function() {
 		var d = $(document);
@@ -115,4 +111,56 @@ BM.Mediator.Directories = {
 			d.trigger('add-directory', [modal.name.val(), modal.selector.val()]);
 		});
 	}
+};
+
+BM.Mediator.Bookmarks = {
+	provide : function() {
+		var d = $(document);
+		var bookmarks = BM.Bookmarks;
+		var sorter = bookmarks.Sorter.g();
+		var t = BM.Templater;
+		
+		d.on('sorter-activate-directory', function(event, directoryId) {
+			sorter.activateDirectory(directoryId, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		
+		d.on('sorter-activate-multiple-directories', function(event, directoryId) {
+			var directoriesId = [directoryId];
+			var listHolder = $('.list-for-directory-' + directoryId);
+			var listItems = listHolder.find('.directory-btn');
+			listItems.each(function() {
+				var index = parseInt($(this).attr('node-id'), 10);
+				directoriesId.push(index);
+			});
+			
+			sorter.activateMultipleDirectory(directoriesId, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		
+		d.on('sorter-diactivate-multiple-directories', function(event, directoryId) {
+			var directoriesId = [directoryId];
+			var listHolder = $('.list-for-directory-' + directoryId);
+			var listItems = listHolder.find('.directory-btn');
+			listItems.each(function() {
+				var index = parseInt($(this).attr('node-id'), 10);
+				directoriesId.push(index);
+			});
+			
+			sorter.diactivateMultipleDirectory(directoriesId);
+		});
+		
+		d.on('sort-bookmarks', function(event) {
+			console.log('sorting bookmarks');
+			console.log(sorter.filters);
+		});
+	}
+};
+
+BM.Mediator.init = function() {
+		this.Categories.provide();
+		this.Directories.provide();
+		this.Bookmarks.provide();
 };
