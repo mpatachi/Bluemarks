@@ -29,20 +29,20 @@ BM.Entities.Bookmark = (function() {
 	}
 })();
 
-BM.Entities.Category = (function() {
-	var Category = function(id, name, intId) {
+BM.Entities.Tag = (function() {
+	var Tag = function(id, name, intId) {
 		this.id = id;
 		this.name = name;
 		this.intId = intId;
 	};
 	
 	return function(id, name, intId) {
-		return new Category(id, name, intId);
+		return new Tag(id, name, intId);
 	};
 })();
 
-BM.Entities.Directory = (function() {
-	var Directory = function(id, name, parentId, intId) {
+BM.Entities.Folder = (function() {
+	var Folder = function(id, name, parentId, intId) {
 		this.id = id;
 		this.name = name;
 		this.parentId = parentId;
@@ -51,7 +51,7 @@ BM.Entities.Directory = (function() {
 	};
 	
 	return function(id, name, parentId, intId) {
-		return new Directory(id, name, parentId, intId);
+		return new Folder(id, name, parentId, intId);
 	};
 })();
 

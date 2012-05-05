@@ -100,78 +100,104 @@ BM.utils = {
  * @author Robert
  */
 
-BM.Templater = {};
+BM.Entities = {};
 
-BM.Templater.Directories = {
-	leftSidebar : function() {
-		return $('.left-sidebar');
-	},
-	directoriesListHolder : function() {
-		return $('.directories-list-holder');
-	},
-	itemTemplate : function(name, id, target, parent) {
-		var it = $("<li><a href='#' class='directory-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
+BM.Entities.Bookmark = (function() {
+	var Bookmark = function(proxy, real) {
+		this.proxy = proxy;
+		this.real = real;
+	};
+	// var Bookmark = function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		// this.id = id;
+		// this.name = name;
+		// this.directoryId = dirId;
+		// this.categoriesId = catIds;
+		// this.typeId = typeId;
+		// this.noteId = noteId;
+		// this.description = description;
+		// this.url = url;
+		// this.image = img;
+	// };
+// 	
+	// return function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
+		// return new Bookmark(id, name, dirId, catIds, typeId, noteId, description, url, img);
+	// };
+	return function(proxy, real) {
+		return new Bookmark(proxy, real);
+	}
+})();
 
-		return it;
-	},
-	listTemplate : function(name) {
-		var holder = $("<ul class='list-for-" + name + " directories-list' node='" + name + "'></ul>");
-		
-		return holder;
-	},
-	getAddModal : function() {
-		var modal = $('#add-directory-modal');
-		var submitBtn = modal.find('.modal-directory-add');
-		var nameField = modal.find('.modal-directory-name');
-		var selector = modal.find('.modal-parent-selector');
-		var nameGroup = modal.find('.modal-name-group');
-		var parentGroup = modal.find('.modal-parent-group');
-		
+BM.Entities.Tag = (function() {
+	var Tag = function(id, name, intId) {
+		this.id = id;
+		this.name = name;
+		this.intId = intId;
+	};
+	
+	return function(id, name, intId) {
+		return new Tag(id, name, intId);
+	};
+})();
+
+BM.Entities.Folder = (function() {
+	var Folder = function(id, name, parentId, intId) {
+		this.id = id;
+		this.name = name;
+		this.parentId = parentId;
+		this.intId = intId;
+		//this.realParentId = realParentId;
+	};
+	
+	return function(id, name, parentId, intId) {
+		return new Folder(id, name, parentId, intId);
+	};
+})();
+
+BM.Entities.Relationer = (function() {
+	var Relationer = function(ref, children) {
+		this.ref = ref;
+		this.children = children;
+	};
+	
+	return function(ref, children) {
+		return new Relationer(ref, children);
+	}
+})();
+/**
+ * @author Robert
+ */
+
+BM.Promiser = (function() {
+	var gettingFolders = new $.Deferred(),
+	gettingTags = new $.Deferred(),
+	gettingBookmarks = new $.Deferred(),
+	storingFolders = new $.Deferred(),
+	storingTags = new $.Deferred(),
+	storingBookmarsk = new $.Deferred(),
+	instantiated = null;
+
+	function init() {
+			
 		return {
-			el : modal,
-			submit : submitBtn,
-			name : nameField,
-			selector : selector,
-			nameGroup : nameGroup,
-			parentGroup : parentGroup
+			gettingFolders : gettingFolders,
+			gettingTags : gettingTags,
+			gettingBookmarks : gettingBookmarks,
+			storingFolders : storingFolders,
+			storingTags : storingTags,
+			storingBookmarsk : storingBookmarsk
 		};
-	}	
-};
-
-BM.Templater.Categories = {
-	ddCategoryHolder : function() {
-		return $('.categories-dropdown');
-	},
-	getAddModal : function() {
-		var modal = $('#add-category-modal');
-		var submitBtn = modal.find('.modal-category-add');
-		var nameField = modal.find('.modal-category-name');
-		var nameGroup = modal.find('.modal-name-group');
-		
-		return {
-			el : modal,
-			submit : submitBtn,
-			name : nameField,
-			nameGroup : nameGroup,
-		};		
 	}
-};
-
-BM.Templater.Bookmarks = {
-	bookmarksList : function() {
-		return $('.bookmarks-list');
-	},
-	bookmarkTemplate : function(id, name, directory, category, type, image) {
-		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-directory='" + directory + "' bookmark-category='" + category + "' bookmark-type='" + type + "' ></li>");
-		var link = $("<a href='#' class='thumbnail'></a>");
-		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
-		var title = $("<h5>" + name + "</h5>");
-		link.append(img, title);
-		li.append(link);
-		
-		return li; 
-	}
-};
+	
+	return {
+		g : function() {
+			if (!instantiated) {
+				instantiated = init();
+			}
+			
+			return instantiated;
+		}
+	};
+})();
 /**
  * @author Robert
  * Storage.js
@@ -180,8 +206,8 @@ BM.Templater.Bookmarks = {
 BM.Storage = (function() {
 	var instantiated = false;
 	var bookmarkCount = 0;
-	var categoryCount = 0;
-	var directoryCount = 0;
+	var tagCount = 0;
+	var folderCount = 0;
 	
 	function init() {
 		/**
@@ -227,33 +253,42 @@ BM.Storage = (function() {
 			bookmarks : {
 					
 			},
-			categories : {
+			tags : {
 				
 			},
-			directories : {
+			folders : {
 				
 			},
 			bookmarkRef : [],
-			directoriesRef : [],
-			categoriesRef : [],
-			directoryTree : [],
+			foldersRef : [],
+			tagsRef : [],
+			folderTree : [],
 						
 			storeBookmark : function($b) {
 				var me = this;
 				var dirId;		
 				bookmarkCount++;
-				var catIds = [];
-				var categories = $b.categoriesId.split(' ');
-				_(categories).each(function(cat) {
-					_(me.categoriesRef).each(function(obj) {
+				var tagsIds = [];
+				var tags = $b.tagsId.split(' ');
+				var tagsRef = me.tagsRef;
+				_(tags).each(function(cat) {
+					_(tagsRef).each(function(obj) {
 						if (obj.realId == cat) {
-							catIds.push(obj.id);
+							tagsIds.push(obj.id);
 						}
 					});
 				});
-				if ($b.directoryId != null) {
-					var di = search(me.directoriesRef, function(obj) {
-						return obj.realId == $b.directoryId;
+				// var tg = tags.length;
+				// var tgr = tagsRef.length;
+				// for (; tg > 0; tg--) {
+					// for (; tgr > 0; tgr--) {
+						// console.log(tagsRef[tgr]);
+					// }
+				// }
+				
+				if ($b.folderId != null) {
+					var di = search(me.foldersRef, function(obj) {
+						return obj.realId == $b.folderId;
 					}, false, true);
 					
 					if (-1 !== di) {
@@ -266,8 +301,8 @@ BM.Storage = (function() {
 				var real = {
 					id : $b.id, 
 					name : $b.name, 
-					directoryId : $b.directoryId, 
-					categoriesId : $b.categoriesId, 
+					folderId : $b.folderId, 
+					tagsId : $b.tagsId, 
 					typeId : $b.typeId, 
 					noteId : $b.noteId,
 					description : $b.description,
@@ -276,9 +311,9 @@ BM.Storage = (function() {
 				};
 				var proxy = {
 					intId : bookmarkCount,
-					directoryId : dirId,
+					folderId : dirId,
 					typeId : $b.typeId,
-					categoriesId : catIds,
+					tagsId : tagsIds,
 					url : $b.url,
 					image : $b.image
 				};
@@ -297,90 +332,95 @@ BM.Storage = (function() {
 			storeAllBookmarks : function($list) {
 				var me = this;
 				var l = $list.length;
-				for (var i =0; i< l; i++) {
+				for (var i = 0; i< l; i++) {
 					me.storeBookmark($list[i]);
 				}
+				BM.Promiser.g().storingBookmarsk.resolve();
 			},
-			storeCategory : function($c) {
-				categoryCount++;
-				var category = new BM.Entities.Category(
-					$c.id, 
-					$c.name,
-					categoryCount
-				);
-				this.categories[categoryCount] = {
-					category : category
-				};
+			storeTag : function($c) {
+				tagCount++;
+				
 				var ref = {
-					id : categoryCount,
+					id : tagCount,
 					realId : $c.id 
 				};
-				this.categoriesRef.push(ref);
-				
-				return this.categories[categoryCount];
+				this.tagsRef.push(ref);
+								
+				var tag = new BM.Entities.Tag(
+					$c.id, 
+					$c.name,
+					tagCount
+				);
+				this.tags[tagCount] = {
+					tag : tag
+				};
+
+				return this.tags[tagCount];
 			},			
-			storeAllCategories : function($list) {
+			storeAllTags : function($list) {
 				var me = this;
 				var l = $list.length;
 				var entity = BM.Entities;
 				for (var i = 0; i < l; i++) {
-					me.storeCategory($list[i]);
+					me.storeTag($list[i]);
 				}
+				
+				BM.Promiser.g().storingTags.resolve(); //resolve the promise
 			},
-			addToDirectoryTree : function(directory) {
+			addToFolderTree : function(folder) {
 				var me = this;
 				var ref = 'root';
-				if (directory.parentId != 'null') {
-					ref = 'directory-' + directory.parentId;
+				if (folder.parentId != 'null') {
+					ref = 'folder-' + folder.parentId;
 				}
-				var rs = search(me.directoryTree, function(obj) {
+				var rs = search(me.folderTree, function(obj) {
 					return obj.ref == ref;
 				}, true);
 						
 				if (-1 !== rs) {
-					me.directoryTree[rs].children.push(directory.intId);
+					me.folderTree[rs].children.push(folder.intId);
 				} else {
-					var item = new BM.Entities.Relationer(ref, [directory.intId]);
-					me.directoryTree.push(item);
+					var item = new BM.Entities.Relationer(ref, [folder.intId]);
+					me.folderTree.push(item);
 				}				
 			},
-			storeDirectory : function($directory, $id) {
+			storeFolder : function($folder, $id) {
 				var returnId;
-				var dir = new BM.Entities.Directory(
-							$directory.id,
-							$directory.name,
-							$directory.parentId
+				var dir = new BM.Entities.Folder(
+							$folder.id,
+							$folder.name,
+							$folder.parentId
 					);
 				if ($id == undefined) {
-					directoryCount++;					
+					folderCount++;					
 					var ref = {
-						id : directoryCount,
-						realId : $directory.id
+						id : folderCount,
+						realId : $folder.id
 					};
-					dir.intId = directoryCount;
-					this.directories[directoryCount] = {
-						directory : dir
+					dir.intId = folderCount;
+					this.folders[folderCount] = {
+						folder : dir
 					};					
-					this.directoriesRef.push(ref);
-					returnId = directoryCount;
+					this.foldersRef.push(ref);
+					returnId = folderCount;
 				} else {
 					dir.intId = $id;
-					this.directories[$id] = {
-						directory : dir
+					this.folders[$id] = {
+						folder : dir
 					};
 					returnId = $id;
 				}
 				
-				return this.directories[returnId];
+				return this.folders[returnId];
 			},
-			storeAllDirectories : function($list) {
+			storeAllFolders : function($list) {
 				var me = this;
 				var l = $list.length;
 				var root = new BM.Entities.Relationer('root', []);
 				var check = false;
 				var currentItem;
 				/*
-				 * for each item in the list create a new directory entity and pass
+				 * for each item in the list create a new folder entity and pass
 				 * the values of the properties after that add it into the internal data
 				 * structure
 				 */
@@ -389,20 +429,20 @@ BM.Storage = (function() {
 					var pId = item.parentId;
 					
 					if (false === check) {
-						currentItem = me.storeDirectory(item);
+						currentItem = me.storeFolder(item);
 					} else {
-						var di = search(me.directoriesRef, function(obj) {
+						var di = search(me.foldersRef, function(obj) {
 							return obj.realId == item.id;
 						}, false, true);
 						
 						if (-1 !== di) {
-							currentItem = me.storeDirectory(item, di.id);
+							currentItem = me.storeFolder(item, di.id);
 						} else {
-							currentItem = me.storeDirectory(item);
+							currentItem = me.storeFolder(item);
 						}
 					}
 
-					var intId = currentItem.directory.intId;
+					var intId = currentItem.folder.intId;
 					
 					/*
 					 * if the parent id of the item is null add it to root
@@ -412,18 +452,18 @@ BM.Storage = (function() {
 					} else {
 						/*
 						 * else if the parent id is set then search in the
-						 * directories reference for the existence of the directory
+						 * folders reference for the existence of the folder
 						 */
 						var refId;
-						var r = search(me.directoriesRef, function(obj) {
+						var r = search(me.foldersRef, function(obj) {
 							return obj.realId == pId;
 						}, false, true);
 						
 						if (-1 == r) {
 							/*
-							 * if the directory does not exist yet then 
+							 * if the folder does not exist yet then 
 							 * create a temporary holder for it 
-							 * we just set the id of the directory 
+							 * we just set the id of the folder 
 							 */
 							check = true;	//we set the check value to search later for existing references
 							var temp = {
@@ -431,17 +471,17 @@ BM.Storage = (function() {
 								name : null,
 								parentId : null
 							};
-							me.storeDirectory(temp);
-							refId = directoryCount; //set the reference id to the latest directory
+							me.storeFolder(temp);
+							refId = folderCount; //set the reference id to the latest folder
 						} else {
 							refId = r.id;	//if there is a reference the we se only the reference id
 						}
 
 						/*
-						 * we search for an existing instance in the directory tree
+						 * we search for an existing instance in the folder tree
 						 */
-						var rs = search(me.directoryTree, function(obj) {
-							return obj.ref == 'directory-' + refId;
+						var rs = search(me.folderTree, function(obj) {
+							return obj.ref == 'folder-' + refId;
 						}, true);
 						/*
 						 * if there is an instance then we add the internal id of the item
@@ -451,14 +491,15 @@ BM.Storage = (function() {
 						 * to it's children 
 						 */
 						if (-1 !== rs) {
-							me.directoryTree[rs].children.push(intId);
+							me.folderTree[rs].children.push(intId);
 						} else {
-							var item = new BM.Entities.Relationer('directory-' + refId, [intId]);
-							me.directoryTree.push(item);
+							var item = new BM.Entities.Relationer('folder-' + refId, [intId]);
+							me.folderTree.push(item);
 						}
 					}
 				}
-				me.directoryTree.push(root);
+				me.folderTree.push(root);
+				BM.Promiser.g().storingFolders.resolve();
 			},
 			getBookmark : function(id) {
 				// var r = search(this.bookmarks, function(obj) {
@@ -471,11 +512,11 @@ BM.Storage = (function() {
 				// return null;
 				return this.bookmarks[id];
 			},
-			getCategory : function(id) {
-				return this.categories[id];
+			getTag : function(id) {
+				return this.tags[id];
 			},
-			getDirectory : function(id) {
-				// var r = search(this.directories, function(obj) {
+			getFolder : function(id) {
+				// var r = search(this.folders, function(obj) {
 					// if (obj.id == id) {
 						// return obj;	
 					// }
@@ -486,13 +527,13 @@ BM.Storage = (function() {
 				// }
 // 				
 				// return null;
-				return this.directories[id];
+				return this.folders[id];
 			},
-			dumpDirectories : function() {
-				directoryCount = 0;
-				this.directories = {};
-				this.directoriesRef = [];
-				this.directoryTree = [];
+			dumpFolders : function() {
+				folderCount = 0;
+				this.folders = {};
+				this.foldersRef = [];
+				this.folderTree = [];
 			}
 		}
 	}
@@ -516,111 +557,126 @@ BM.Storage = (function() {
  * @author Robert
  */
 
-BM.Entities = {};
+BM.Templater = {};
 
-BM.Entities.Bookmark = (function() {
-	var Bookmark = function(proxy, real) {
-		this.proxy = proxy;
-		this.real = real;
-	};
-	// var Bookmark = function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
-		// this.id = id;
-		// this.name = name;
-		// this.directoryId = dirId;
-		// this.categoriesId = catIds;
-		// this.typeId = typeId;
-		// this.noteId = noteId;
-		// this.description = description;
-		// this.url = url;
-		// this.image = img;
-	// };
-// 	
-	// return function(id, name, dirId, catIds, typeId, noteId, description, url, img) {
-		// return new Bookmark(id, name, dirId, catIds, typeId, noteId, description, url, img);
-	// };
-	return function(proxy, real) {
-		return new Bookmark(proxy, real);
+BM.Templater.Folders = {
+	leftSidebar : function() {
+		return $('.left-sidebar');
+	},
+	foldersListHolder : function() {
+		return $('.folders-list-holder');
+	},
+	itemTemplate : function(name, id, target, parent) {
+		var it = $("<li><a href='#' class='folder-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
+
+		return it;
+	},
+	listTemplate : function(name) {
+		var holder = $("<ul class='list-for-" + name + " folders-list' node='" + name + "'></ul>");
+		
+		return holder;
+	},
+	getAddModal : function() {
+		var modal = $('#add-folder-modal');
+		var submitBtn = modal.find('.modal-folder-add');
+		var nameField = modal.find('.modal-folder-name');
+		var selector = modal.find('.modal-parent-selector');
+		var nameGroup = modal.find('.modal-name-group');
+		var parentGroup = modal.find('.modal-parent-group');
+		
+		return {
+			el : modal,
+			submit : submitBtn,
+			name : nameField,
+			selector : selector,
+			nameGroup : nameGroup,
+			parentGroup : parentGroup
+		};
+	}	
+};
+
+BM.Templater.Tags = {
+	ddTagHolder : function() {
+		return $('.categories-dropdown');
+	},
+	getAddModal : function() {
+		var modal = $('#add-tag-modal');
+		var submitBtn = modal.find('.modal-tag-add');
+		var nameField = modal.find('.modal-tag-name');
+		var nameGroup = modal.find('.modal-name-group');
+		
+		return {
+			el : modal,
+			submit : submitBtn,
+			name : nameField,
+			nameGroup : nameGroup,
+		};		
+	},
+	tagTypeahead : function() {
+		return $('.apply-tag-input');
 	}
-})();
+};
 
-BM.Entities.Category = (function() {
-	var Category = function(id, name, intId) {
-		this.id = id;
-		this.name = name;
-		this.intId = intId;
-	};
-	
-	return function(id, name, intId) {
-		return new Category(id, name, intId);
-	};
-})();
-
-BM.Entities.Directory = (function() {
-	var Directory = function(id, name, parentId, intId) {
-		this.id = id;
-		this.name = name;
-		this.parentId = parentId;
-		this.intId = intId;
-		//this.realParentId = realParentId;
-	};
-	
-	return function(id, name, parentId, intId) {
-		return new Directory(id, name, parentId, intId);
-	};
-})();
-
-BM.Entities.Relationer = (function() {
-	var Relationer = function(ref, children) {
-		this.ref = ref;
-		this.children = children;
-	};
-	
-	return function(ref, children) {
-		return new Relationer(ref, children);
+BM.Templater.Bookmarks = {
+	bookmarksList : function() {
+		return $('.bookmarks-list');
+	},
+	bookmarkTemplate : function(id, name, folder, tag, type, image) {
+		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
+		var link = $("<a href='#' class='thumbnail'></a>");
+		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
+		var title = $("<h5>" + name + "</h5>");
+		link.append(img, title);
+		li.append(link);
+		
+		return li; 
 	}
-})();
+};
 /**
  * @author Robert
- * Directories.js
+ * Folders.js
  */
 
-BM.Directories = {
-	directoriesRef : [],
+BM.Folders = {
+	foldersRef : [],
 	
-	getDirectory : function(id, limit) {
+	getFolder : function(id, limit) {
 		var params = {
 			id : id,
 			limit : limit
 		};
-		var directory = BM.p('directories/list', function(data) {
+		var folder = BM.p('folders/list', function(data) {
 			console.log(data);
 		}, params);
 		
-		return directory;
+		return folder;
 	},
-	getDirectories : function(callback, limit) {
-		BM.p('directories/list_all', function(response) {
+	getFolders : function(callback, limit) {
+		BM.p('folders/list_all', function(response) {
 			if (response.status === 'ok') {
-				BM.Storage.g().storeAllDirectories(response.data);
-				BM.e(callback);
+				//BM.Storage.g().storeAllFolders(response.data);
+				BM.Promiser.g().gettingFolders.resolve(response.data);
+				if (callback != undefined) {
+					BM.e(callback);
+				}
 			}
 			
 			/* should place error provider */
 		});
 	},
-	addDirectory : function(name, parentId) {
+	addFolder : function(name, parentId) {
 		var me = this;
 		var storage = BM.Storage.g();
 		var intParentId = parentId;
 		 
 		if (parentId != 'null') {
 			var utils = BM.utils;
-			var r = utils.search(storage.directoriesRef, function(obj) {
+			var r = utils.search(storage.foldersRef, function(obj) {
 				return obj.id == parentId;
 			});
 			
 			if (-1 !== r) {
-				parentId = storage.directoriesRef[r].realId;
+				parentId = storage.foldersRef[r].realId;
 			}
 		}
 					
@@ -628,100 +684,112 @@ BM.Directories = {
 			name : name,
 			parentId : parentId
 		};
-		BM.p('directories/add', function(response) {
+		BM.p('folders/add', function(response) {
 			if (response.status === 'ok') {
-				var directory = {
+				var folder = {
 					id : response.data.id,
 					name : name,
 					parentId : parentId
 				};
-				var newDirectory = storage.storeDirectory(directory);
-				newDirectory.directory.parentId = intParentId;
-				storage.addToDirectoryTree(newDirectory.directory);
-				BM.Directories.View.addDirectoryToList(newDirectory.directory);
-				$(document).trigger('add-directory-success', [response.msg]);
+				var newFolder = storage.storeFolder(folder);
+				newFolder.folder.parentId = intParentId;
+				storage.addToFolderTree(newFolder.folder);
+				BM.Folders.View.addFolderToList(newFolder.folder);
+				$(document).trigger('add-folder-success', [response.msg]);
 			} else {
-				$(document).trigger('add-directory-error', [response.msg]);
+				$(document).trigger('add-folder-error', [response.msg]);
 			}
 		}, params);
 	},
-	updateDirectoriesList : function() {
-		BM.Storage.g().dumpDirectories();
-		this.getDirectories(function() {
- 			BM.Directories.View.init();
+	updateFoldersList : function() {
+		BM.Storage.g().dumpFolders();
+		this.getFolders(function() {
+ 			BM.Folders.View.init();
  		});		
 	},
 	init : function() {
 		var me = this;
- 		me.getDirectories(function() {
- 			BM.Directories.View.init();
- 			BM.Directories.View.AddDirectory.init();
- 		});	
+		var p = BM.Promiser.g();
+		
+ 		// me.getFolders(function() {
+ 			// BM.Folders.View.init();
+ 			// BM.Folders.View.AddFolder.init();
+ 		// });	
+ 		me.getFolders();
+ 		p.gettingFolders.done(function(data) {
+ 			console.log('# done getting folders');
+ 			BM.Storage.g().storeAllFolders(data);	
+ 		});
+ 		p.storingFolders.done(function() {
+ 			console.log('# done storing folders');
+ 			BM.Folders.View.init();
+ 			BM.Folders.View.AddFolder.init(); 			
+ 		});
 	}
 };
 /**
  * @author Robert
- * Directories.View.js
+ * Folders.View.js
  */
-BM.Directories.View = {
-	directoryHolder : 'directories-list',
+BM.Folders.View = {
+	folderHolder : 'folders-list',
 	isLoading : false,
-	activeDirectory : null,
+	activeFolder : null,
 	activeList : [],
 	
-	getDirectoriesHolder : function() {
-		return $(this.directoryHolder);
+	getFoldersHolder : function() {
+		return $(this.folderHolder);
 	},
-	addDirectoryToList : function(directory) {
+	addFolderToList : function(folder) {
 		var targetNode;
 		var utils = BM.utils;
 		var storage = BM.Storage.g();
-		var t = BM.Templater.Directories;
-		if (directory.parentId != 'null') {
-			// var r = utils.search(storage.directoriesRef, function(i) {
-				// return i.realId == directory.parentId;
+		var t = BM.Templater.Folders;
+		if (folder.parentId != 'null') {
+			// var r = utils.search(storage.foldersRef, function(i) {
+				// return i.realId == folder.parentId;
 			// });
 			
 			// if (-1 !== r) {
-				// var nodeId = storage.directoriesRef[r].id;
-				// targetNode = 'directory-' + nodeId;
+				// var nodeId = storage.foldersRef[r].id;
+				// targetNode = 'folder-' + nodeId;
 				// var listTemplate = t.listTemplate(targetNode);
-				// var node = $(".directory-btn[node-id='" + nodeId + "']");
+				// var node = $(".folder-btn[node-id='" + nodeId + "']");
 				// node.attr('node-target', targetNode);
 			// }
-			var nodeId = directory.parentId;	//i have overwriten the parentId with the internal pId
-			targetNode = 'directory-' + nodeId;
+			var nodeId = folder.parentId;	//i have overwriten the parentId with the internal pId
+			targetNode = 'folder-' + nodeId;
 			var listTemplate = t.listTemplate(targetNode);
-			var node = $(".directory-btn[node-id='" + nodeId + "']");
+			var node = $(".folder-btn[node-id='" + nodeId + "']");
 			node.attr('node-target', targetNode);
-			t.directoriesListHolder().append(listTemplate);
+			t.foldersListHolder().append(listTemplate);
 		} else {
 			targetNode = 'root';
 		}
-		var dirRef = 'directory-' + directory.intId;
-		var r = utils.search(storage.directoryTree, function(it) {
+		var dirRef = 'folder-' + folder.intId;
+		var r = utils.search(storage.folderTree, function(it) {
 			return it.ref == dirRef;
 		});
 		if (-1 === r) {
 			dirRef = 'none';
 		}
-		var listItem = t.itemTemplate(directory.name, directory.intId, dirRef, targetNode);
-		var target = $(".directories-list[node='" + targetNode + "']");
+		var listItem = t.itemTemplate(folder.name, folder.intId, dirRef, targetNode);
+		var target = $(".folders-list[node='" + targetNode + "']");
 		target.append(listItem);
 	},
-	listDirectories : function(callback) {
+	listFolders : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
-		var t = BM.Templater.Directories;
+		var t = BM.Templater.Folders;
 		var utils = BM.utils;
 		
-		_(storage.directoryTree).each(function(obj) {
+		_(storage.folderTree).each(function(obj) {
 			var listTemplate = t.listTemplate(obj.ref);
 
 			_(obj.children).each(function(index) {
-				var item = storage.getDirectory(index).directory;
-				var dirRef = 'directory-' + item.intId;
-				var r = utils.search(storage.directoryTree, function(it) {
+				var item = storage.getFolder(index).folder;
+				var dirRef = 'folder-' + item.intId;
+				var r = utils.search(storage.folderTree, function(it) {
 					return it.ref == dirRef;
 				});
 				if (-1 === r) {
@@ -731,48 +799,48 @@ BM.Directories.View = {
 				listTemplate.append(listItem);
 			});
 			
-			t.directoriesListHolder().append(listTemplate);
+			t.foldersListHolder().append(listTemplate);
 		});
 
 		BM.e(callback);
 	},
-	showDirectories : function(item) {
-		//var d = $(".directories-list[node='" + id + "']");
+	showFolders : function(item) {
+		//var d = $(".folders-list[node='" + id + "']");
 		item.fadeIn('200');
 	},
-	hideDirectories : function(item) {
+	hideFolders : function(item) {
 		item.hide();
 	},
 	bindHandlers : function() {
 		var me = this;
-		var dList = $('.directories-list');
+		var dList = $('.folders-list');
 		var d = $(document);
-		var dirNavigator = $('.directories-breadcum-navigation');
-		var dirHolder = $('.directories-list-holder');
+		var dirNavigator = $('.folders-breadcum-navigation');
+		var dirHolder = $('.folders-list-holder');
 		
-		dirHolder.on('click', '.directory-btn', function(event) {
+		dirHolder.on('click', '.folder-btn', function(event) {
 			var item = $(this);
 			var targetNode = item.attr('node-target');
 			var nodeId = parseInt(item.attr('node-id'), 10);
 			if (targetNode !== 'none') {
-				var target = $(".directories-list[node='" + targetNode + "']");
+				var target = $(".folders-list[node='" + targetNode + "']");
 				if(target.length > 0) {
-					var toHide = item.parents('.directories-list');
+					var toHide = item.parents('.folders-list');
 					var parentNode = item.attr('node-parent');
-					me.hideDirectories(toHide);
-					me.showDirectories(target);
+					me.hideFolders(toHide);
+					me.showFolders(target);
 					dirNavigator.attr('node-target', parentNode);
-					me.activeDirectory = target;	//introduce the active directory
-					me.activeList.push(target);	//introduce the active directory to the active dir list 
+					me.activeFolder = target;	//introduce the active folder
+					me.activeList.push(target);	//introduce the active folder to the active dir list 
 					dirHolder.attr('active-node', nodeId);
 				}
 				
-				d.trigger('sorter-activate-multiple-directories', [nodeId]);
+				d.trigger('sorter-activate-multiple-folders', [nodeId]);
 			} else {
-				d.trigger('sorter-activate-directory', [nodeId]);
+				d.trigger('sorter-activate-folder', [nodeId]);
 			}
 			
-			//BM.Bookmarks.Sorter.g().activateDirectory(nodeId);	
+			//BM.Bookmarks.Sorter.g().activateFolder(nodeId);	
 			return false;
 		});
 		/*
@@ -783,8 +851,8 @@ BM.Directories.View = {
 			var l = t.length;
 
 			if (l > 1) {
-				me.hideDirectories(t[l-1]);
-				me.showDirectories(t[l-2]);
+				me.hideFolders(t[l-1]);
+				me.showFolders(t[l-2]);
 				
 				var temp = t[l-1].attr('node').split('-');
 				var diactivate = parseInt(temp[1], 10);
@@ -793,8 +861,8 @@ BM.Directories.View = {
 				if (temp[0] == 'root') {
 					active = -1;
 				}
-				d.trigger('sorter-diactivate-multiple-directories', [diactivate]);	
-				d.trigger('sorter-activate-multiple-directories', [activate]);
+				d.trigger('sorter-diactivate-multiple-folders', [diactivate]);	
+				d.trigger('sorter-activate-multiple-folders', [activate]);
 				dirHolder.attr('active-node', activate);
 				
 				me.activeList.splice(l-1, 1);			
@@ -803,8 +871,8 @@ BM.Directories.View = {
 			return false;
 		});
 		
-		var addDirInput = $('.add-new-directory');
-		var addDirBtn = $('.add-directory-shortcut-btn');
+		var addDirInput = $('.add-new-folder');
+		var addDirBtn = $('.add-folder-shortcut-btn');
 		addDirInput.keyup(function(e) {
 			if (e.keyCode == 27) {
 				addDirInput.fadeOut(function() {
@@ -821,7 +889,7 @@ BM.Directories.View = {
 			if (parent == -1) {
 				parent = 'null';
 			}
-			d.trigger('add-directory', [addDirInput.val(), parent]);
+			d.trigger('add-folder', [addDirInput.val(), parent]);
 			addDirInput.val('');
 			addDirInput.fadeOut(function() {
 				addDirBtn.fadeIn();
@@ -843,43 +911,43 @@ BM.Directories.View = {
 	},
 	init : function() {
 		var me = this;
-		$('.directories-list-holder').empty();
+		$('.folders-list-holder').empty();
 		
-		me.listDirectories(function() {
-			var r = $(".directories-list[node='root']");
+		me.listFolders(function() {
+			var r = $(".folders-list[node='root']");
 			me.activeList.push(r);
-			me.showDirectories(r);
+			me.showFolders(r);
 			me.bindHandlers();
 		});
 	} 
 };	/**
  * @author Robert
- * Directories.View.AddDirectory.js
+ * Folders.View.AddFolder.js
  */
 
-BM.Directories.View.AddDirectory = {
+BM.Folders.View.AddFolder = {
 	modal : function() {
-		return $('#add-directory-modal');
+		return $('#add-folder-modal');
 	},
 	bindHandlers : function() {
-		var modal = $('#add-directory-modal');
-		var submitBtn = modal.find('.modal-directory-add');
-		var nameField = modal.find('.modal-directory-name');
+		var modal = $('#add-folder-modal');
+		var submitBtn = modal.find('.modal-folder-add');
+		var nameField = modal.find('.modal-folder-name');
 		var selector = modal.find('.modal-parent-selector');
 		var d = $(document);
 		
 		submitBtn.on('click', function() {
-			d.trigger('add-directory', [nameField.val(), selector.val()]);
+			d.trigger('add-folder', [nameField.val(), selector.val()]);
 			
 			return false;
 		});
 	},
 	listParents : function(callback) {
-		var storage = BM.Storage.g().directories;
+		var storage = BM.Storage.g().folders;
 		var selector = this.modal().find('.modal-parent-selector');
 
 		_(storage).each(function(obj) {
-			var item = "<option value='" + obj.directory.intId + "'>" + obj.directory.name + "</option>";
+			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
 			selector.append(item);
 		});
 		
@@ -896,85 +964,114 @@ BM.Directories.View.AddDirectory = {
  * @author Robert
  */
 
-BM.Categories = {
-	getCategories : function(callback, limit) {
-		BM.p('categories/list_all', function(response) {
+BM.Tags = {
+	getTags : function(callback, limit) {
+		BM.p('tags/list_all', function(response) {
 			if (response.status === 'ok') {
-				BM.Storage.g().storeAllCategories(response.data);
-				BM.e(callback);
+				// BM.Storage.g().storeAllTags(response.data);
+				BM.Promiser.g().gettingTags.resolve(response.data);
+				if (callback != undefined) {
+					BM.e(callback);
+				}
 			}
 		});
 	},
-	addCategory : function(name, callback) {
+	addTag : function(name, callback) {
 		var params = {
 			name : name
 		};
-		BM.p('categories/add', function(response) {
+		BM.p('tags/add', function(response) {
 			if (response.status === 'ok') {
-				var category = {
+				var tag = {
 					id : response.data.id,
 					name : name
 				};
-				var newCategory = BM.Storage.g().storeCategory(category);
-				BM.Categories.View.addCategoryToList(newCategory.category);
-				$(document).trigger('add-category-success', [response.msg]);
+				var newTag = BM.Storage.g().storeTag(tag);
+				BM.Tags.View.addTagToList(newTag.tag);
+				$(document).trigger('add-tag-success', [response.msg]);
 			} else {
-				$(document).trigger('add-category-error', [response.msg]);
+				$(document).trigger('add-tag-error', [response.msg]);
 			}
 		}, params);
 	},
 	init : function() {
 		var me = this;
-		me.getCategories(function() {
-			BM.Categories.View.init();
-			BM.Categories.View.AddCategory.init();
+		var p = BM.Promiser.g();
+		// me.getTags(function() {
+			// BM.Tags.View.init();
+			// BM.Tags.View.AddTag.init();
+		// });
+		me.getTags();
+		p.gettingTags.done(function(data) {
+			console.log('# done getting tags');
+			BM.Storage.g().storeAllTags(data);
 		});
+		p.storingTags.done(function() {
+			console.log('# done storing tags');
+			BM.Tags.View.init();
+			BM.Tags.View.AddTag.init();			
+		});	
 	}
 };
 /**
  * @author Robert
  */
 
-BM.Categories.View = {
+BM.Tags.View = {
 	ddItemTemplate : function(name, id) {
-		var it = $("<li><a href='#' category-id='" + id + "'>" + name + "</a></li>");
+		var it = $("<li><a href='#' tag-id='" + id + "'>" + name + "</a></li>");
 		
 		return it;
 	},
-	listCategories : function(callback) {
+	listTags : function(callback) {
 		var me = this;
 		var storage = BM.Storage.g();
-		_(storage.categories).each(function(obj, key) {
-			var itemTample = me.ddItemTemplate(obj.category.name, key);
-			BM.Templater.Categories.ddCategoryHolder().append(itemTample);
+		_(storage.tags).each(function(obj, key) {
+			var itemTample = me.ddItemTemplate(obj.tag.name, key);
+			BM.Templater.Tags.ddTagHolder().append(itemTample);
 		});
 		
 		if (callback !== undefined) {
 			BM.e(callback);	
 		}
 	},
-	addCategoryToList : function(category, callback) {
+	populateTypeahead : function(callback) {
 		var me = this;
-		var itemTample = me.ddItemTemplate(category.name, category.intId);
-		BM.Templater.Categories.ddCategoryHolder().append(itemTample);
+		var storage = BM.Storage.g();
+		var typeahead = $('.apply-tag-input');
+		var tags = [];
+		_(storage.tags).each(function(obj, key) {
+			tags.push(obj.tag.name);
+		});
+		typeahead.typeahead({
+			source : tags
+		});
+		if (callback !== undefined) {
+			BM.e(callback);	
+		}		
+	},
+	addTagToList : function(tag, callback) {
+		var me = this;
+		var itemTample = me.ddItemTemplate(tag.name, tag.intId);
+		BM.Templater.Tags.ddTagHolder().append(itemTample);
 		
 		if (callback !== undefined) {
 			BM.e(callback);		
 		}	
 	},
 	bindHandlers : function() {
-		$('.sort-categories').on('click', function(event) {
+		$('.sort-tags').on('click', function(event) {
 			var item = $(this);
 			var active = item.hasClass('active');
-			var toolbar = $('.categories-toolbar');
+			var toolbar = $('.tags-toolbar');
 			
 			if (active) {
 				toolbar.animate({
-					'marginTop' : 0
+					'marginTop' : '-51px'
 				}, 300, 'linear');
 			} else {
 				toolbar.animate({
-					'marginTop' : '50px'
+					'marginTop' : 0
 				}, 300, 'linear');				
 			}
 		});
@@ -982,7 +1079,7 @@ BM.Categories.View = {
 	init : function() {
 		var me = this;
 		
-		me.listCategories(function() {
+		me.populateTypeahead(function() {
 			
 		});
 		me.bindHandlers();
@@ -991,9 +1088,9 @@ BM.Categories.View = {
 /**
  * @author Robert
  */
-BM.Categories.View.AddCategory = {
+BM.Tags.View.AddTag = {
 	bindHandlers : function() {
-		var t = BM.Templater.Categories;
+		var t = BM.Templater.Tags;
 		var modal = t.getAddModal();
 		//var submitBtn = modal.find('.modal-directory-add');
 		//var nameField = modal.find('.modal-directory-name');
@@ -1001,7 +1098,7 @@ BM.Categories.View.AddCategory = {
 		var d = $(document);
 		
 		modal.submit.on('click', function() {
-			d.trigger('add-category', [modal.name.val()]);
+			d.trigger('add-tag', [modal.name.val()]);
 			
 			return false;
 		});
@@ -1020,17 +1117,21 @@ BM.Bookmarks = {
 	getBookmarks : function(callback, limit) {
 		BM.p('bookmarks/list_all', function(response) {
 			if (response.status === 'ok') {
-				BM.Storage.g().storeAllBookmarks(response.data);
-				BM.e(callback);
+				//BM.Storage.g().storeAllBookmarks(response.data);
+				BM.Promiser.g().gettingBookmarks.resolve(response.data);
+				
+				if (callback != undefined) {
+					BM.e(callback);
+				}
 			}
 		});
 	},
-	addBookmark : function(name, url, directoryId, categoriesId, typeId, callback) {
+	addBookmark : function(name, url, folderId, tagsId, typeId, callback) {
 		var params = {
 			name : name,
 			url : url,
-			directoryId : directoryId,
-			categoriesId : categoriesId,
+			folderId : folderId,
+			tagsId : tagsId,
 			typeId : typeId
 		};
 		
@@ -1044,9 +1145,24 @@ BM.Bookmarks = {
 	},
 	init : function() {
 		var me = this;
-		me.getBookmarks(function() {
+		var p = BM.Promiser.g();
+		// me.getBookmarks(function() {
+			// BM.Bookmarks.View.init();
+		// });
+		p.gettingBookmarks.done(function(data) {
+			console.log('# done getting bookmarks');
+			
+			$.when(p.storingTags, p.storingFolders).done(function() {
+				BM.Storage.g().storeAllBookmarks(data);
+			});	
+		});
+		p.storingBookmarsk.done(function() {
+			console.log('# done storing bookmarks');
+		});
+		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
 		});
+		me.getBookmarks();
 	}
 };
 /**
@@ -1058,8 +1174,8 @@ BM.Bookmarks.Sorter = (function() {
 	var d = $(document);
 	var filters = {
 		active : {
-			directory : [],
-			category : [],
+			folder : [],
+			tag : [],
 			type : []
 		},
 		noActive : true
@@ -1067,49 +1183,49 @@ BM.Bookmarks.Sorter = (function() {
 	function init() {
 		return {
 			filters : filters,
-			activateDirectory : function(id, callback) {
-				filters.active.directory = [];
-				filters.active.directory.push(id);
+			activateFolder : function(id, callback) {
+				filters.active.folder = [];
+				filters.active.folder.push(id);
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateMultipleDirectory : function(list, callback) {
-				filters.active.directory = list;
+			activateMultipleFolder : function(list, callback) {
+				filters.active.folder = list;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateDirectory : function(id) {
-				var r = _.reject(filters.active.directory, function(num) {
+			diactivateFolder : function(id) {
+				var r = _.reject(filters.active.folder, function(num) {
 					return num == id;
 				});
 
-				filters.active.directory = r;
+				filters.active.folder = r;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateMultipleDirectory : function(list, callback) {
-				var r = _.without(filters.active.directory, list);
+			diactivateMultipleFolder : function(list, callback) {
+				var r = _.without(filters.active.folder, list);
 				
-				filters.active.directory = r;
+				filters.active.folder = r;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateCategory : function(id) {
-				filters.active.category.push(id);
+			activateTag : function(id) {
+				filters.active.tag.push(id);
 			},
-			diactivateCategory : function(id) {
+			diactivateTag : function(id) {
 				/**
 				 * diactivation code here
 				 */
@@ -1155,7 +1271,7 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.directoryId, bookmark.categoriesId, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.folderId, bookmark.tagsId, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		
@@ -1186,37 +1302,37 @@ BM.Bookmarks.View = {
 
 BM.Mediator = {};
 
-BM.Mediator.Categories = {
+BM.Mediator.Tags = {
 	provide : function() {
 		var d = $(document);
-		var categories = BM.Categories;
+		var tags = BM.Tags;
 		var t = BM.Templater;
-		var modal = t.Categories.getAddModal();
+		var modal = t.Tags.getAddModal();
 		var nameGroup = modal.nameGroup;
 		//var storage = BM.Storage.g();
 		//var utils = BM.utils;
 		
 		/**
-		 * bind the add category event to the document
+		 * bind the add tag event to the document
 		 */
-		d.on('add-category', function(event, name) {
+		d.on('add-tag', function(event, name) {
 			if (name == '') {
 				return;
 			}
-			categories.addCategory(name);
+			tags.addTag(name);
 		});
 		/*
-		 * displays error message if adding a category fails
+		 * displays error message if adding a tag fails
 		 */
-		d.on('add-category-error', function(event, msg) {
+		d.on('add-tag-error', function(event, msg) {
 			nameGroup.removeClass('success'); 
 			nameGroup.addClass('error');
 			nameGroup.children('span').text(msg);
 		});		
 		/**
-		 * hide the modal if the category is added with success
+		 * hide the modal if the tag is added with success
 		 */
-		d.on('add-category-success', function(event, msg) {
+		d.on('add-tag-success', function(event, msg) {
 			modal.el.modal('hide');
 		});
 		/** fires when the modal is hiding
@@ -1234,48 +1350,48 @@ BM.Mediator.Categories = {
 			if (event.keyCode !== 13) {
 				return;
 			}
-			d.trigger('add-category', [modal.name.val()]);
+			d.trigger('add-tag', [modal.name.val()]);
 		});		
 	}
 };
-BM.Mediator.Directories = {
+BM.Mediator.Folders = {
 	provide : function() {
 		var d = $(document);
-		var directories = BM.Directories;
+		var folders = BM.Folders;
 		var t = BM.Templater;
-		var modal = t.Directories.getAddModal();
+		var modal = t.Folders.getAddModal();
 		var nameGroup = modal.nameGroup;
 		//var storage = BM.Storage.g();
 		//var utils = BM.utils;
 		
 		/**
-		 * bind the add directory event to the document
+		 * bind the add folder event to the document
 		 */
-		d.on('add-directory', function(event, name, parentId) {
+		d.on('add-folder', function(event, name, parentId) {
 			if (name == '') {
 				return;
 			}
-			directories.addDirectory(name, parentId);
+			folders.addFolder(name, parentId);
 		});
 		/*
-		 * displays error message if adding a directory fails
+		 * displays error message if adding a folder fails
 		 */
-		d.on('add-directory-error', function(event, msg) {
+		d.on('add-folder-error', function(event, msg) {
 			nameGroup.removeClass('success'); 
 			nameGroup.addClass('error');
 			nameGroup.children('span').text(msg);
 		});
 		/**
-		 * hides the add directory modal when the success event is triggered
+		 * hides the add folder modal when the success event is triggered
 		 */
-		d.on('add-directory-success', function(event, msg) {
+		d.on('add-folder-success', function(event, msg) {
 			// nameGroup.removeClass('error');
 			// nameGroup.addClass('success');
 			// nameGroup.children('span').text(msg);
 			modal.el.modal('hide');
 		});
 		/**
-		 * resets the add directory modal on hide event
+		 * resets the add folder modal on hide event
 		 */
 		modal.el.on('hide', function() {
 			modal.name.val('');
@@ -1284,13 +1400,13 @@ BM.Mediator.Directories = {
 			modal.selector.val(modal.selector.prop('defaultSelected'));
 		});
 		/**
-		 * adds an enter keypress event to the add directory modal 
+		 * adds an enter keypress event to the add folder modal 
 		 */
 		modal.el.on('keypress', function(event) {
 			if (event.keyCode !== 13) {
 				return;
 			}
-			d.trigger('add-directory', [modal.name.val(), modal.selector.val()]);
+			d.trigger('add-folder', [modal.name.val(), modal.selector.val()]);
 		});
 	}
 };
@@ -1301,49 +1417,79 @@ BM.Mediator.Bookmarks = {
 		var bookmarks = BM.Bookmarks;
 		var sorter = bookmarks.Sorter.g();
 		var t = BM.Templater;
+		var addBmActive = false;
 		
-		d.on('sorter-activate-directory', function(event, directoryId) {
-			sorter.activateDirectory(directoryId, function() {
+		d.on('sorter-activate-folder', function(event, folderId) {
+			sorter.activateFolder(folderId, function() {
 				d.trigger('sort-bookmarks');
 			});
 		});
 		
-		d.on('sorter-activate-multiple-directories', function(event, directoryId) {
-			var directoriesId = [directoryId];
-			var listHolder = $('.list-for-directory-' + directoryId);
-			var listItems = listHolder.find('.directory-btn');
+		d.on('sorter-activate-multiple-folders', function(event, folderId) {
+			var foldersId = [folderId];
+			var listHolder = $('.list-for-folder-' + folderId);
+			var listItems = listHolder.find('.folder-btn');
 			listItems.each(function() {
 				var index = parseInt($(this).attr('node-id'), 10);
-				directoriesId.push(index);
+				foldersId.push(index);
 			});
 			
-			sorter.activateMultipleDirectory(directoriesId, function() {
+			sorter.activateMultipleFolder(foldersId, function() {
 				d.trigger('sort-bookmarks');
 			});
 		});
 		
-		d.on('sorter-diactivate-multiple-directories', function(event, directoryId) {
-			var directoriesId = [directoryId];
-			var listHolder = $('.list-for-directory-' + directoryId);
-			var listItems = listHolder.find('.directory-btn');
+		d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
+			var foldersId = [folderId];
+			var listHolder = $('.list-for-folder-' + folderId);
+			var listItems = listHolder.find('.folder-btn');
 			listItems.each(function() {
 				var index = parseInt($(this).attr('node-id'), 10);
-				directoriesId.push(index);
+				foldersId.push(index);
 			});
 			
-			sorter.diactivateMultipleDirectory(directoriesId);
+			sorter.diactivateMultipleFolder(foldersId);
 		});
 		
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
 			console.log(sorter.filters);
 		});
+		
+		var bookmarkAction = $('.main-bookmark-action');
+		var bookmarkExecutor = $('.main-action-executor')
+		bookmarkAction.on('click', function() {
+			if (!addBmActive) {
+				bookmarkAction.children('i').addClass('icon-white');
+				addBmActive = true;
+				setTimeout(function() {
+					$('.main-action-bar-input').focus();
+					bookmarkExecutor.children('i').addClass('icon-plus');
+				}, 50);
+			} else {
+				addBmActive = false;
+				bookmarkAction.children('i').removeClass('icon-white');
+				bookmarkExecutor.children('i').removeClass('icon-plus');
+			}
+		});
+		$('.main-action-bar-input').blur(function() {
+			if (!addBmActive) { return; }
+			setTimeout(function() {
+				if (addBmActive) {
+					addBmActive = false;
+					bookmarkAction.button('toggle');
+					bookmarkAction.children('i').removeClass('icon-white');
+					bookmarkExecutor.children('i').removeClass('icon-plus');
+				}				
+			}, 100);
+
+		});
 	}
 };
 
 BM.Mediator.init = function() {
-		this.Categories.provide();
-		this.Directories.provide();
+		this.Tags.provide();
+		this.Folders.provide();
 		this.Bookmarks.provide();
 };
 /**
@@ -1362,16 +1508,17 @@ BM.AppBoot = {
 		});
 	},
 	displayUser : function() {
-		var holder = $('.current-user');
+		var holder = $('.current-user .username');
 		holder.text(this.user.email);
 	},
 	init : function() {
 		var me = this;
 		me.getInfo();
-		BM.Directories.init();
-		BM.Categories.init();
+		BM.Folders.init();
+		BM.Tags.init();
 		BM.Bookmarks.init();
-		BM.Mediator.init();
+		BM.Mediator.init();					
+
 	},
 	end : function() {
 		

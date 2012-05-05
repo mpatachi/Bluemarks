@@ -4,27 +4,27 @@
 
 BM.Templater = {};
 
-BM.Templater.Directories = {
+BM.Templater.Folders = {
 	leftSidebar : function() {
 		return $('.left-sidebar');
 	},
-	directoriesListHolder : function() {
-		return $('.directories-list-holder');
+	foldersListHolder : function() {
+		return $('.folders-list-holder');
 	},
 	itemTemplate : function(name, id, target, parent) {
-		var it = $("<li><a href='#' class='directory-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
+		var it = $("<li><a href='#' class='folder-btn' node-id='" + id + "' node-target='" + target + "' node-parent='" + parent + "'>" + name + "</a></li>");
 
 		return it;
 	},
 	listTemplate : function(name) {
-		var holder = $("<ul class='list-for-" + name + " directories-list' node='" + name + "'></ul>");
+		var holder = $("<ul class='list-for-" + name + " folders-list' node='" + name + "'></ul>");
 		
 		return holder;
 	},
 	getAddModal : function() {
-		var modal = $('#add-directory-modal');
-		var submitBtn = modal.find('.modal-directory-add');
-		var nameField = modal.find('.modal-directory-name');
+		var modal = $('#add-folder-modal');
+		var submitBtn = modal.find('.modal-folder-add');
+		var nameField = modal.find('.modal-folder-name');
 		var selector = modal.find('.modal-parent-selector');
 		var nameGroup = modal.find('.modal-name-group');
 		var parentGroup = modal.find('.modal-parent-group');
@@ -40,14 +40,14 @@ BM.Templater.Directories = {
 	}	
 };
 
-BM.Templater.Categories = {
-	ddCategoryHolder : function() {
+BM.Templater.Tags = {
+	ddTagHolder : function() {
 		return $('.categories-dropdown');
 	},
 	getAddModal : function() {
-		var modal = $('#add-category-modal');
-		var submitBtn = modal.find('.modal-category-add');
-		var nameField = modal.find('.modal-category-name');
+		var modal = $('#add-tag-modal');
+		var submitBtn = modal.find('.modal-tag-add');
+		var nameField = modal.find('.modal-tag-name');
 		var nameGroup = modal.find('.modal-name-group');
 		
 		return {
@@ -56,6 +56,9 @@ BM.Templater.Categories = {
 			name : nameField,
 			nameGroup : nameGroup,
 		};		
+	},
+	tagTypeahead : function() {
+		return $('.apply-tag-input');
 	}
 };
 
@@ -63,8 +66,8 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
-	bookmarkTemplate : function(id, name, directory, category, type, image) {
-		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-directory='" + directory + "' bookmark-category='" + category + "' bookmark-type='" + type + "' ></li>");
+	bookmarkTemplate : function(id, name, folder, tag, type, image) {
+		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");

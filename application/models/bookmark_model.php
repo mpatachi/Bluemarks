@@ -10,17 +10,17 @@ class Bookmark_model extends CI_Model {
 	}
 	
 	/**
-	 * Get Category
+	 * Get bookmark
 	 * 
 	 * @access public
 	 * @param integer id
-	 * @return category
+	 * @return bookmark
 	 */
 	public function getBookmark($id) {
 		//$userId = $this->session->userdata('id');
 		$query = $this
 					->db
-					->select('id, directoryId, userId, typeId, noteId, name, description, url, image')
+					->select('id, folderId, tagsId, typeId, noteId, name, description, url, image')
 					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->limit(1)
@@ -29,7 +29,7 @@ class Bookmark_model extends CI_Model {
 		return $query->row();		
 	}
 	/**
-	 * Get Directories
+	 * Get bookmarks
 	 * 
 	 * @access public
 	 * @param none
@@ -38,7 +38,7 @@ class Bookmark_model extends CI_Model {
 	public function getAllBookmarks() {
 		$query = $this
 					->db
-					->select('id, directoryId, categoriesId, typeId, noteId, name, description, url, image')
+					->select('id, folderId, tagsId, typeId, noteId, name, description, url, image')
 					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->get('bookmarks');
@@ -47,16 +47,16 @@ class Bookmark_model extends CI_Model {
 	}
 	
 	/**
-	 * Create category
+	 * Create bookmark
 	 * 
 	 * @access public
 	 * @param bookmark entity
 	 * @return bool
 	 */
-	public function createBookmark($name, $description, $url, $image, $typeId, $directoryId, $noteId) {
+	public function createBookmark($name, $description, $url, $image, $typeId, $folderId, $noteId) {
 		$newBookmark = array('name' => $name, 'userId' => $this->userId, 'description' => $description, 
 							 'url' => $url, 'image' => $image, 'typeId' => $typeId,
-							 'directoryId' => $directoryId, 'noteId' => $noteId);
+							 'folderId' => $folderId, 'noteId' => $noteId);
 		$action = $this
 					->db
 					->insert('bookmarks', $newBookmark);

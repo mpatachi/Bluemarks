@@ -7,8 +7,8 @@ BM.Bookmarks.Sorter = (function() {
 	var d = $(document);
 	var filters = {
 		active : {
-			directory : [],
-			category : [],
+			folder : [],
+			tag : [],
 			type : []
 		},
 		noActive : true
@@ -16,49 +16,49 @@ BM.Bookmarks.Sorter = (function() {
 	function init() {
 		return {
 			filters : filters,
-			activateDirectory : function(id, callback) {
-				filters.active.directory = [];
-				filters.active.directory.push(id);
+			activateFolder : function(id, callback) {
+				filters.active.folder = [];
+				filters.active.folder.push(id);
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateMultipleDirectory : function(list, callback) {
-				filters.active.directory = list;
+			activateMultipleFolder : function(list, callback) {
+				filters.active.folder = list;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateDirectory : function(id) {
-				var r = _.reject(filters.active.directory, function(num) {
+			diactivateFolder : function(id) {
+				var r = _.reject(filters.active.folder, function(num) {
 					return num == id;
 				});
 
-				filters.active.directory = r;
+				filters.active.folder = r;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateMultipleDirectory : function(list, callback) {
-				var r = _.without(filters.active.directory, list);
+			diactivateMultipleFolder : function(list, callback) {
+				var r = _.without(filters.active.folder, list);
 				
-				filters.active.directory = r;
+				filters.active.folder = r;
 				
 				if (callback !== undefined) {
 					BM.e(callback);
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateCategory : function(id) {
-				filters.active.category.push(id);
+			activateTag : function(id) {
+				filters.active.tag.push(id);
 			},
-			diactivateCategory : function(id) {
+			diactivateTag : function(id) {
 				/**
 				 * diactivation code here
 				 */

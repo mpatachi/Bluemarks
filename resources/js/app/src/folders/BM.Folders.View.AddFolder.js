@@ -1,31 +1,31 @@
 /**
  * @author Robert
- * Directories.View.AddDirectory.js
+ * Folders.View.AddFolder.js
  */
 
-BM.Directories.View.AddDirectory = {
+BM.Folders.View.AddFolder = {
 	modal : function() {
-		return $('#add-directory-modal');
+		return $('#add-folder-modal');
 	},
 	bindHandlers : function() {
-		var modal = $('#add-directory-modal');
-		var submitBtn = modal.find('.modal-directory-add');
-		var nameField = modal.find('.modal-directory-name');
+		var modal = $('#add-folder-modal');
+		var submitBtn = modal.find('.modal-folder-add');
+		var nameField = modal.find('.modal-folder-name');
 		var selector = modal.find('.modal-parent-selector');
 		var d = $(document);
 		
 		submitBtn.on('click', function() {
-			d.trigger('add-directory', [nameField.val(), selector.val()]);
+			d.trigger('add-folder', [nameField.val(), selector.val()]);
 			
 			return false;
 		});
 	},
 	listParents : function(callback) {
-		var storage = BM.Storage.g().directories;
+		var storage = BM.Storage.g().folders;
 		var selector = this.modal().find('.modal-parent-selector');
 
 		_(storage).each(function(obj) {
-			var item = "<option value='" + obj.directory.intId + "'>" + obj.directory.name + "</option>";
+			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
 			selector.append(item);
 		});
 		

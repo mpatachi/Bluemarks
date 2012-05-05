@@ -1,9 +1,9 @@
 /**
  * @author Robert
  */
-BM.Categories.View.AddCategory = {
+BM.Tags.View.AddTag = {
 	bindHandlers : function() {
-		var t = BM.Templater.Categories;
+		var t = BM.Templater.Tags;
 		var modal = t.getAddModal();
 		//var submitBtn = modal.find('.modal-directory-add');
 		//var nameField = modal.find('.modal-directory-name');
@@ -11,7 +11,7 @@ BM.Categories.View.AddCategory = {
 		var d = $(document);
 		
 		modal.submit.on('click', function() {
-			d.trigger('add-category', [modal.name.val()]);
+			d.trigger('add-tag', [modal.name.val()]);
 			
 			return false;
 		});

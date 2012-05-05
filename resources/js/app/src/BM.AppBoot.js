@@ -14,16 +14,17 @@ BM.AppBoot = {
 		});
 	},
 	displayUser : function() {
-		var holder = $('.current-user');
+		var holder = $('.current-user .username');
 		holder.text(this.user.email);
 	},
 	init : function() {
 		var me = this;
 		me.getInfo();
-		BM.Directories.init();
-		BM.Categories.init();
+		BM.Folders.init();
+		BM.Tags.init();
 		BM.Bookmarks.init();
-		BM.Mediator.init();
+		BM.Mediator.init();					
+
 	},
 	end : function() {
 		

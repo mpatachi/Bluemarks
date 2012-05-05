@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Category_model extends CI_Model {
+class Tag_model extends CI_Model {
 	
 	private $userId = null;
 	
@@ -10,13 +10,13 @@ class Category_model extends CI_Model {
 	}
 
 	/**
-	 * Get Category
+	 * Get tag
 	 * 
 	 * @access public
-	 * @param category
-	 * @return category
+	 * @param tag
+	 * @return tag
 	 */
-	public function getCategory($id) {
+	public function getTag($id) {
 		//$userId = $this->session->userdata('id');
 		$query = $this
 					->db
@@ -24,7 +24,7 @@ class Category_model extends CI_Model {
 					->where('userId', $userId)
 					->where('deleted', 0)
 					->limit(1)
-					->get('categories');
+					->get('tags');
 		
 		return $query->row();		
 	}
@@ -34,31 +34,31 @@ class Category_model extends CI_Model {
 	 * 
 	 * @access public
 	 * @param none
-	 * @return categories list
+	 * @return tags list
 	 */
-	public function getAllCategories() {
+	public function getAllTags() {
 		$query = $this
 					->db
 					->select('id, name')
 					->where('userId', $this->userId)
 					->where('deleted', 0)
-					->get('categories');
+					->get('tags');
 		
 		return $query->result_array();		
 	}
 	
 	/**
-	 * Create category
+	 * Create tag
 	 * 
 	 * @access public
-	 * @param category entity
+	 * @param tag entity
 	 * @return bool
 	 */
-	public function createCategory($name) {
-		$newCategory = array('name' => $name, 'userId' => $this->userId);
+	public function createTag($name) {
+		$newTag = array('name' => $name, 'userId' => $this->userId);
 		$action = $this
 					->db
-					->insert('categories', $newCategory);
+					->insert('tags', $newTag);
 		
 		if($action) {
 			$returnId = array('id' => $this->db->insert_id());
@@ -69,13 +69,13 @@ class Category_model extends CI_Model {
 	}
 	
 	/**
-	 * Delete category
+	 * Delete tag
 	 * 
 	 * @access public
-	 * @param category id
+	 * @param tag id
 	 * @return bool
 	 */
-	public function deleteCategory($catId) {
+	public function deleteTag($catId) {
 		$newData = array('deleted', 1);
 		
 		$query = $this
@@ -83,24 +83,24 @@ class Category_model extends CI_Model {
 					->where('id', $catId)
 					->where('userId', $userId)
 					->where('deleted', 0)
-					->update('categories', $newData);
+					->update('tags', $newData);
 	}
 	
 	/**
-	 * Check category name
+	 * Check tag name
 	 * 
 	 * @access public
 	 * @param name
 	 * @return bool
 	 */	
-	 public function checkCategoryName($name) {
+	 public function checkTagName($name) {
 		$query = $this
 					->db
 					->select('id')
 					->where('userId', $this->userId)
 					->where('LOWER(name)=', strtolower($name))
 					->limit(1)
-					->get('categories');
+					->get('tags');
 					
 		if ($query->num_rows() > 0) {
 			return FALSE;

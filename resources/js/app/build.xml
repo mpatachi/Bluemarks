@@ -13,18 +13,19 @@
         <concat destfile="${JS}">
             <fileset dir="${SRC_JS_DIR}" includes="init.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Templater.js" />
-            <fileset dir="${SRC_JS_DIR}" includes="BM.Storage.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Entities.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.View.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Directories.View.AddDirectory.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.View.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Categories.View.AddCategory.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Bookmarks.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Bookmarks.Sorter.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="BM.Bookmarks.View.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Promiser.js" />
+            <fileset dir="${SRC_JS_DIR}" includes="BM.Storage.js" />						
+			<fileset dir="${SRC_JS_DIR}" includes="BM.Templater.js" />			
+			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.View.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.View.AddFolder.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.View.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.View.AddTag.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.Sorter.js" />
+			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.View.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Mediator.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="BM.AppBoot.js" />
         </concat>

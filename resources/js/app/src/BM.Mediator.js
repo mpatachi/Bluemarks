@@ -4,37 +4,37 @@
 
 BM.Mediator = {};
 
-BM.Mediator.Categories = {
+BM.Mediator.Tags = {
 	provide : function() {
 		var d = $(document);
-		var categories = BM.Categories;
+		var tags = BM.Tags;
 		var t = BM.Templater;
-		var modal = t.Categories.getAddModal();
+		var modal = t.Tags.getAddModal();
 		var nameGroup = modal.nameGroup;
 		//var storage = BM.Storage.g();
 		//var utils = BM.utils;
 		
 		/**
-		 * bind the add category event to the document
+		 * bind the add tag event to the document
 		 */
-		d.on('add-category', function(event, name) {
+		d.on('add-tag', function(event, name) {
 			if (name == '') {
 				return;
 			}
-			categories.addCategory(name);
+			tags.addTag(name);
 		});
 		/*
-		 * displays error message if adding a category fails
+		 * displays error message if adding a tag fails
 		 */
-		d.on('add-category-error', function(event, msg) {
+		d.on('add-tag-error', function(event, msg) {
 			nameGroup.removeClass('success'); 
 			nameGroup.addClass('error');
 			nameGroup.children('span').text(msg);
 		});		
 		/**
-		 * hide the modal if the category is added with success
+		 * hide the modal if the tag is added with success
 		 */
-		d.on('add-category-success', function(event, msg) {
+		d.on('add-tag-success', function(event, msg) {
 			modal.el.modal('hide');
 		});
 		/** fires when the modal is hiding
@@ -52,48 +52,48 @@ BM.Mediator.Categories = {
 			if (event.keyCode !== 13) {
 				return;
 			}
-			d.trigger('add-category', [modal.name.val()]);
+			d.trigger('add-tag', [modal.name.val()]);
 		});		
 	}
 };
-BM.Mediator.Directories = {
+BM.Mediator.Folders = {
 	provide : function() {
 		var d = $(document);
-		var directories = BM.Directories;
+		var folders = BM.Folders;
 		var t = BM.Templater;
-		var modal = t.Directories.getAddModal();
+		var modal = t.Folders.getAddModal();
 		var nameGroup = modal.nameGroup;
 		//var storage = BM.Storage.g();
 		//var utils = BM.utils;
 		
 		/**
-		 * bind the add directory event to the document
+		 * bind the add folder event to the document
 		 */
-		d.on('add-directory', function(event, name, parentId) {
+		d.on('add-folder', function(event, name, parentId) {
 			if (name == '') {
 				return;
 			}
-			directories.addDirectory(name, parentId);
+			folders.addFolder(name, parentId);
 		});
 		/*
-		 * displays error message if adding a directory fails
+		 * displays error message if adding a folder fails
 		 */
-		d.on('add-directory-error', function(event, msg) {
+		d.on('add-folder-error', function(event, msg) {
 			nameGroup.removeClass('success'); 
 			nameGroup.addClass('error');
 			nameGroup.children('span').text(msg);
 		});
 		/**
-		 * hides the add directory modal when the success event is triggered
+		 * hides the add folder modal when the success event is triggered
 		 */
-		d.on('add-directory-success', function(event, msg) {
+		d.on('add-folder-success', function(event, msg) {
 			// nameGroup.removeClass('error');
 			// nameGroup.addClass('success');
 			// nameGroup.children('span').text(msg);
 			modal.el.modal('hide');
 		});
 		/**
-		 * resets the add directory modal on hide event
+		 * resets the add folder modal on hide event
 		 */
 		modal.el.on('hide', function() {
 			modal.name.val('');
@@ -102,13 +102,13 @@ BM.Mediator.Directories = {
 			modal.selector.val(modal.selector.prop('defaultSelected'));
 		});
 		/**
-		 * adds an enter keypress event to the add directory modal 
+		 * adds an enter keypress event to the add folder modal 
 		 */
 		modal.el.on('keypress', function(event) {
 			if (event.keyCode !== 13) {
 				return;
 			}
-			d.trigger('add-directory', [modal.name.val(), modal.selector.val()]);
+			d.trigger('add-folder', [modal.name.val(), modal.selector.val()]);
 		});
 	}
 };
@@ -119,48 +119,78 @@ BM.Mediator.Bookmarks = {
 		var bookmarks = BM.Bookmarks;
 		var sorter = bookmarks.Sorter.g();
 		var t = BM.Templater;
+		var addBmActive = false;
 		
-		d.on('sorter-activate-directory', function(event, directoryId) {
-			sorter.activateDirectory(directoryId, function() {
+		d.on('sorter-activate-folder', function(event, folderId) {
+			sorter.activateFolder(folderId, function() {
 				d.trigger('sort-bookmarks');
 			});
 		});
 		
-		d.on('sorter-activate-multiple-directories', function(event, directoryId) {
-			var directoriesId = [directoryId];
-			var listHolder = $('.list-for-directory-' + directoryId);
-			var listItems = listHolder.find('.directory-btn');
+		d.on('sorter-activate-multiple-folders', function(event, folderId) {
+			var foldersId = [folderId];
+			var listHolder = $('.list-for-folder-' + folderId);
+			var listItems = listHolder.find('.folder-btn');
 			listItems.each(function() {
 				var index = parseInt($(this).attr('node-id'), 10);
-				directoriesId.push(index);
+				foldersId.push(index);
 			});
 			
-			sorter.activateMultipleDirectory(directoriesId, function() {
+			sorter.activateMultipleFolder(foldersId, function() {
 				d.trigger('sort-bookmarks');
 			});
 		});
 		
-		d.on('sorter-diactivate-multiple-directories', function(event, directoryId) {
-			var directoriesId = [directoryId];
-			var listHolder = $('.list-for-directory-' + directoryId);
-			var listItems = listHolder.find('.directory-btn');
+		d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
+			var foldersId = [folderId];
+			var listHolder = $('.list-for-folder-' + folderId);
+			var listItems = listHolder.find('.folder-btn');
 			listItems.each(function() {
 				var index = parseInt($(this).attr('node-id'), 10);
-				directoriesId.push(index);
+				foldersId.push(index);
 			});
 			
-			sorter.diactivateMultipleDirectory(directoriesId);
+			sorter.diactivateMultipleFolder(foldersId);
 		});
 		
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
 			console.log(sorter.filters);
 		});
+		
+		var bookmarkAction = $('.main-bookmark-action');
+		var bookmarkExecutor = $('.main-action-executor')
+		bookmarkAction.on('click', function() {
+			if (!addBmActive) {
+				bookmarkAction.children('i').addClass('icon-white');
+				addBmActive = true;
+				setTimeout(function() {
+					$('.main-action-bar-input').focus();
+					bookmarkExecutor.children('i').addClass('icon-plus');
+				}, 50);
+			} else {
+				addBmActive = false;
+				bookmarkAction.children('i').removeClass('icon-white');
+				bookmarkExecutor.children('i').removeClass('icon-plus');
+			}
+		});
+		$('.main-action-bar-input').blur(function() {
+			if (!addBmActive) { return; }
+			setTimeout(function() {
+				if (addBmActive) {
+					addBmActive = false;
+					bookmarkAction.button('toggle');
+					bookmarkAction.children('i').removeClass('icon-white');
+					bookmarkExecutor.children('i').removeClass('icon-plus');
+				}				
+			}, 100);
+
+		});
 	}
 };
 
 BM.Mediator.init = function() {
-		this.Categories.provide();
-		this.Directories.provide();
+		this.Tags.provide();
+		this.Folders.provide();
 		this.Bookmarks.provide();
 };

@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Directory_model extends CI_Model {
+class Folder_model extends CI_Model {
 		
 	private $userId = null;
 	
@@ -10,13 +10,13 @@ class Directory_model extends CI_Model {
 	}
 	
 	/**
-	 * Get directory
+	 * Get folder
 	 * 
 	 * @access public
 	 * @param dirId
-	 * @return directory entity
+	 * @return folder entity
 	 */
-	public function getDirectory($dirId) {
+	public function getFolder($dirId) {
 		$query = $this
 					->db
 					->select('id, name, parentId')
@@ -24,44 +24,44 @@ class Directory_model extends CI_Model {
 					->where('id', $dirId)
 					->where('deleted', 0)
 					->limit(1)
-					->get('directories');
+					->get('folders');
 		
 		return $query->row();
 	}
 	
 	/**
-	 * Get directories
+	 * Get folders
 	 * 
 	 * @access public
 	 * @param
-	 * @return directories list
+	 * @return folders list
 	 */
-	public function getAllDirectories() {
+	public function getAllFolders() {
 		$query = $this
 					->db
 					->select('id, name, parentId')
 					->where('userId', $this->userId)
 					->where('deleted', 0)
-					->get('directories');
+					->get('folders');
 					
 		return $query->result_array();
 	}
 	
 	/**
-	 * Create directory
+	 * Create folder
 	 * 
 	 * @access public
-	 * @param directory
+	 * @param folder
 	 * @return success
 	 */
-	public function createDirectory($name, $parentId) {
-		// $isDirectoryAvailable = $this->checkDirectoryName($name);
+	public function createFolder($name, $parentId) {
+		// $isFolderAvailable = $this->checkFolderName($name);
 // 		
-		// if ($isDirectoryAvailable) {	
-			// $newDirectory = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
+		// if ($isFolderAvailable) {	
+			// $newFolder = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
 			// $action = $this
 						// ->db
-						// ->insert('directories', $newDirectory);
+						// ->insert('folders', $newFolder);
 // 		
 			// if($action) {
 				// return TRUE;
@@ -72,14 +72,14 @@ class Directory_model extends CI_Model {
 			// return FALSE;
 		// }s
 		if ($parentId == 'null') {
-			$newDirectory = array('name' => $name, 'userId' => $this->userId);
+			$newFolder = array('name' => $name, 'userId' => $this->userId);
 		} else {
-			$newDirectory = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
+			$newFolder = array('name' => $name, 'parentId' => $parentId, 'userId' => $this->userId);
 		}
 		
 		$action = $this
 					->db
-					->insert('directories', $newDirectory);
+					->insert('folders', $newFolder);
 	
 		if($action) {
 			$returnId = array('id' => $this->db->insert_id());
@@ -90,13 +90,13 @@ class Directory_model extends CI_Model {
 	}
 	
 	/**
-	 * Delete directory
-	 * TODO : check with recursivity if directory has child elements and move them up with one level
+	 * Delete folder
+	 * TODO : check with recursivity if folder has child elements and move them up with one level
 	 * @access public
-	 * @param directory id
+	 * @param folder id
 	 * @return success
 	 */
-	public function deleteDirectory($dirId) {
+	public function deleteFolder($dirId) {
 		$newData = array('deleted', 1);
 		
 		$query = $this
@@ -104,24 +104,24 @@ class Directory_model extends CI_Model {
 					->where('id', $dirId)					
 					->where('userId', $this->userId)
 					->where('deleted', 0)
-					->update('directories', $newData);
+					->update('folders', $newData);
 	}
 	
 	/**
-	 * Check directory name
-	 * TODO : check if the directory name exists for that parent element {if the directory has a parent}
+	 * Check folder name
+	 * TODO : check if the folder name exists for that parent element {if the folder has a parent}
 	 * @access public
 	 * @param direcotry name
 	 * @return bool
 	 */	
-	public function checkDirectoryName($name) {
+	public function checkFolderName($name) {
 		$query = $this
 					->db
 					->select('id')
 					->where('userId', $this->userId)
 					->where('LOWER(name)=', strtolower($name))
 					->limit(1)
-					->get('directories');
+					->get('folders');
 		
 		if ($query->num_rows() > 0) {
 			return FALSE;
