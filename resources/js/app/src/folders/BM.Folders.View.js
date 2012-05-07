@@ -147,6 +147,7 @@ BM.Folders.View = {
 		addDirInput.keyup(function(e) {
 			if (e.keyCode == 27) {
 				addDirInput.fadeOut(function() {
+					addDirInput.val('');
 					addDirBtn.fadeIn();
 				});
 			}
@@ -168,6 +169,7 @@ BM.Folders.View = {
 		});
 		addDirInput.blur(function() {
 			addDirInput.fadeOut(function() {
+				addDirInput.val('');
 				addDirBtn.fadeIn();
 			});
 		});

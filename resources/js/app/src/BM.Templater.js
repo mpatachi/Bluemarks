@@ -41,22 +41,22 @@ BM.Templater.Folders = {
 };
 
 BM.Templater.Tags = {
-	ddTagHolder : function() {
-		return $('.categories-dropdown');
-	},
-	getAddModal : function() {
-		var modal = $('#add-tag-modal');
-		var submitBtn = modal.find('.modal-tag-add');
-		var nameField = modal.find('.modal-tag-name');
-		var nameGroup = modal.find('.modal-name-group');
-		
-		return {
-			el : modal,
-			submit : submitBtn,
-			name : nameField,
-			nameGroup : nameGroup,
-		};		
-	},
+	// ddTagHolder : function() {
+		// return $('.categories-dropdown');
+	// },
+	// getAddModal : function() {
+		// var modal = $('#add-tag-modal');
+		// var submitBtn = modal.find('.modal-tag-add');
+		// var nameField = modal.find('.modal-tag-name');
+		// var nameGroup = modal.find('.modal-name-group');
+// 		
+		// return {
+			// el : modal,
+			// submit : submitBtn,
+			// name : nameField,
+			// nameGroup : nameGroup,
+		// };		
+	// },
 	tagTypeahead : function() {
 		return $('.apply-tag-input');
 	}

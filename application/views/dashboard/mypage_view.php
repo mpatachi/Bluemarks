@@ -75,7 +75,7 @@
 						<!-- folders list -->
 					</div>
 					<div class='sidebar-item'>
-						<a href='#' class='add-folder-shortcut-btn'>new folder</a>
+						<a href='#' class='add-folder-shortcut-btn btn-special'>new folder</a>
 						<input class="span2 add-new-folder" size="16" type="text" placeholder="type name...">
 					</div>
 					<div class="folders-group btn-group dropup">
@@ -90,22 +90,22 @@
 			<div class='right-content'>
 				<div class='tags-toolbar'>
 					<ul class='toolbar'>
-						<li>
+<!-- 						<li>
 							<div class="btn-group toolbar-item">
 								<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-tags'></i></button>
 							  	<ul class='dropdown-menu tags-dropdown'>
 							  	</ul>
 							</div>
-						</li>
-						<!-- end type buttons -->
+						</li> -->
 						<li>
 							<ul class="tags-group toolbar-item">
-
 							</ul>						
 						</li>
 						<li>
-							<a href='#' class='apply-tag-btn'>filter by tag</a>
-							<input class="span2 apply-tag-input" size="16" type="text" placeholder="type tag...">							
+							<div class="toolbar-item tags-action">
+								<a href='#' class='apply-tag-btn btn-special'>filter by tag</a>
+								<input class="span2 apply-tag-input" rel="popover" size="16" type="text" placeholder="type tag...">
+							</div>
 						</li>
 						<li class='right'>
 							<div class="btn-group toolbar-item">
@@ -165,6 +165,16 @@
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
 	    	<a href="#" class="btn btn-primary modal-tag-add">add</a>
 	  	</div>
+	</div>
+	<div id='apply-tag-popover-add' class='popover-source'>
+		<div class='title'>Add as new tag</div>
+		<div class='content'>
+			Tag does not exist, do you want to save it?
+			<div class='popover-footer'>
+				<button class='btn tag-popover-close' >close</button>
+				<button class='btn btn-primary tag-popover-confirm' >ok</button>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

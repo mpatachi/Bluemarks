@@ -9,11 +9,15 @@ BM.Mediator.Tags = {
 		var d = $(document);
 		var tags = BM.Tags;
 		var t = BM.Templater;
-		var modal = t.Tags.getAddModal();
-		var nameGroup = modal.nameGroup;
+		//var modal = t.Tags.getAddModal();
+		//var nameGroup = modal.nameGroup;
 		//var storage = BM.Storage.g();
 		//var utils = BM.utils;
-		
+		d.on('apply-tag', function(event, name) {
+			if (name == '') {
+				return;
+			}			
+		});
 		/**
 		 * bind the add tag event to the document
 		 */
@@ -26,34 +30,36 @@ BM.Mediator.Tags = {
 		/*
 		 * displays error message if adding a tag fails
 		 */
-		d.on('add-tag-error', function(event, msg) {
-			nameGroup.removeClass('success'); 
-			nameGroup.addClass('error');
-			nameGroup.children('span').text(msg);
-		});		
+		// d.on('add-tag-error', function(event, msg) {
+			// nameGroup.removeClass('success'); 
+			// nameGroup.addClass('error');
+			// nameGroup.children('span').text(msg);
+		// });		
 		/**
 		 * hide the modal if the tag is added with success
 		 */
 		d.on('add-tag-success', function(event, msg) {
-			modal.el.modal('hide');
+			tags.View.updateTypeahead();
+			d.trigger('hide-tag-popover');
+			d.trigger('hide-apply-tag-input');
 		});
 		/** fires when the modal is hiding
 		 * 
 		 */
-		modal.el.on('hide', function() {
-			modal.name.val('');
-			nameGroup.children('span').text('');
-			nameGroup.removeClass('error').removeClass('success');
-		});
+		// modal.el.on('hide', function() {
+			// modal.name.val('');
+			// nameGroup.children('span').text('');
+			// nameGroup.removeClass('error').removeClass('success');
+		// });
 		/**
 		 *  what happens on enter key press on the modal
 		 */
-		modal.el.on('keypress', function(event) {
-			if (event.keyCode !== 13) {
-				return;
-			}
-			d.trigger('add-tag', [modal.name.val()]);
-		});		
+		// modal.el.on('keypress', function(event) {
+			// if (event.keyCode !== 13) {
+				// return;
+			// }
+			// d.trigger('add-tag', [modal.name.val()]);
+		// });		
 	}
 };
 BM.Mediator.Folders = {

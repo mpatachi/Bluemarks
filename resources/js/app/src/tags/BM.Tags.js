@@ -15,6 +15,9 @@ BM.Tags = {
 		});
 	},
 	addTag : function(name, callback) {
+		if (name == '') {
+			return;
+		}		
 		var params = {
 			name : name
 		};
@@ -25,7 +28,7 @@ BM.Tags = {
 					name : name
 				};
 				var newTag = BM.Storage.g().storeTag(tag);
-				BM.Tags.View.addTagToList(newTag.tag);
+				//BM.Tags.View.addTagToList(newTag.tag);
 				$(document).trigger('add-tag-success', [response.msg]);
 			} else {
 				$(document).trigger('add-tag-error', [response.msg]);
@@ -47,7 +50,7 @@ BM.Tags = {
 		p.storingTags.done(function() {
 			console.log('# done storing tags');
 			BM.Tags.View.init();
-			BM.Tags.View.AddTag.init();			
+			//BM.Tags.View.AddTag.init();			
 		});	
 	}
 };

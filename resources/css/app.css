@@ -234,6 +234,10 @@ html, body {
 	float: left;
 	margin-left: 10px;
 }
+.tags-action .apply-tag-input {
+	margin: 0;
+	display: none;
+}
 .main-action-bar .main-bookmark-action.active,
 .main-action-bar .main-bookmark-action:active {
   background-color: #0074cc;
@@ -311,18 +315,10 @@ html, body {
 	margin: 0;
 }
 .add-folder-shortcut-btn {
-	color:#595959;
-	text-shadow: 0 1px 0 #fff;
-	text-decoration: none;
-	border: 1px #d1d1d1 solid;
-	padding: 5px;
-	-webkit-box-shadow: 0px 1px 0px #f5f5f5, inset 0px 1px 0px #fff;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;	
+/*nothing here for now*/
 }
 .add-folder-shortcut-btn:hover {
-	text-decoration: none;
-	color:#222222;
+/*nothing here for now*/
 }
 .add-new-folder {
 	display: none;
@@ -370,6 +366,24 @@ html, body {
 	width: 239px;
 	height: 49px;
 }
+/* custom buttons */
+.btn-special {
+	padding: 4px 6px;
+	margin: 0;
+	position: relative;
+	float: left;	
+	color:#595959;
+	text-shadow: 0 1px 0 #fff;
+	text-decoration: none;
+	border: 1px #d1d1d1 solid;
+	-webkit-box-shadow: 0px 1px 0px #f5f5f5, inset 0px 1px 0px #fff;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;	
+}
+.btn-special:hover {
+	text-decoration: none;
+	color:#222222;
+}
 /* other stuff */
 .no-select {
 	-webkit-user-select: none;
@@ -378,3 +392,17 @@ html, body {
 	-o-user-select: none;
 	/*user-select: none;*/
 }
+.popover-source {
+	display: none;
+}
+.popover-footer {
+	padding: 10px 0 0 0;
+  	margin-bottom: 0;
+  	text-align: right;
+  	*zoom: 1;	
+}
+.popover-footer .btn + .btn {
+  	margin-bottom: 0;
+  	margin-left: 5px;
+}
+
