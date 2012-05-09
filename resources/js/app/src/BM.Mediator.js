@@ -164,34 +164,34 @@ BM.Mediator.Bookmarks = {
 			console.log(sorter.filters);
 		});
 		
-		var bookmarkAction = $('.main-bookmark-action');
-		var bookmarkExecutor = $('.main-action-executor')
-		bookmarkAction.on('click', function() {
-			if (!addBmActive) {
-				bookmarkAction.children('i').addClass('icon-white');
-				addBmActive = true;
-				setTimeout(function() {
-					$('.main-action-bar-input').focus();
-					bookmarkExecutor.children('i').addClass('icon-plus');
-				}, 50);
-			} else {
-				addBmActive = false;
-				bookmarkAction.children('i').removeClass('icon-white');
-				bookmarkExecutor.children('i').removeClass('icon-plus');
-			}
-		});
-		$('.main-action-bar-input').blur(function() {
-			if (!addBmActive) { return; }
-			setTimeout(function() {
-				if (addBmActive) {
-					addBmActive = false;
-					bookmarkAction.button('toggle');
-					bookmarkAction.children('i').removeClass('icon-white');
-					bookmarkExecutor.children('i').removeClass('icon-plus');
-				}				
-			}, 100);
-
-		});
+		// var bookmarkAction = $('.main-bookmark-action');
+		// var bookmarkExecutor = $('.main-action-executor')
+		// bookmarkAction.on('click', function() {
+			// if (!addBmActive) {
+				// bookmarkAction.children('i').addClass('icon-white');
+				// addBmActive = true;
+				// setTimeout(function() {
+					// $('.main-action-bar-input').focus();
+					// bookmarkExecutor.children('i').addClass('icon-plus');
+				// }, 50);
+			// } else {
+				// addBmActive = false;
+				// bookmarkAction.children('i').removeClass('icon-white');
+				// bookmarkExecutor.children('i').removeClass('icon-plus');
+			// }
+		// });
+		// $('.main-action-bar-input').blur(function() {
+			// if (!addBmActive) { return; }
+			// setTimeout(function() {
+				// if (addBmActive) {
+					// addBmActive = false;
+					// bookmarkAction.button('toggle');
+					// bookmarkAction.children('i').removeClass('icon-white');
+					// bookmarkExecutor.children('i').removeClass('icon-plus');
+				// }				
+			// }, 100);
+// 
+		// });
 	}
 };
 

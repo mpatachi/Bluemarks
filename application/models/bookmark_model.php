@@ -45,7 +45,22 @@ class Bookmark_model extends CI_Model {
 		
 		return $query->result_array();		
 	}
-	
+	public function quickAddBookmark($name, $url, $folderId, $tagsId) {
+		$newBookmark = array('userId' => $this->userId, 'name' => $name, 
+							 'url' => $url, 'folderId' => $folderId, 'tagsId' => $tagsId);
+		
+		$action = $this
+					->db
+					->insert('bookmarks', $newBookmark);
+					
+		if($action) {
+			$returnId = array('id' => $this->db->insert_id());
+			return $returnId;
+		} else {
+			return FALSE;
+		}					
+		
+	}
 	/**
 	 * Create bookmark
 	 * 
@@ -53,7 +68,7 @@ class Bookmark_model extends CI_Model {
 	 * @param bookmark entity
 	 * @return bool
 	 */
-	public function createBookmark($name, $description, $url, $image, $typeId, $folderId, $noteId) {
+	public function createBookmark($name, $description, $url, $image, $typeId, $folderId, $tagsId, $noteId) {
 		$newBookmark = array('name' => $name, 'userId' => $this->userId, 'description' => $description, 
 							 'url' => $url, 'image' => $image, 'typeId' => $typeId,
 							 'folderId' => $folderId, 'noteId' => $noteId);
@@ -62,7 +77,8 @@ class Bookmark_model extends CI_Model {
 					->insert('bookmarks', $newBookmark);
 		
 		if($action) {
-			return TRUE;
+			$returnId = array('id' => $this->db->insert_id());
+			return $returnId;
 		} else {
 			return FALSE;
 		}			
@@ -99,15 +115,19 @@ class Bookmark_model extends CI_Model {
 	 * @param string name, integer userId
 	 * @return bool
 	 */	
-	 public function checkBookmarkUrl($url, $uId) {
+	 public function checkBookmarkUrl($url) {
 		$query = $this
 					->db
 					->select('id')
 					->where('userId', $this->userId)
-					->where('LOWER(url)=', strtolower($url))
+					->where('url', $url)
 					->limit(1)
 					->get('bookmarks');
 					
-		return $query->row() == 0;	 	
+		if ($query->num_rows() > 0) {
+			return FALSE;
+		}			
+		
+		return TRUE;	 	
 	 }
 }

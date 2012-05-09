@@ -29,8 +29,8 @@
 							<div class='form-inline toolbar-item'>
 								<div class="control-group">
 								    <div class="controls">
-											<div class="input-prepend input-append main-action-bar">
-												<button class="btn main-bookmark-action" type="button" data-toggle="button"><i class='icon-bookmark'></i></button><input class="span4 main-action-bar-input" size="16" type="text"><button class="btn main-action-executor" type="button"><i class='icon-search'></i></button>
+											<div class="input-append searchbar">
+												<input class="span4 search-input" size="16" type="text"><button class="btn search-btn" type="button"><i class='icon-search'></i></button>
 											</div>
 									</div>
 								</div>							
@@ -38,6 +38,7 @@
 						</li>
 						<li class='sort-group'>
 							<div class="toolbar-item">
+							  <button class="btn bookmark-action" data-toggle="button"><i class='icon-star'></i></button>								
 							  <button class="btn sort-tags" data-toggle="button"><i class='icon-tags'></i></button>
 							  <button class="btn share-all" data-toggle="button"><i class='icon-share-alt'></i></button>
 							  <button class="btn open-all" data-toggle="button"><i class='icon-eye-open'></i></button>
@@ -148,7 +149,24 @@
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
 	    	<a href="#" class="btn btn-primary modal-folder-add">add</a>
 	  	</div>
-	</div><!-- end add folder modal -->	
+	</div><!-- end add folder modal -->
+	<div class="modal fade" id="add-bookmark-modal">
+  		<div class="modal-header">
+	    	<a class="close" data-dismiss="modal">×</a>
+	    	<h3>Add bookmark</h3>
+	  	</div>
+  		<div class="modal-body">
+  			<div class='control-group modal-name-group'>
+	    		<label>tag name</label>
+  				<input type="text" class="span3 modal-tag-name" placeholder="Type something…">
+  				<span class='help-inline help-message'></span>
+  			</div>
+	  	</div>
+	  	<div class="modal-footer">
+	    	<a href="#" class="btn" data-dismiss="modal">close</a>
+	    	<a href="#" class="btn btn-primary modal-tag-add">add</a>
+	  	</div>
+	</div><!-- end add bookmark modal -->		
 	<div class="modal fade" id="add-tag-modal">
   		<div class="modal-header">
 	    	<a class="close" data-dismiss="modal">×</a>

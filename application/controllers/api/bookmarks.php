@@ -34,15 +34,20 @@ class Bookmarks extends REST_Controller
 		}
 	}
 	
-	function add_post($name, $description, $url, $image, $typeId, $directoryId, $noteId) {
+	function add_post() {
 		$checkUrl = $this
 					->bookmark_model
 					->checkBookmarkUrl($url);
 					
 		if($checkUrl) {
+			$this->load->helper('get_title');
+			$name = getTitle($this->post('url'));
+			
 			$bookmark = $this
 						->bookmark_model
-						->createBookmark($name, $description, $url, $image, $typeId, $directoryId, $noteId);
+						->createBookmark($name, $this->post('description'), $this->post('url'), 
+										 $this->post('image'), $this->post('typeId'), $this->post('directoryId'), 
+										 $this->post('noteId'));
 			
 			if($bookmark) {
 				$this->response(array('status' => 'ok', 'msg' => 'Bookmark created successfuly.'), 200);
