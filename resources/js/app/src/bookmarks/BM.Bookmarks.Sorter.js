@@ -71,7 +71,7 @@ BM.Bookmarks.Sorter = (function() {
 				 * diactivation code here
 				 */
 			}
-		}
+		};
 	}
 	
 	return {

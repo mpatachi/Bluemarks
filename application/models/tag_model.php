@@ -69,6 +69,19 @@ class Tag_model extends CI_Model {
 	}
 	
 	/**
+	 * tag article
+	 * @access public
+	 * @param int tag_id
+	 * @param int bookmark_id
+	 * @return null
+	 */
+	public function tagBookmark($tag_id, $bookmark_id) {
+		$newItem = array('tag_id' => $tag_id, 'bookmark_id' => $bookmark_id);
+		$action = $this
+					->db
+					->insert('bookmark_tagged', $newItem);
+	}
+	/**
 	 * Delete tag
 	 * 
 	 * @access public

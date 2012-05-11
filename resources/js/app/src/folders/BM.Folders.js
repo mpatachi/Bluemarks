@@ -81,7 +81,6 @@ BM.Folders = {
  			// BM.Folders.View.init();
  			// BM.Folders.View.AddFolder.init();
  		// });	
- 		me.getFolders();
  		p.gettingFolders.done(function(data) {
  			console.log('# done getting folders');
  			BM.Storage.g().storeAllFolders(data);	
@@ -91,5 +90,6 @@ BM.Folders = {
  			BM.Folders.View.init();
  			BM.Folders.View.AddFolder.init(); 			
  		});
+ 		me.getFolders(); 		
 	}
 };

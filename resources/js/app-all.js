@@ -263,28 +263,22 @@ BM.Storage = (function() {
 			foldersRef : [],
 			tagsRef : [],
 			folderTree : [],
+			tagsName : [],
 						
 			storeBookmark : function($b) {
 				var me = this;
 				var dirId;		
 				bookmarkCount++;
-				var tagsIds = [];
-				var tags = $b.tagsId.split(' ');
-				var tagsRef = me.tagsRef;
-				_(tags).each(function(cat) {
-					_(tagsRef).each(function(obj) {
-						if (obj.realId == cat) {
-							tagsIds.push(obj.id);
-						}
-					});
-				});
-				// var tg = tags.length;
-				// var tgr = tagsRef.length;
-				// for (; tg > 0; tg--) {
-					// for (; tgr > 0; tgr--) {
-						// console.log(tagsRef[tgr]);
-					// }
-				// }
+				// var tagsIds = [];
+				// var tags = $b.tagsId.split(' ');
+				// var tagsRef = me.tagsRef;
+				// _(tags).each(function(cat) {
+					// _(tagsRef).each(function(obj) {
+						// if (obj.realId == cat) {
+							// tagsIds.push(obj.id);
+						// }
+					// });
+				// });
 				
 				if ($b.folderId != null) {
 					var di = search(me.foldersRef, function(obj) {
@@ -302,7 +296,7 @@ BM.Storage = (function() {
 					id : $b.id, 
 					name : $b.name, 
 					folderId : $b.folderId, 
-					tagsId : $b.tagsId, 
+					tags : $b.tags, 
 					typeId : $b.typeId, 
 					noteId : $b.noteId,
 					description : $b.description,
@@ -313,7 +307,7 @@ BM.Storage = (function() {
 					intId : bookmarkCount,
 					folderId : dirId,
 					typeId : $b.typeId,
-					tagsId : tagsIds,
+					tags : $b.tags,
 					url : $b.url,
 					image : $b.image
 				};
@@ -344,7 +338,9 @@ BM.Storage = (function() {
 					id : tagCount,
 					realId : $c.id 
 				};
+				
 				this.tagsRef.push(ref);
+				this.tagsName.push($c.name);
 								
 				var tag = new BM.Entities.Tag(
 					$c.id, 
@@ -621,6 +617,27 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
+	getAddModal : function() {
+		var modal = $('#add-bookmark-modal');
+		var submitBtn = modal.find('.modal-bookmark-add-confirm');
+		var urlField = modal.find('.modal-bookmark-url');
+		var folderField = modal.find('.modal-bookmark-folder');
+		var tagsField = modal.find('.modal-bookmark-tags');
+		var urlGroup = modal.find('.modal-url-group');
+		var folderGroup = modal.find('.modal-folder-group');
+		var tagsGroup = modal.find('.modal-tags-group');
+		
+		return {
+			el : modal,
+			submit : submitBtn,
+			url : urlField,
+			folder : folderField,
+			tags : tagsField,
+			urlGroup : urlGroup,
+			folderGroup : folderGroup,
+			tagsGroup : tagsGroup
+		};
+	},	
 	bookmarkTemplate : function(id, name, folder, tag, type, image) {
 		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");
@@ -715,7 +732,6 @@ BM.Folders = {
  			// BM.Folders.View.init();
  			// BM.Folders.View.AddFolder.init();
  		// });	
- 		me.getFolders();
  		p.gettingFolders.done(function(data) {
  			console.log('# done getting folders');
  			BM.Storage.g().storeAllFolders(data);	
@@ -725,6 +741,7 @@ BM.Folders = {
  			BM.Folders.View.init();
  			BM.Folders.View.AddFolder.init(); 			
  		});
+ 		me.getFolders(); 		
 	}
 };
 /**
@@ -953,7 +970,9 @@ BM.Folders.View.AddFolder = {
 			selector.append(item);
 		});
 		
-		BM.e(callback);
+		if (callback != undefined) {
+			BM.e(callback);
+		}
 	},
 	init : function() {
 		var me = this;
@@ -1006,7 +1025,6 @@ BM.Tags = {
 			// BM.Tags.View.init();
 			// BM.Tags.View.AddTag.init();
 		// });
-		me.getTags();
 		p.gettingTags.done(function(data) {
 			console.log('# done getting tags');
 			BM.Storage.g().storeAllTags(data);
@@ -1015,7 +1033,8 @@ BM.Tags = {
 			console.log('# done storing tags');
 			BM.Tags.View.init();
 			//BM.Tags.View.AddTag.init();			
-		});	
+		});
+		me.getTags();			
 	}
 };
 /**
@@ -1052,12 +1071,12 @@ BM.Tags.View = {
 	// },
 	populateTypeahead : function(callback) {
 		var me = this;
-		var storage = BM.Storage.g();
+		var tags = BM.Storage.g().tagsName;
 		var typeahead = $('.apply-tag-input');
-		var tags = [];
-		_(storage.tags).each(function(obj, key) {
-			tags.push(obj.tag.name);
-		});
+		// var tags = [];
+		// _(storage.tags).each(function(obj, key) {
+			// tags.push(obj.tag.name);
+		// });
 		me.typeaheadObject = typeahead.typeahead({
 			source : tags
 		});
@@ -1067,13 +1086,14 @@ BM.Tags.View = {
 		}		
 	},
 	updateTypeahead : function(data) {
-		var storage = BM.Storage.g();
-		var tags = [];
-		_(storage.tags).each(function(obj, key) {
-			tags.push(obj.tag.name);
-		});
-		this.typeaheadObject.data('typeahead').source = tags;
-		this.tagsList = tags;
+		var me = this;
+		var tags = BM.Storage.g().tagsName;
+		// var tags = [];
+		// _(storage.tags).each(function(obj, key) {
+			// tags.push(obj.tag.name);
+		// });
+		me.typeaheadObject.data('typeahead').source = tags;
+		me.tagsList = tags;
 		
 	},
 	addPopovers : function() {
@@ -1157,9 +1177,7 @@ BM.Tags.View = {
 					applyTagInput.val('');
 					applyTagBtn.fadeIn();
 				});				
-			}
-			
-			console.log(r, value);		
+			}			
 		});
 		// applyTagInput.on('change', function() {
 			// if (popoverIsActive) {
@@ -1326,6 +1344,7 @@ BM.Bookmarks = {
 		});
 		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
+			BM.Bookmarks.View.AddBookmark.init();
 		});
 		me.getBookmarks();
 	}
@@ -1403,7 +1422,7 @@ BM.Bookmarks.Sorter = (function() {
 				 * diactivation code here
 				 */
 			}
-		}
+		};
 	}
 	
 	return {
@@ -1436,7 +1455,7 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.folderId, bookmark.tagsId, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		
@@ -1453,12 +1472,106 @@ BM.Bookmarks.View = {
 		});
 		
 	},
+	addPopovers : function() {
+		var popoverContent = $('#add-bookmark-popover');
+		var target = $('.bookmark-action');
+		target.popover({
+			placement : 'bottom',
+			trigger : 'manual',
+			title : function() {
+				return popoverContent.children('.title').html();
+			},
+			content : function() {
+				return popoverContent.children('.content').html();
+			}
+		});		
+	},
+	bindHandlers : function() {
+		var me = this;
+		var d = $(document);
+//		var addPopoverIsActive = false;
+		var addBookmarkBtn = $('.bookmark-action');
+		
+		// d.on('show-add-bookmark-popover', function() {
+			// addPopoverIsActive = true;
+			// addBookmarkBtn.popover('show');
+			// d.trigger('bind-add-bookmark-popover-events');			
+		// });
+		// d.on('hide-add-bookmark-popover', function() {
+			// d.trigger('unbind-add-bookmark-popover-events');
+			// addBookmarkBtn.popover('hide');
+			// addPopoverIsActive = false;
+		// });
+		// d.on('bind-add-bookmark-popover-events', function() {
+			// var popConfirm = $('.add-bookmark-popover-confirm');
+			// popConfirm.on('click', function(event) {
+				// //d.trigger('add-bookmark', [applyTagInput.val()]);
+				// console.log('this will be for adding bookmarks');
+				// return false;
+			// });
+			// var popClose = $('.add-bookmark-popover-close');
+			// popClose.on('click', function(event) {
+				// d.trigger('hide-add-bookmark-popover');
+				// //applyTagInput.val('');
+				// //applyTagInput.focus();
+// 				
+				// return false;		
+			// });			
+		// });
+		// d.on('unbind-add-bookmark-popover-events', function() {
+			// var popConfirm = $('.add-bookmark-popover-confirm');
+			// popConfirm.off('click');
+			// var popClose = $('.add-bookmark-popover-close');
+			// popClose.off('click');						
+		// });			
+		// addBookmarkBtn.on('click', function() {
+			// if (addPopoverIsActive) {
+				// d.trigger('hide-add-bookmark-popover');
+			// } else {
+				// d.trigger('show-add-bookmark-popover');
+			// }
+		// });	
+	},
 	init : function() {
 		var me = this;
 		
 		me.listBookmarks(function() {
 //			console.log('done listing bookmarks');
 		});
+		//me.addPopovers();
+		//me.bindHandlers();
+	}
+};
+/**
+ * @author Robert
+ */
+
+BM.Bookmarks.View.AddBookmark = {
+	modal : BM.Templater.Bookmarks.getAddModal(),
+	bindHandlers : function() {
+		var me = this;
+		var t = BM.Templater.Bookmarks;
+		var modal = me.modal;
+		var d = $(document);
+		
+		modal.submit.on('click', function() {
+			d.trigger('add-bookmark', [modal.url.val(), modal.folder.val(), modal.tags.val()]);
+			
+			return false;
+		});
+	},
+	listFolders : function() {
+		var storage = BM.Storage.g().folders;
+		var modal = this.modal;
+		_(storage).each(function(obj) {
+			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
+			modal.folder.append(item);
+		});		
+	},
+	init : function() {
+		var me = this;
+		me.listFolders();
+		me.bindHandlers();
 	}
 };
 /**
@@ -1627,6 +1740,9 @@ BM.Mediator.Bookmarks = {
 			console.log(sorter.filters);
 		});
 		
+		d.on('add-bookmark', function(event, url, folder, tags) {
+			console.log(url, folder, tags);
+		});
 		// var bookmarkAction = $('.main-bookmark-action');
 		// var bookmarkExecutor = $('.main-action-executor')
 		// bookmarkAction.on('click', function() {

@@ -32,12 +32,12 @@ BM.Tags.View = {
 	// },
 	populateTypeahead : function(callback) {
 		var me = this;
-		var storage = BM.Storage.g();
+		var tags = BM.Storage.g().tagsName;
 		var typeahead = $('.apply-tag-input');
-		var tags = [];
-		_(storage.tags).each(function(obj, key) {
-			tags.push(obj.tag.name);
-		});
+		// var tags = [];
+		// _(storage.tags).each(function(obj, key) {
+			// tags.push(obj.tag.name);
+		// });
 		me.typeaheadObject = typeahead.typeahead({
 			source : tags
 		});
@@ -47,13 +47,14 @@ BM.Tags.View = {
 		}		
 	},
 	updateTypeahead : function(data) {
-		var storage = BM.Storage.g();
-		var tags = [];
-		_(storage.tags).each(function(obj, key) {
-			tags.push(obj.tag.name);
-		});
-		this.typeaheadObject.data('typeahead').source = tags;
-		this.tagsList = tags;
+		var me = this;
+		var tags = BM.Storage.g().tagsName;
+		// var tags = [];
+		// _(storage.tags).each(function(obj, key) {
+			// tags.push(obj.tag.name);
+		// });
+		me.typeaheadObject.data('typeahead').source = tags;
+		me.tagsList = tags;
 		
 	},
 	addPopovers : function() {
@@ -137,9 +138,7 @@ BM.Tags.View = {
 					applyTagInput.val('');
 					applyTagBtn.fadeIn();
 				});				
-			}
-			
-			console.log(r, value);		
+			}			
 		});
 		// applyTagInput.on('change', function() {
 			// if (popoverIsActive) {

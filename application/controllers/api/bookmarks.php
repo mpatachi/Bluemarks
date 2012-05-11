@@ -18,7 +18,7 @@ class Bookmarks extends REST_Controller
 		if($bookmark) {
 			$this->response(array('status' => 'ok', 'data' => $bookmark), 200); // 200 being the HTTP response code
 		} else {
-			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t find the bookmark!'), 404);
+			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t find the bookmark!'), 200);
 		}
 	}
 	
@@ -39,23 +39,24 @@ class Bookmarks extends REST_Controller
 					->bookmark_model
 					->checkBookmarkUrl($url);
 					
-		if($checkUrl) {
+		if ($checkUrl) {
 			$this->load->helper('get_title');
 			$name = getTitle($this->post('url'));
-			
+
 			$bookmark = $this
 						->bookmark_model
-						->createBookmark($name, $this->post('description'), $this->post('url'), 
-										 $this->post('image'), $this->post('typeId'), $this->post('directoryId'), 
-										 $this->post('noteId'));
+						->quickAddBookmark($name, 
+										   $this->post('url'), 
+										   $this->post('folderId'), 
+										   $this->post('tags'));
 			
-			if($bookmark) {
-				$this->response(array('status' => 'ok', 'msg' => 'Bookmark created successfuly.'), 200);
+			if (FALSE != $bookmark) {
+				$this->response(array('status' => 'ok', 'msg' => 'Bookmark created successfuly.', 'data' => $bookmark), 200);
 			} else {
-				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t create bookmark.'), 404);
+				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t create bookmark.'), 200);
 			}									
 		} else {
-			$this->response(array('status' => 'error', 'msg' => 'This bookmark url already exists.'), 404);
+			$this->response(array('status' => 'error', 'msg' => 'This bookmark url already exists.'), 200);
 		}
 	}
 	

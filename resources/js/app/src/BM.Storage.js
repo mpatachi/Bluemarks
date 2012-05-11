@@ -63,28 +63,22 @@ BM.Storage = (function() {
 			foldersRef : [],
 			tagsRef : [],
 			folderTree : [],
+			tagsName : [],
 						
 			storeBookmark : function($b) {
 				var me = this;
 				var dirId;		
 				bookmarkCount++;
-				var tagsIds = [];
-				var tags = $b.tagsId.split(' ');
-				var tagsRef = me.tagsRef;
-				_(tags).each(function(cat) {
-					_(tagsRef).each(function(obj) {
-						if (obj.realId == cat) {
-							tagsIds.push(obj.id);
-						}
-					});
-				});
-				// var tg = tags.length;
-				// var tgr = tagsRef.length;
-				// for (; tg > 0; tg--) {
-					// for (; tgr > 0; tgr--) {
-						// console.log(tagsRef[tgr]);
-					// }
-				// }
+				// var tagsIds = [];
+				// var tags = $b.tagsId.split(' ');
+				// var tagsRef = me.tagsRef;
+				// _(tags).each(function(cat) {
+					// _(tagsRef).each(function(obj) {
+						// if (obj.realId == cat) {
+							// tagsIds.push(obj.id);
+						// }
+					// });
+				// });
 				
 				if ($b.folderId != null) {
 					var di = search(me.foldersRef, function(obj) {
@@ -102,7 +96,7 @@ BM.Storage = (function() {
 					id : $b.id, 
 					name : $b.name, 
 					folderId : $b.folderId, 
-					tagsId : $b.tagsId, 
+					tags : $b.tags, 
 					typeId : $b.typeId, 
 					noteId : $b.noteId,
 					description : $b.description,
@@ -113,7 +107,7 @@ BM.Storage = (function() {
 					intId : bookmarkCount,
 					folderId : dirId,
 					typeId : $b.typeId,
-					tagsId : tagsIds,
+					tags : $b.tags,
 					url : $b.url,
 					image : $b.image
 				};
@@ -144,7 +138,9 @@ BM.Storage = (function() {
 					id : tagCount,
 					realId : $c.id 
 				};
+				
 				this.tagsRef.push(ref);
+				this.tagsName.push($c.name);
 								
 				var tag = new BM.Entities.Tag(
 					$c.id, 

@@ -29,7 +29,9 @@ BM.Folders.View.AddFolder = {
 			selector.append(item);
 		});
 		
-		BM.e(callback);
+		if (callback != undefined) {
+			BM.e(callback);
+		}
 	},
 	init : function() {
 		var me = this;

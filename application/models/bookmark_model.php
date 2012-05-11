@@ -38,23 +38,43 @@ class Bookmark_model extends CI_Model {
 	public function getAllBookmarks() {
 		$query = $this
 					->db
-					->select('id, folderId, tagsId, typeId, noteId, name, description, url, image')
+					->select('id, folderId, tags, typeId, noteId, name, description, url, image')
 					->where('userId', $this->userId)
 					->where('deleted', 0)
 					->get('bookmarks');
 		
 		return $query->result_array();		
 	}
-	public function quickAddBookmark($name, $url, $folderId, $tagsId) {
+	/**
+	 * method for adding bookmark from the app UI
+	 */
+	public function quickAddBookmark($name, $url, $folderId, $tags) {
 		$newBookmark = array('userId' => $this->userId, 'name' => $name, 
-							 'url' => $url, 'folderId' => $folderId, 'tagsId' => $tagsId);
+							 'url' => $url, 'folderId' => $folderId, 'tags' => $tags);
 		
 		$action = $this
 					->db
 					->insert('bookmarks', $newBookmark);
 					
 		if($action) {
-			$returnId = array('id' => $this->db->insert_id());
+			$this->load->model('tag_model','',TRUE);
+						
+			$returnId = array('id' => $this->db->insert_id());			
+			
+			$tags = explode(",",$this->post('tags'));
+			$count = count($tags);
+			
+			for ($i = 0; $i < $count; $i++) {
+				$tag = $this
+						->tag_model
+						->createTag($tags[i]);
+				if ($tag) {
+					$this
+						->tag_model
+						->tagBookmark($tag, $action);
+				}
+			}			
+
 			return $returnId;
 		} else {
 			return FALSE;

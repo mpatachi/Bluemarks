@@ -44,7 +44,7 @@ class Tags extends REST_Controller
 						->tag_model
 						->createTag($this->post('name'));
 			
-			if(FALSE != $action) {
+			if (FALSE != $action) {
 				$this->response(array('status' => 'ok', 'msg' => 'Tag created successfuly.', 'data' => $action), 200);
 			} else {
 				$this->response(array('status' => 'error', 'msg' => 'Couldn\'t create tag.'), 200);

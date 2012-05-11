@@ -11,7 +11,7 @@
 	<script type="text/javascript" src="<?php echo site_url('resources/js/jquery-1.7.1.min.js'); ?>"></script>
 	<script type="text/javascript" src="<?php echo site_url('resources/js/bootstrap.min.js'); ?>"></script>	
 	<script type="text/javascript" src="<?php echo site_url('resources/js/underscore.js'); ?>"></script>
-	<script type="text/javascript" src="<?php echo site_url('resources/js/app-all.js'); ?>"></script>	
+	<script type="text/javascript" src="<?php echo site_url('resources/js/jquery.autocomplete-min.js'); ?>"></script>	
 </head>
 <body>
 	<div class='main-app-container'>
@@ -38,7 +38,7 @@
 						</li>
 						<li class='sort-group'>
 							<div class="toolbar-item">
-							  <button class="btn bookmark-action" data-toggle="button"><i class='icon-star'></i></button>								
+							  <button class="btn bookmark-action" data-toggle="modal" href="#add-bookmark-modal"><i class='icon-star'></i></button>								
 							  <button class="btn sort-tags" data-toggle="button"><i class='icon-tags'></i></button>
 							  <button class="btn share-all" data-toggle="button"><i class='icon-share-alt'></i></button>
 							  <button class="btn open-all" data-toggle="button"><i class='icon-eye-open'></i></button>
@@ -156,15 +156,36 @@
 	    	<h3>Add bookmark</h3>
 	  	</div>
   		<div class="modal-body">
-  			<div class='control-group modal-name-group'>
-	    		<label>tag name</label>
-  				<input type="text" class="span3 modal-tag-name" placeholder="Type something…">
-  				<span class='help-inline help-message'></span>
+  			<div class='control-group modal-url-group'>
+	    		<label>bookmark url:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-globe'></i></span><!--
+  				 --><input type="text" class="span3 modal-bookmark-url" placeholder="Type address…">
+	  				<span class='help-inline help-message'></span>
+  				</div>
   			</div>
+  			<div class='control-group modal-folder-group'>
+	    		<label>foldder:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-folder-open'></i></span><!--
+	  			 --><select class='span3 modal-bookmark-folder'>
+	  					<option value='null'>unsorted bookmarks</option>
+	  				</select>
+  					<span class='help-inline help-message'></span>
+  				</div>
+  			</div>
+  			<div class='control-group modal-tags-group'>
+	    		<label>tags:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-tags'></i></span><!--
+  				 --><input type="text" class="span3 modal-bookmark-tags" placeholder="Type address…">
+  					<span class='help-inline help-message'>Separate tags with commas</span>
+  				</div>
+  			</div>  			  			
 	  	</div>
 	  	<div class="modal-footer">
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
-	    	<a href="#" class="btn btn-primary modal-tag-add">add</a>
+	    	<a href="#" class="btn btn-primary modal-bookmark-add-confirm">add</a>
 	  	</div>
 	</div><!-- end add bookmark modal -->		
 	<div class="modal fade" id="add-tag-modal">
@@ -194,5 +215,16 @@
 			</div>
 		</div>
 	</div>
+	<div id='add-bookmark-popover' class='popover-source'>
+		<div class='title'>Add new bookmark</div>
+		<div class='content'>
+			<input class="span4 add-bookmark-input" size="16" type="text">
+			<div class='popover-footer'>
+				<button class='btn add-bookmark-popover-close' >close</button>
+				<button class='btn btn-primary add-bookmark-popover-confirm' >ok</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="<?php echo site_url('resources/js/app-all.js'); ?>"></script>
 </body>
 </html>

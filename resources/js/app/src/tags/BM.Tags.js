@@ -42,7 +42,6 @@ BM.Tags = {
 			// BM.Tags.View.init();
 			// BM.Tags.View.AddTag.init();
 		// });
-		me.getTags();
 		p.gettingTags.done(function(data) {
 			console.log('# done getting tags');
 			BM.Storage.g().storeAllTags(data);
@@ -51,6 +50,7 @@ BM.Tags = {
 			console.log('# done storing tags');
 			BM.Tags.View.init();
 			//BM.Tags.View.AddTag.init();			
-		});	
+		});
+		me.getTags();			
 	}
 };

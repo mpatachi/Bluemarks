@@ -66,6 +66,27 @@ BM.Templater.Bookmarks = {
 	bookmarksList : function() {
 		return $('.bookmarks-list');
 	},
+	getAddModal : function() {
+		var modal = $('#add-bookmark-modal');
+		var submitBtn = modal.find('.modal-bookmark-add-confirm');
+		var urlField = modal.find('.modal-bookmark-url');
+		var folderField = modal.find('.modal-bookmark-folder');
+		var tagsField = modal.find('.modal-bookmark-tags');
+		var urlGroup = modal.find('.modal-url-group');
+		var folderGroup = modal.find('.modal-folder-group');
+		var tagsGroup = modal.find('.modal-tags-group');
+		
+		return {
+			el : modal,
+			submit : submitBtn,
+			url : urlField,
+			folder : folderField,
+			tags : tagsField,
+			urlGroup : urlGroup,
+			folderGroup : folderGroup,
+			tagsGroup : tagsGroup
+		};
+	},	
 	bookmarkTemplate : function(id, name, folder, tag, type, image) {
 		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
 		var link = $("<a href='#' class='thumbnail'></a>");

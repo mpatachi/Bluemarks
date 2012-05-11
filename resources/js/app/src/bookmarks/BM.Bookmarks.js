@@ -50,6 +50,7 @@ BM.Bookmarks = {
 		});
 		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
+			BM.Bookmarks.View.AddBookmark.init();
 		});
 		me.getBookmarks();
 	}
