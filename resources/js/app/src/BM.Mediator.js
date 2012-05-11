@@ -166,6 +166,10 @@ BM.Mediator.Bookmarks = {
 		
 		d.on('add-bookmark', function(event, url, folder, tags) {
 			console.log(url, folder, tags);
+			if (url == '') {
+				return;
+			}
+			bookmarks.addBookmark(url, folder, tags);
 		});
 		// var bookmarkAction = $('.main-bookmark-action');
 		// var bookmarkExecutor = $('.main-action-executor')

@@ -1309,18 +1309,36 @@ BM.Bookmarks = {
 			}
 		});
 	},
-	addBookmark : function(name, url, folderId, tagsId, typeId, callback) {
-		var params = {
-			name : name,
-			url : url,
-			folderId : folderId,
-			tagsId : tagsId,
-			typeId : typeId
-		};
+	formatUrl : function(url) {
+		var reg = url.match(/(http:\/\/|https:\/\/|ftp:\/\/)+\b/);
 		
+		if (reg) {
+			return url;
+		}
+		
+		var protocol = "http://";
+		
+		return protocol + url;
+	},
+	addBookmark : function(url, folderId, tags, callback) {
+		var storage = BM.Storage.g();
+		var folder;
+		if (folderId == 'null') {
+			folder = null;
+		} else {
+			folder = storage.folders[folderId].folder.id;
+		}
+		var formatedUrl = this.formatUrl(url);
+		
+		var params = {
+			url : formatedUrl,
+			folderId : folder,
+			tags : tags
+		};
+		console.log(params);
 		BM.p('bookmarks/add', function(response) {
 			if (response.status === 'ok') {
-				
+				console.log('bookmark added', response.data);
 			} else {
 				
 			}
@@ -1742,6 +1760,10 @@ BM.Mediator.Bookmarks = {
 		
 		d.on('add-bookmark', function(event, url, folder, tags) {
 			console.log(url, folder, tags);
+			if (url == '') {
+				return;
+			}
+			bookmarks.addBookmark(url, folder, tags);
 		});
 		// var bookmarkAction = $('.main-bookmark-action');
 		// var bookmarkExecutor = $('.main-action-executor')

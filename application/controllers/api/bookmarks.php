@@ -37,7 +37,7 @@ class Bookmarks extends REST_Controller
 	function add_post() {
 		$checkUrl = $this
 					->bookmark_model
-					->checkBookmarkUrl($url);
+					->checkBookmarkUrl($this->post('url'));
 					
 		if ($checkUrl) {
 			$this->load->helper('get_title');
