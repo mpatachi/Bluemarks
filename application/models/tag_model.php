@@ -79,7 +79,7 @@ class Tag_model extends CI_Model {
 		$newItem = array('tag_id' => $tag_id, 'bookmark_id' => $bookmark_id);
 		$action = $this
 					->db
-					->insert('bookmark_tagged', $newItem);
+					->insert('bookmarks_tagged', $newItem);
 	}
 	/**
 	 * Delete tag
@@ -116,7 +116,8 @@ class Tag_model extends CI_Model {
 					->get('tags');
 					
 		if ($query->num_rows() > 0) {
-			return FALSE;
+			$r = $query->result_array();
+			return $r[0];
 		}
 		
 		return TRUE; 	

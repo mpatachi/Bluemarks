@@ -294,20 +294,21 @@ BM.Storage = (function() {
 								
 				var real = {
 					id : $b.id, 
-					name : $b.name, 
+					//name : $b.name, 
 					folderId : $b.folderId, 
-					tags : $b.tags, 
-					typeId : $b.typeId, 
+					//tags : $b.tags, 
+					//typeId : $b.typeId, 
 					noteId : $b.noteId,
 					description : $b.description,
-					url : $b.url,
-					image : $b.image					
+					//url : $b.url,
+					//image : $b.image					
 				};
 				var proxy = {
 					intId : bookmarkCount,
 					folderId : dirId,
 					typeId : $b.typeId,
 					tags : $b.tags,
+					name : $b.name, 					
 					url : $b.url,
 					image : $b.image
 				};
@@ -1473,7 +1474,7 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.folderId, bookmark.tags, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		

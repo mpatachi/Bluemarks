@@ -61,18 +61,24 @@ class Bookmark_model extends CI_Model {
 						
 			$returnId = array('id' => $this->db->insert_id());			
 			
-			$tags = explode(",",$this->post('tags'));
+			$tags = explode(",",$tags);
 			$count = count($tags);
 			
 			for ($i = 0; $i < $count; $i++) {
-				$tag = $this
-						->tag_model
-						->createTag($tags[i]);
-				if ($tag) {
-					$this
-						->tag_model
-						->tagBookmark($tag, $action);
+				$checkTagName = $this->tag_model->checkTagName($tags[$i]);
+
+				if (TRUE === $checkTagName) {
+					$tag = $this
+							->tag_model
+							->createTag($tags[$i]);
+					$tagId = $tag["id"];							
+				} else {
+					$tagId = $checkTagName["id"];
 				}
+				
+				$this
+					->tag_model
+					->tagBookmark($tagId, $returnId["id"]);			
 			}			
 
 			return $returnId;

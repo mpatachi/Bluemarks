@@ -13,7 +13,7 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.folderId, bookmark.tags, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		

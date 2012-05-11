@@ -94,20 +94,21 @@ BM.Storage = (function() {
 								
 				var real = {
 					id : $b.id, 
-					name : $b.name, 
+					//name : $b.name, 
 					folderId : $b.folderId, 
-					tags : $b.tags, 
-					typeId : $b.typeId, 
+					//tags : $b.tags, 
+					//typeId : $b.typeId, 
 					noteId : $b.noteId,
 					description : $b.description,
-					url : $b.url,
-					image : $b.image					
+					//url : $b.url,
+					//image : $b.image					
 				};
 				var proxy = {
 					intId : bookmarkCount,
 					folderId : dirId,
 					typeId : $b.typeId,
 					tags : $b.tags,
+					name : $b.name, 					
 					url : $b.url,
 					image : $b.image
 				};
