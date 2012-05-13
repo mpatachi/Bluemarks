@@ -150,6 +150,7 @@ BM.Folders.View = {
 			me.showFolders(target);
 			me.activeFolder = target;
 			dirHolder.attr('active-node', -1);
+			d.trigger('show-root-folders');
 		});
 		/*
 		 * the folder navigation by breadcrumb

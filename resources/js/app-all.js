@@ -954,6 +954,7 @@ BM.Folders.View = {
 			me.showFolders(target);
 			me.activeFolder = target;
 			dirHolder.attr('active-node', -1);
+			d.trigger('show-root-folders');
 		});
 		/*
 		 * the folder navigation by breadcrumb
@@ -1625,6 +1626,8 @@ BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
 		var storage = BM.Storage.g();
 		var t = BM.Templater.Bookmarks;
+		var bHolder = t.bookmarksList();
+		bHolder.empty();
 		_(storage.bookmarks).each(function(obj, key) {
 			var bookmark = obj.bookmark.proxy;
 			// var catName = "";
@@ -1633,7 +1636,7 @@ BM.Bookmarks.View = {
 				// catName += " " + r.category.name;
 			// });
 			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
-			t.bookmarksList().append(itemTemplate); 
+			bHolder.append(itemTemplate); 
 		});
 		
 		BM.e(callback);
@@ -1649,7 +1652,8 @@ BM.Bookmarks.View = {
 			return;
 		}
 		for (var i = 0; i < len; i++) {
-			var b = bookmarks[list[i]];
+			var b = bookmarks[list[i]].bookmark.proxy;
+			console.log(b);
 			var itemTemplate = t.bookmarkTemplate(b.intId, b.name, b.url, b.folderId, b.tags, b.typeId);
 			bHolder.append(itemTemplate); 			
 		}
@@ -1673,7 +1677,10 @@ BM.Bookmarks.View = {
 		var d = $(document);
 //		var addPopoverIsActive = false;
 		var addBookmarkBtn = $('.bookmark-action');
-		
+		d.on('show-root-folders', function() {
+			console.log('showing all bookmarks');
+			me.listBookmarks();
+		});
 		// d.on('show-add-bookmark-popover', function() {
 			// addPopoverIsActive = true;
 			// addBookmarkBtn.popover('show');
@@ -1721,7 +1728,7 @@ BM.Bookmarks.View = {
 //			console.log('done listing bookmarks');
 		});
 		//me.addPopovers();
-		//me.bindHandlers();
+		me.bindHandlers();
 	}
 };
 /**
