@@ -174,11 +174,13 @@ BM.Promiser = (function() {
 	storingFolders = new $.Deferred(),
 	storingTags = new $.Deferred(),
 	storingBookmarsk = new $.Deferred(),
+	fixingNoFolder = new $.Deferred(),
 	instantiated = null;
 
 	function init() {
 			
 		return {
+			fixingNoFolder : fixingNoFolder,
 			gettingFolders : gettingFolders,
 			gettingTags : gettingTags,
 			gettingBookmarks : gettingBookmarks,
@@ -259,6 +261,12 @@ BM.Storage = (function() {
 			folders : {
 				
 			},
+			bookmarksByTag : {
+				
+			},
+			bookmarksByFolder : {
+				
+			},
 			bookmarkRef : [],
 			foldersRef : [],
 			tagsRef : [],
@@ -321,7 +329,13 @@ BM.Storage = (function() {
 				me.bookmarks[bookmarkCount] = {
 					bookmark : bookmark
 				};
-				
+				me.bookmarksByFolder[dirId] = me.bookmarksByFolder[dirId] || [];
+				me.bookmarksByFolder[dirId].push(bookmarkCount);
+				var tag = $b.tags.split(',');
+				_(tag).each(function(item) {
+					me.bookmarksByTag[item] = me.bookmarksByTag[item] || [];
+					me.bookmarksByTag[item].push(bookmarkCount);
+				});
 				return me.bookmarks[bookmarkCount];			
 			},
 			storeAllBookmarks : function($list) {
@@ -410,10 +424,15 @@ BM.Storage = (function() {
 				
 				return this.folders[returnId];
 			},
+			noFolderFix : function() {
+				var root = new BM.Entities.Relationer('root', [0]);
+				this.folderTree.push(root);
+				BM.Promiser.g().storingFolders.resolve();				
+			},
 			storeAllFolders : function($list) {
 				var me = this;
 				var l = $list.length;
-				var root = new BM.Entities.Relationer('root', []);
+				var root = new BM.Entities.Relationer('root', [0]);
 				var check = false;
 				var currentItem;
 				/*
@@ -639,9 +658,9 @@ BM.Templater.Bookmarks = {
 			tagsGroup : tagsGroup
 		};
 	},	
-	bookmarkTemplate : function(id, name, folder, tag, type, image) {
+	bookmarkTemplate : function(id, name, url, folder, tag, type, image) {
 		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
-		var link = $("<a href='#' class='thumbnail'></a>");
+		var link = $("<a href='" + url + "' target='_blank' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");
 		link.append(img, title);
@@ -677,6 +696,8 @@ BM.Folders = {
 				if (callback != undefined) {
 					BM.e(callback);
 				}
+			} else if (response.status === 'error') {
+				BM.Promiser.g().fixingNoFolder.resolve();
 			}
 			
 			/* should place error provider */
@@ -713,9 +734,9 @@ BM.Folders = {
 				newFolder.folder.parentId = intParentId;
 				storage.addToFolderTree(newFolder.folder);
 				BM.Folders.View.addFolderToList(newFolder.folder);
-				$(document).trigger('add-folder-success', [response.msg]);
+				//$(document).trigger('add-folder-success', [response.msg]);
 			} else {
-				$(document).trigger('add-folder-error', [response.msg]);
+				//$(document).trigger('add-folder-error', [response.msg]);
 			}
 		}, params);
 	},
@@ -732,10 +753,46 @@ BM.Folders = {
  		// me.getFolders(function() {
  			// BM.Folders.View.init();
  			// BM.Folders.View.AddFolder.init();
- 		// });	
+ 		// });
+ 		p.fixingNoFolder.done(function() {
+ 			console.log('# there were no folders -- fixing');
+ 			var storage = BM.Storage.g();
+			var folder = new BM.Entities.Folder(
+								'0',
+								'Unsorted',
+								null
+				);
+			folder.intId = '0';
+			var ref = {
+				id : '0',
+				realId : '0'
+			};
+			storage.foldersRef.push(ref);
+			//inject special folder "Unsorted"
+ 			storage.folders[0] = {
+ 				folder : folder 		
+ 			};			
+			storage.noFolderFix(); 			
+ 		});	
  		p.gettingFolders.done(function(data) {
  			console.log('# done getting folders');
- 			BM.Storage.g().storeAllFolders(data);	
+ 			var storage = BM.Storage.g();
+			var folder = new BM.Entities.Folder(
+								'0',
+								'Unsorted',
+								null
+				);
+			folder.intId = '0';
+			var ref = {
+				id : '0',
+				realId : '0'
+			};
+			storage.foldersRef.push(ref);			
+			//inject special folder "Unsorted"
+ 			storage.folders[0] = {
+ 				folder : folder 		
+ 			};
+ 			storage.storeAllFolders(data);	
  		});
  		p.storingFolders.done(function() {
  			console.log('# done storing folders');
@@ -752,13 +809,15 @@ BM.Folders = {
 BM.Folders.View = {
 	folderHolder : 'folders-list',
 	isLoading : false,
-	activeFolder : null,
+	activeFolder : $('.list-for-root'),
+	currentFolder : null,
 	activeList : [],
 	
 	getFoldersHolder : function() {
 		return $(this.folderHolder);
 	},
 	addFolderToList : function(folder) {
+		console.log('addFolderToList');
 		var targetNode;
 		var utils = BM.utils;
 		var storage = BM.Storage.g();
@@ -777,10 +836,12 @@ BM.Folders.View = {
 			// }
 			var nodeId = folder.parentId;	//i have overwriten the parentId with the internal pId
 			targetNode = 'folder-' + nodeId;
-			var listTemplate = t.listTemplate(targetNode);
 			var node = $(".folder-btn[node-id='" + nodeId + "']");
 			node.attr('node-target', targetNode);
-			t.foldersListHolder().append(listTemplate);
+			if ($('.list-for-' + targetNode).length == 0) {
+				var listTemplate = t.listTemplate(targetNode);
+				t.foldersListHolder().append(listTemplate);
+			}
 		} else {
 			targetNode = 'root';
 		}
@@ -833,61 +894,123 @@ BM.Folders.View = {
 		var me = this;
 		var dList = $('.folders-list');
 		var d = $(document);
-		var dirNavigator = $('.folders-breadcum-navigation');
+		//var dirNavigator = $('.folders-breadcrumb-navigation');
 		var dirHolder = $('.folders-list-holder');
+		var breadcrumb = $('.breadcrumb-active-folders');
 		
+		/*
+		 * main logi of the folder navigation
+		 */
 		dirHolder.on('click', '.folder-btn', function(event) {
 			var item = $(this);
 			var targetNode = item.attr('node-target');
 			var nodeId = parseInt(item.attr('node-id'), 10);
+			var itemText = item.text();
+			var parentNode = item.attr('node-parent');
+			var folder = $("<span class='active' node-id='" + nodeId + "' node-target='" + targetNode + "' node-name='" + itemText + "' node-parent='" + parentNode + "'>" + itemText + "/</span>");
+			var breadcrumbChildren = breadcrumb.children();
+			breadcrumbChildren.removeClass('active');
+			
 			if (targetNode !== 'none') {
 				var target = $(".folders-list[node='" + targetNode + "']");
 				if(target.length > 0) {
 					var toHide = item.parents('.folders-list');
-					var parentNode = item.attr('node-parent');
+					
 					me.hideFolders(toHide);
 					me.showFolders(target);
-					dirNavigator.attr('node-target', parentNode);
+					//dirNavigator.attr('node-target', parentNode);
 					me.activeFolder = target;	//introduce the active folder
 					me.activeList.push(target);	//introduce the active folder to the active dir list 
-					dirHolder.attr('active-node', nodeId);
 				}
 				
-				d.trigger('sorter-activate-multiple-folders', [nodeId]);
+				//d.trigger('sorter-activate-multiple-folders', [nodeId]);
+				// breadcrumb.append(folder);
 			} else {
-				d.trigger('sorter-activate-folder', [nodeId]);
+
 			}
+			var bLastItem = breadcrumbChildren.last();
 			
-			//BM.Bookmarks.Sorter.g().activateFolder(nodeId);	
+			if (bLastItem.attr('node-parent') == parentNode) {
+				bLastItem.remove();
+			}
+			breadcrumb.append(folder);
+			dirHolder.attr('active-node', nodeId);			
+			me.currentFolder = nodeId;
+			d.trigger('sorter-activate-folder');
+
 			return false;
+		});
+		/*
+		 * show the root folders only
+		 */
+		$('.breadcrumb-show-root').on('click', function() {
+			var target = $('.list-for-root');
+			if (target == me.activeFolder) {
+				return;
+			}
+			breadcrumb.empty();
+			console.log('showing root folder');
+			me.hideFolders(me.activeFolder);
+			me.showFolders(target);
+			me.activeFolder = target;
+			dirHolder.attr('active-node', -1);
+		});
+		/*
+		 * the folder navigation by breadcrumb
+		 */
+		breadcrumb.on('click', 'span', function() {
+			var item = $(this);
+			if (item.hasClass('active')) {
+				return;
+			}
+			console.log('#');
+			var parent = item.parent();
+			var parentChildren = parent.children();
+			var len = parentChildren.length;
+			var index = parentChildren.index(item);
+			var target = $('.list-for-' + item.attr('node-target'));
+			me.hideFolders(me.activeFolder);
+			me.showFolders(target);
+			me.activeFolder = target;
+			me.currentFolder = parseInt(item.attr('node-id'), 10);	
+			if (index < len - 1) {
+				for (var i = index + 1; i < len; i++) {
+					parentChildren.eq(i).remove();
+				}
+			}
+			if (index == len -1) {
+				parentChildren.eq(index + 1).remove();
+			}
+			parentChildren.eq(index).addClass('active');
+			d.trigger('sorter-activate-folder');
 		});
 		/*
 		 * TODO: use a targeting system instead of array
 		 */
-		dirNavigator.on('click', function(event) {
-			var t = me.activeList;
-			var l = t.length;
-
-			if (l > 1) {
-				me.hideFolders(t[l-1]);
-				me.showFolders(t[l-2]);
-				
-				var temp = t[l-1].attr('node').split('-');
-				var diactivate = parseInt(temp[1], 10);
-				temp = t[l-2].attr('node').split('-');
-				var activate = parseInt(temp[1], 10);
-				if (temp[0] == 'root') {
-					active = -1;
-				}
-				d.trigger('sorter-diactivate-multiple-folders', [diactivate]);	
-				d.trigger('sorter-activate-multiple-folders', [activate]);
-				dirHolder.attr('active-node', activate);
-				
-				me.activeList.splice(l-1, 1);			
-			}
-
-			return false;
-		});
+		// dirNavigator.on('click', function(event) {
+			// var t = me.activeList;
+			// var l = t.length;
+// 
+			// if (l > 1) {
+				// me.hideFolders(t[l-1]);
+				// me.showFolders(t[l-2]);
+// 				
+				// var temp = t[l-1].attr('node').split('-');
+				// var diactivate = parseInt(temp[1], 10);
+				// temp = t[l-2].attr('node').split('-');
+				// var activate = parseInt(temp[1], 10);
+				// if (temp[0] == 'root') {
+					// active = -1;
+				// }
+				// d.trigger('sorter-diactivate-multiple-folders', [diactivate]);	
+				// d.trigger('sorter-activate-multiple-folders', [activate]);
+				// dirHolder.attr('active-node', activate);
+// 				
+				// me.activeList.splice(l-1, 1);			
+			// }
+// 
+			// return false;
+		// });
 		
 		var addDirInput = $('.add-new-folder');
 		var addDirBtn = $('.add-folder-shortcut-btn');
@@ -1375,6 +1498,11 @@ BM.Bookmarks = {
 BM.Bookmarks.Sorter = (function() {
 	var instantiated = false;
 	var d = $(document);
+	var storage = BM.Storage.g();
+	var bookmarks = {
+		active : [],
+		cache : []	
+	};
 	var filters = {
 		active : {
 			folder : [],
@@ -1386,6 +1514,36 @@ BM.Bookmarks.Sorter = (function() {
 	function init() {
 		return {
 			filters : filters,
+			bookmarks : bookmarks,
+			sortBookmarks : function() {
+				var me = this;
+				var byFolder = [];
+				var byTag = [];
+				var active = filters.active;
+				var r;
+				
+				_(active.folder).each(function(f) {
+					var b = storage.bookmarksByFolder[f];
+					if (b) {
+						byFolder = b;
+					}
+				});
+				
+				_(active.tag).each(function(t) {
+					var b = storage.bookmarksByTag[t];
+					if (b) {
+						byTag = t;
+					}
+				});
+				if (byTag.length == 0) {
+					r = byFolder;
+				} else {
+					r = _.intersection(byFolder, byTag);
+				}
+				
+				BM.Bookmarks.View.showBookmarks(r);
+				console.log(byFolder, byTag, r);
+			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];
 				filters.active.folder.push(id);
@@ -1474,22 +1632,27 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.folderId, bookmark.tags, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		
 		BM.e(callback);
 	},
-	showBookmarks : function(filter, callback) {
+	showBookmarks : function(list, callback) {
 		var t = BM.Templater.Bookmarks;
-		t.bookmarksList().empty();
-		var storage = BM.Storage.g();
-		
-		_(storage.bookmarks).each(function(obj, key) {
-			var bookmark = obj.bookmark;
-			
-		});
-		
+		var bHolder = t.bookmarksList();
+		bHolder.empty();
+		var bookmarks = BM.Storage.g().bookmarks;
+		var len = list.length;
+		if (len == 0) {
+			bHolder.text('looks like there is no bookmarks');
+			return;
+		}
+		for (var i = 0; i < len; i++) {
+			var b = bookmarks[list[i]];
+			var itemTemplate = t.bookmarkTemplate(b.intId, b.name, b.url, b.folderId, b.tags, b.typeId);
+			bHolder.append(itemTemplate); 			
+		}
 	},
 	addPopovers : function() {
 		var popoverContent = $('#add-bookmark-popover');
@@ -1718,45 +1881,68 @@ BM.Mediator.Bookmarks = {
 	provide : function() {
 		var d = $(document);
 		var bookmarks = BM.Bookmarks;
+		var view = bookmarks.View;
+		var foldersView = BM.Folders.View;
 		var sorter = bookmarks.Sorter.g();
 		var t = BM.Templater;
 		var addBmActive = false;
 		
-		d.on('sorter-activate-folder', function(event, folderId) {
-			sorter.activateFolder(folderId, function() {
-				d.trigger('sort-bookmarks');
-			});
+		d.on('sorter-activate-folder', function(event) {
+			var current = foldersView.currentFolder;
+			var node = $(".folder-btn[node-id='" + current + "']");
+			var nodeTarge = node.attr('node-target');
+			console.log('current folder is: ', foldersView.currentFolder);
+			if ( nodeTarge === 'none') {
+				sorter.activateFolder(current, function() {
+					d.trigger('sort-bookmarks');
+				});				
+			} else {
+				var foldersId = [current];
+				var listHolder = $('.list-for-folder-' + current);
+				var listItems = listHolder.find('.folder-btn');
+				listItems.each(function() {
+					var index = parseInt($(this).attr('node-id'), 10);
+					foldersId.push(index);
+				});
+				
+				sorter.activateMultipleFolder(foldersId, function() {
+					d.trigger('sort-bookmarks');
+				});				
+			}
+			// sorter.activateFolder(folderId, function() {
+				// d.trigger('sort-bookmarks');
+			// });
 		});
 		
-		d.on('sorter-activate-multiple-folders', function(event, folderId) {
-			var foldersId = [folderId];
-			var listHolder = $('.list-for-folder-' + folderId);
-			var listItems = listHolder.find('.folder-btn');
-			listItems.each(function() {
-				var index = parseInt($(this).attr('node-id'), 10);
-				foldersId.push(index);
-			});
-			
-			sorter.activateMultipleFolder(foldersId, function() {
-				d.trigger('sort-bookmarks');
-			});
-		});
-		
-		d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
-			var foldersId = [folderId];
-			var listHolder = $('.list-for-folder-' + folderId);
-			var listItems = listHolder.find('.folder-btn');
-			listItems.each(function() {
-				var index = parseInt($(this).attr('node-id'), 10);
-				foldersId.push(index);
-			});
-			
-			sorter.diactivateMultipleFolder(foldersId);
-		});
+		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
+			// var foldersId = [folderId];
+			// var listHolder = $('.list-for-folder-' + folderId);
+			// var listItems = listHolder.find('.folder-btn');
+			// listItems.each(function() {
+				// var index = parseInt($(this).attr('node-id'), 10);
+				// foldersId.push(index);
+			// });
+// 			
+			// sorter.activateMultipleFolder(foldersId, function() {
+				// d.trigger('sort-bookmarks');
+			// });
+		// });
+// 		
+		// d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
+			// var foldersId = [folderId];
+			// var listHolder = $('.list-for-folder-' + folderId);
+			// var listItems = listHolder.find('.folder-btn');
+			// listItems.each(function() {
+				// var index = parseInt($(this).attr('node-id'), 10);
+				// foldersId.push(index);
+			// });
+// 			
+			// sorter.diactivateMultipleFolder(foldersId);
+		// });
 		
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
-			console.log(sorter.filters);
+			sorter.sortBookmarks();
 		});
 		
 		d.on('add-bookmark', function(event, url, folder, tags) {

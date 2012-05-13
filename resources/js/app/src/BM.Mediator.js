@@ -123,45 +123,68 @@ BM.Mediator.Bookmarks = {
 	provide : function() {
 		var d = $(document);
 		var bookmarks = BM.Bookmarks;
+		var view = bookmarks.View;
+		var foldersView = BM.Folders.View;
 		var sorter = bookmarks.Sorter.g();
 		var t = BM.Templater;
 		var addBmActive = false;
 		
-		d.on('sorter-activate-folder', function(event, folderId) {
-			sorter.activateFolder(folderId, function() {
-				d.trigger('sort-bookmarks');
-			});
+		d.on('sorter-activate-folder', function(event) {
+			var current = foldersView.currentFolder;
+			var node = $(".folder-btn[node-id='" + current + "']");
+			var nodeTarge = node.attr('node-target');
+			console.log('current folder is: ', foldersView.currentFolder);
+			if ( nodeTarge === 'none') {
+				sorter.activateFolder(current, function() {
+					d.trigger('sort-bookmarks');
+				});				
+			} else {
+				var foldersId = [current];
+				var listHolder = $('.list-for-folder-' + current);
+				var listItems = listHolder.find('.folder-btn');
+				listItems.each(function() {
+					var index = parseInt($(this).attr('node-id'), 10);
+					foldersId.push(index);
+				});
+				
+				sorter.activateMultipleFolder(foldersId, function() {
+					d.trigger('sort-bookmarks');
+				});				
+			}
+			// sorter.activateFolder(folderId, function() {
+				// d.trigger('sort-bookmarks');
+			// });
 		});
 		
-		d.on('sorter-activate-multiple-folders', function(event, folderId) {
-			var foldersId = [folderId];
-			var listHolder = $('.list-for-folder-' + folderId);
-			var listItems = listHolder.find('.folder-btn');
-			listItems.each(function() {
-				var index = parseInt($(this).attr('node-id'), 10);
-				foldersId.push(index);
-			});
-			
-			sorter.activateMultipleFolder(foldersId, function() {
-				d.trigger('sort-bookmarks');
-			});
-		});
-		
-		d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
-			var foldersId = [folderId];
-			var listHolder = $('.list-for-folder-' + folderId);
-			var listItems = listHolder.find('.folder-btn');
-			listItems.each(function() {
-				var index = parseInt($(this).attr('node-id'), 10);
-				foldersId.push(index);
-			});
-			
-			sorter.diactivateMultipleFolder(foldersId);
-		});
+		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
+			// var foldersId = [folderId];
+			// var listHolder = $('.list-for-folder-' + folderId);
+			// var listItems = listHolder.find('.folder-btn');
+			// listItems.each(function() {
+				// var index = parseInt($(this).attr('node-id'), 10);
+				// foldersId.push(index);
+			// });
+// 			
+			// sorter.activateMultipleFolder(foldersId, function() {
+				// d.trigger('sort-bookmarks');
+			// });
+		// });
+// 		
+		// d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
+			// var foldersId = [folderId];
+			// var listHolder = $('.list-for-folder-' + folderId);
+			// var listItems = listHolder.find('.folder-btn');
+			// listItems.each(function() {
+				// var index = parseInt($(this).attr('node-id'), 10);
+				// foldersId.push(index);
+			// });
+// 			
+			// sorter.diactivateMultipleFolder(foldersId);
+		// });
 		
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
-			console.log(sorter.filters);
+			sorter.sortBookmarks();
 		});
 		
 		d.on('add-bookmark', function(event, url, folder, tags) {

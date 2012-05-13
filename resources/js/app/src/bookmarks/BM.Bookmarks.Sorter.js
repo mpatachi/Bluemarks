@@ -5,6 +5,11 @@
 BM.Bookmarks.Sorter = (function() {
 	var instantiated = false;
 	var d = $(document);
+	var storage = BM.Storage.g();
+	var bookmarks = {
+		active : [],
+		cache : []	
+	};
 	var filters = {
 		active : {
 			folder : [],
@@ -16,6 +21,36 @@ BM.Bookmarks.Sorter = (function() {
 	function init() {
 		return {
 			filters : filters,
+			bookmarks : bookmarks,
+			sortBookmarks : function() {
+				var me = this;
+				var byFolder = [];
+				var byTag = [];
+				var active = filters.active;
+				var r;
+				
+				_(active.folder).each(function(f) {
+					var b = storage.bookmarksByFolder[f];
+					if (b) {
+						byFolder = b;
+					}
+				});
+				
+				_(active.tag).each(function(t) {
+					var b = storage.bookmarksByTag[t];
+					if (b) {
+						byTag = t;
+					}
+				});
+				if (byTag.length == 0) {
+					r = byFolder;
+				} else {
+					r = _.intersection(byFolder, byTag);
+				}
+				
+				BM.Bookmarks.View.showBookmarks(r);
+				console.log(byFolder, byTag, r);
+			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];
 				filters.active.folder.push(id);

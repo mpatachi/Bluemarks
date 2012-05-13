@@ -13,22 +13,27 @@ BM.Bookmarks.View = {
 				// var r = storage.getCategory(cat);
 				// catName += " " + r.category.name;
 			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.folderId, bookmark.tags, bookmark.typeId);
+			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
 			t.bookmarksList().append(itemTemplate); 
 		});
 		
 		BM.e(callback);
 	},
-	showBookmarks : function(filter, callback) {
+	showBookmarks : function(list, callback) {
 		var t = BM.Templater.Bookmarks;
-		t.bookmarksList().empty();
-		var storage = BM.Storage.g();
-		
-		_(storage.bookmarks).each(function(obj, key) {
-			var bookmark = obj.bookmark;
-			
-		});
-		
+		var bHolder = t.bookmarksList();
+		bHolder.empty();
+		var bookmarks = BM.Storage.g().bookmarks;
+		var len = list.length;
+		if (len == 0) {
+			bHolder.text('looks like there is no bookmarks');
+			return;
+		}
+		for (var i = 0; i < len; i++) {
+			var b = bookmarks[list[i]];
+			var itemTemplate = t.bookmarkTemplate(b.intId, b.name, b.url, b.folderId, b.tags, b.typeId);
+			bHolder.append(itemTemplate); 			
+		}
 	},
 	addPopovers : function() {
 		var popoverContent = $('#add-bookmark-popover');

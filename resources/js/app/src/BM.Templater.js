@@ -87,9 +87,9 @@ BM.Templater.Bookmarks = {
 			tagsGroup : tagsGroup
 		};
 	},	
-	bookmarkTemplate : function(id, name, folder, tag, type, image) {
+	bookmarkTemplate : function(id, name, url, folder, tag, type, image) {
 		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
-		var link = $("<a href='#' class='thumbnail'></a>");
+		var link = $("<a href='" + url + "' target='_blank' class='thumbnail'></a>");
 		var img = $("<img src='../resources/img/160x120.gif' alt=''>");
 		var title = $("<h5>" + name + "</h5>");
 		link.append(img, title);

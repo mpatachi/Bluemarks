@@ -59,6 +59,12 @@ BM.Storage = (function() {
 			folders : {
 				
 			},
+			bookmarksByTag : {
+				
+			},
+			bookmarksByFolder : {
+				
+			},
 			bookmarkRef : [],
 			foldersRef : [],
 			tagsRef : [],
@@ -121,7 +127,13 @@ BM.Storage = (function() {
 				me.bookmarks[bookmarkCount] = {
 					bookmark : bookmark
 				};
-				
+				me.bookmarksByFolder[dirId] = me.bookmarksByFolder[dirId] || [];
+				me.bookmarksByFolder[dirId].push(bookmarkCount);
+				var tag = $b.tags.split(',');
+				_(tag).each(function(item) {
+					me.bookmarksByTag[item] = me.bookmarksByTag[item] || [];
+					me.bookmarksByTag[item].push(bookmarkCount);
+				});
 				return me.bookmarks[bookmarkCount];			
 			},
 			storeAllBookmarks : function($list) {
@@ -210,10 +222,15 @@ BM.Storage = (function() {
 				
 				return this.folders[returnId];
 			},
+			noFolderFix : function() {
+				var root = new BM.Entities.Relationer('root', [0]);
+				this.folderTree.push(root);
+				BM.Promiser.g().storingFolders.resolve();				
+			},
 			storeAllFolders : function($list) {
 				var me = this;
 				var l = $list.length;
-				var root = new BM.Entities.Relationer('root', []);
+				var root = new BM.Entities.Relationer('root', [0]);
 				var check = false;
 				var currentItem;
 				/*

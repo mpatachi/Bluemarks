@@ -49,8 +49,13 @@ class Bookmark_model extends CI_Model {
 	 * method for adding bookmark from the app UI
 	 */
 	public function quickAddBookmark($name, $url, $folderId, $tags) {
-		$newBookmark = array('userId' => $this->userId, 'name' => $name, 
-							 'url' => $url, 'folderId' => $folderId, 'tags' => $tags);
+		if ($folderId == 'null') {
+			$newBookmark = array('userId' => $this->userId, 'name' => $name, 
+								 'url' => $url, 'tags' => $tags);
+		} else {
+			$newBookmark = array('userId' => $this->userId, 'name' => $name, 
+								 'url' => $url, 'folderId' => $folderId, 'tags' => $tags);			
+		}
 		
 		$action = $this
 					->db

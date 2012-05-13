@@ -9,11 +9,13 @@ BM.Promiser = (function() {
 	storingFolders = new $.Deferred(),
 	storingTags = new $.Deferred(),
 	storingBookmarsk = new $.Deferred(),
+	fixingNoFolder = new $.Deferred(),
 	instantiated = null;
 
 	function init() {
 			
 		return {
+			fixingNoFolder : fixingNoFolder,
 			gettingFolders : gettingFolders,
 			gettingTags : gettingTags,
 			gettingBookmarks : gettingBookmarks,

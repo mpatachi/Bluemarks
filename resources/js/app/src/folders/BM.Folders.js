@@ -25,6 +25,8 @@ BM.Folders = {
 				if (callback != undefined) {
 					BM.e(callback);
 				}
+			} else if (response.status === 'error') {
+				BM.Promiser.g().fixingNoFolder.resolve();
 			}
 			
 			/* should place error provider */
@@ -61,9 +63,9 @@ BM.Folders = {
 				newFolder.folder.parentId = intParentId;
 				storage.addToFolderTree(newFolder.folder);
 				BM.Folders.View.addFolderToList(newFolder.folder);
-				$(document).trigger('add-folder-success', [response.msg]);
+				//$(document).trigger('add-folder-success', [response.msg]);
 			} else {
-				$(document).trigger('add-folder-error', [response.msg]);
+				//$(document).trigger('add-folder-error', [response.msg]);
 			}
 		}, params);
 	},
@@ -80,10 +82,46 @@ BM.Folders = {
  		// me.getFolders(function() {
  			// BM.Folders.View.init();
  			// BM.Folders.View.AddFolder.init();
- 		// });	
+ 		// });
+ 		p.fixingNoFolder.done(function() {
+ 			console.log('# there were no folders -- fixing');
+ 			var storage = BM.Storage.g();
+			var folder = new BM.Entities.Folder(
+								'0',
+								'Unsorted',
+								null
+				);
+			folder.intId = '0';
+			var ref = {
+				id : '0',
+				realId : '0'
+			};
+			storage.foldersRef.push(ref);
+			//inject special folder "Unsorted"
+ 			storage.folders[0] = {
+ 				folder : folder 		
+ 			};			
+			storage.noFolderFix(); 			
+ 		});	
  		p.gettingFolders.done(function(data) {
  			console.log('# done getting folders');
- 			BM.Storage.g().storeAllFolders(data);	
+ 			var storage = BM.Storage.g();
+			var folder = new BM.Entities.Folder(
+								'0',
+								'Unsorted',
+								null
+				);
+			folder.intId = '0';
+			var ref = {
+				id : '0',
+				realId : '0'
+			};
+			storage.foldersRef.push(ref);			
+			//inject special folder "Unsorted"
+ 			storage.folders[0] = {
+ 				folder : folder 		
+ 			};
+ 			storage.storeAllFolders(data);	
  		});
  		p.storingFolders.done(function() {
  			console.log('# done storing folders');

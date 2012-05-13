@@ -306,9 +306,15 @@ html, body {
 	bottom: 0;
 	padding: 10px;
 }
-.folders-breadcum-holder {
+.folders-breadcrumb-holder {
 }
-.folders-breadcum-holder .folders-breadcum-navigation {
+.folders-breadcrumb-holder .breadcrumb-active-folders {
+	display: inline-block;
+}
+.folders-breadcrumb-holder .breadcrumb-active-folders span {
+	cursor: pointer;
+}
+.folders-breadcrumb-holder .folders-breadcrumb-navigation {
 	cursor: pointer;
 }
 .folders-list-holder {

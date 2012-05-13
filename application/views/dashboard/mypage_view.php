@@ -66,12 +66,14 @@
 		<div class='main-content'>
 			<div class='left-content'>
 				<div class='left-sidebar'>
-					<div class="folders-holder-header">Folders:</div>
-					<div class="separator no-select"></div>
-					<div class="sidebar-item folders-breadcum-holder">
+<!-- 					<div class="folders-holder-header">Folders:</div> -->
+					<div class="sidebar-item folders-breadcrumb-holder">
 						<!-- folders breadcum -->
-						<i class='icon-chevron-left folders-breadcum-navigation' node-target=''></i>
+						<!-- <i class='icon-chevron-left folders-breadcrumb-navigation' node-target=''></i> -->
+						<i class='icon-folder-open breadcrumb-show-root'></i>
+						<div class='breadcrumb-active-folders'></div>
 					</div>
+					<div class="separator no-select"></div>
 					<div class="folders-list-holder" active-node='-1'>
 						<!-- folders list -->
 					</div>
