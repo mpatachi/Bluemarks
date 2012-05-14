@@ -1624,39 +1624,54 @@ BM.Bookmarks.Sorter = (function() {
 
 BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
-		var storage = BM.Storage.g();
-		var t = BM.Templater.Bookmarks;
-		var bHolder = t.bookmarksList();
+		var bookmarks = BM.Storage.g().bookmarks,
+			t = BM.Templater.Bookmarks,
+			bHolder = t.bookmarksList(),
+			bHolderParent = bHolder.parent(),
+			html = '',
+			i = bookmarks.length;
+		bHolder.detach();
 		bHolder.empty();
-		_(storage.bookmarks).each(function(obj, key) {
+		_(bookmarks).each(function(obj, key) {
 			var bookmark = obj.bookmark.proxy;
-			// var catName = "";
-			// _(bookmark.categoriesId).each(function(cat) {
-				// var r = storage.getCategory(cat);
-				// catName += " " + r.category.name;
-			// });
-			var itemTemplate = t.bookmarkTemplate(key, bookmark.name, bookmark.url, bookmark.folderId, bookmark.tags, bookmark.typeId);
-			bHolder.append(itemTemplate); 
+			var img = "<img src='../resources/img/160x120.gif' alt=''>";
+			var title = "<h5>" + bookmark.name + "</h5>";
+			html += "<li class='span2' bookmark-id='" + key + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"  
 		});
-		
-		BM.e(callback);
+		// for (; i > 0; i--) {
+			// var bookmark = bookmarks[i-1].bookmark.proxy;			
+			// var img = "<img src='../resources/img/160x120.gif' alt=''>";
+			// var title = "<h5>" + bookmark.name + "</h5>";
+			// html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
+		// }		
+		bHolder.html(html);
+		bHolderParent.append(bHolder);
+		if (callback != undefined) {
+			BM.e(callback);
+		}
 	},
 	showBookmarks : function(list, callback) {
-		var t = BM.Templater.Bookmarks;
-		var bHolder = t.bookmarksList();
-		bHolder.empty();
-		var bookmarks = BM.Storage.g().bookmarks;
-		var len = list.length;
-		if (len == 0) {
-			bHolder.text('looks like there is no bookmarks');
+		var t = BM.Templater.Bookmarks,
+			bHolder = t.bookmarksList(),
+			bHolderParent = bHolder.parent(),
+			html = '',
+			bookmarks = BM.Storage.g().bookmarks,
+			i = list.length;
+		bHolder.detach();
+		bHolder.empty();	
+		if (i == 0) {
+			bHolder.html('<p>looks like there is no bookmarks</p>');
+			bHolderParent.append(bHolder);
 			return;
 		}
-		for (var i = 0; i < len; i++) {
-			var b = bookmarks[list[i]].bookmark.proxy;
-			console.log(b);
-			var itemTemplate = t.bookmarkTemplate(b.intId, b.name, b.url, b.folderId, b.tags, b.typeId);
-			bHolder.append(itemTemplate); 			
+		for (; i > 0; i--) {
+			var bookmark = bookmarks[list[i-1]].bookmark.proxy;			
+			var img = "<img src='../resources/img/160x120.gif' alt=''>";
+			var title = "<h5>" + bookmark.name + "</h5>";
+			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
 		}
+		bHolder.html(html);
+		bHolderParent.append(bHolder);
 	},
 	addPopovers : function() {
 		var popoverContent = $('#add-bookmark-popover');
