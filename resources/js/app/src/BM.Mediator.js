@@ -59,7 +59,7 @@ BM.Mediator.Tags = {
 				// return;
 			// }
 			// d.trigger('add-tag', [modal.name.val()]);
-		// });		
+		// });
 	}
 };
 BM.Mediator.Folders = {
@@ -155,7 +155,22 @@ BM.Mediator.Bookmarks = {
 				// d.trigger('sort-bookmarks');
 			// });
 		});
-		
+		d.on('sorter-activate-tag', function(event, tag) {
+			if (tag == '') {
+				return;
+			}
+			sorter.activateTag(tag, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		d.on('sorter-diactivate-tag', function(event, tag) {
+			if (tag == '') {
+				return;
+			}
+			sorter.diactivateTag(tag, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});		
 		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
 			// var foldersId = [folderId];
 			// var listHolder = $('.list-for-folder-' + folderId);

@@ -32,20 +32,25 @@ BM.Bookmarks.Sorter = (function() {
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
 					if (b) {
-						byFolder = b;
+						byFolder.push(b);
 					}
 				});
 				
 				_(active.tag).each(function(t) {
 					var b = storage.bookmarksByTag[t];
 					if (b) {
-						byTag = t;
+						byTag.push(b);
 					}
 				});
+
 				if (byTag.length == 0) {
-					r = byFolder;
+					r = _.chain(byFolder).flatten().uniq().value();
+				} else if (byFolder.length == 0) {
+					r = _.chain(byTag).flatten().uniq().value();
 				} else {
-					r = _.intersection(byFolder, byTag);
+					var byF = _.chain(byFolder).flatten().uniq().value();
+					var byT = _.chain(byTag).flatten().uniq().value();
+					r = _.intersection(byF, byT);
 				}
 				
 				BM.Bookmarks.View.showBookmarks(r);
@@ -68,7 +73,7 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateFolder : function(id) {
+			diactivateFolder : function(id, callback) {
 				var r = _.reject(filters.active.folder, function(num) {
 					return num == id;
 				});
@@ -90,16 +95,30 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateTag : function(id) {
+			activateTag : function(id, callback) {
 				filters.active.tag.push(id);
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}				
 			},
-			diactivateTag : function(id) {
-				/**
-				 * diactivation code here
-				 */
+			diactivateTag : function(tag, callback) {
+				var r = _.reject(filters.active.tag, function(value) {
+					return value === tag;
+				});
+				
+				filters.active.tag = r;
+
+				if (callback !== undefined) {
+					BM.e(callback);
+				}				
 			},
-			activateType : function(id) {
+			activateType : function(id, callback) {
 				filters.active.type.push(id);
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
 			},
 			diactivateType : function(id) {
 				/**

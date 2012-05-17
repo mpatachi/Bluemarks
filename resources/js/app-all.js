@@ -272,6 +272,7 @@ BM.Storage = (function() {
 			tagsRef : [],
 			folderTree : [],
 			tagsName : [],
+			foldersId : [0],
 						
 			storeBookmark : function($b) {
 				var me = this;
@@ -414,6 +415,7 @@ BM.Storage = (function() {
 					};					
 					this.foldersRef.push(ref);
 					returnId = folderCount;
+					this.foldersId.push(returnId);
 				} else {
 					dir.intId = $id;
 					this.folders[$id] = {
@@ -1169,6 +1171,7 @@ BM.Tags = {
 BM.Tags.View = {
 	tagsList : [],
 	typeaheadObject : null,
+	activeTags : null,
 	/*
 	 * this method of displaing the tags is not used in
 	 * the latest version of the application all related templates are not used
@@ -1248,14 +1251,26 @@ BM.Tags.View = {
 			// BM.e(callback);		
 		// }	
 	// },
+	addToActiveTags : function(tag) {
+		var parent = this.activeTags.parent(),
+			item = "<li class='tag-active-item'><span tag-name='" + tag + "'>" + tag + "<a class='close tag-remove' href='#'>&times;</a></span></li>",  
+			html = this.activeTags.html();
+		this.activeTags.detach();
+		html += item;
+		this.activeTags.html(html);
+		parent.append(this.activeTags);		
+	},
 	bindHandlers : function() {
-		var me = this;
-		var d = $(document);
+		var me = this,
+			d = $(document),
+			applyTagInput = $('.apply-tag-input'),
+		 	applyTagBtn = $('.apply-tag-btn'),
+		 	toolbar = $('.tags-toolbar');
+		 	
 		$('.sort-tags').on('click', function(event) {
-			var item = $(this);
-			var active = item.hasClass('active');
-			var toolbar = $('.tags-toolbar');
-			
+			var item = $(this),
+				active = item.hasClass('active');
+					
 			if (active) {
 				toolbar.animate({
 					'marginTop' : '-51px'
@@ -1266,17 +1281,25 @@ BM.Tags.View = {
 				}, 300, 'linear');				
 			}
 		});
-		
-		var applyTagInput = $('.apply-tag-input');
-		var applyTagBtn = $('.apply-tag-btn');
-		var popoverIsActive = false; 
+		$('#active-tags-list').on('click', '.tag-remove', function(event) {
+			var item = $(this),
+				parent = item.parent(),
+				value = parent.attr('tag-name');
+			parent.remove();
+			d.trigger('sorter-diactivate-tag', [value]);
+			
+			return false;
+		});
+		function hideTagInput() {
+			applyTagInput.fadeOut(function() {
+				applyTagInput.val('');
+				applyTagBtn.fadeIn();
+			});			
+		}
+
 		applyTagInput.keyup(function(e) {
 			if (e.keyCode == 27) {
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');					
-					popoverIsActive = false;
-					applyTagBtn.fadeIn();
-				});
+				hideTagInput();
 			}
 		});
 		applyTagInput.on('keypress', function(event) {
@@ -1291,49 +1314,15 @@ BM.Tags.View = {
 				return item == value;
 			});
 			if (!r) {
-				// popoverIsActive = true;
-				// applyTagInput.popover('show');
-				// d.trigger('bind-tag-popover-events');
-				d.trigger('show-tag-popover');				
+				hideTagInput();
 			} else {
-				//d.trigger('apply-tag', [value]);
-				popoverIsActive = false;
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');
-					applyTagBtn.fadeIn();
-				});				
+				me.addToActiveTags(value);
+				d.trigger('sorter-activate-tag', [value]);
+				hideTagInput();			
 			}			
 		});
-		// applyTagInput.on('change', function() {
-			// if (popoverIsActive) {
-				// applyTagInput.fadeOut(function() {
-					// applyTagInput.popover('hide');
-					// popoverIsActive = false;
-					// applyTagInput.val('');
-					// applyTagBtn.fadeIn();
-				// });	
-			// }
-		// });
-		applyTagInput.on('input', function(e) {
-			if (popoverIsActive) {
-				// d.trigger('unbind-tag-popover-events');
-				// applyTagInput.popover('hide');				
-				// popoverIsActive = false;
-				d.trigger('hide-tag-popover');
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');
-					applyTagBtn.fadeIn();
-				});					
-			}
-		});
 		applyTagInput.blur(function() {
-			if (popoverIsActive) {
-				return;
-			}
-			applyTagInput.fadeOut(function() {
-				applyTagInput.val('');
-				applyTagBtn.fadeIn();
-			});
+			hideTagInput();
 		});
 		applyTagBtn.on('click', function() {
 			$(this).fadeOut(function() {
@@ -1343,53 +1332,17 @@ BM.Tags.View = {
 			
 			return false;
 		});
-		d.on('bind-tag-popover-events', function() {
-			var popConfirm = $('.tag-popover-confirm');
-			popConfirm.on('click', function(event) {
-				d.trigger('add-tag', [applyTagInput.val()]);
-				
-				return false;
-			});
-			var popClose = $('.tag-popover-close');
-			popClose.on('click', function(event) {
-				// d.trigger('unbind-tag-popover-events');
-				// applyTagInput.popover('hide');
-				// popoverIsActive = false;
-				d.trigger('hide-tag-popover');
-				applyTagInput.val('');
-				applyTagInput.focus();
-				
-				return false;		
-			});			
-		});
-		d.on('unbind-tag-popover-events', function() {
-			var popConfirm = $('.tag-popover-confirm');
-			popConfirm.off('click');
-			var popClose = $('.tag-popover-close');
-			popClose.off('click');						
-		});
-		d.on('show-tag-popover', function() {
-			popoverIsActive = true;
-			applyTagInput.popover('show');
-			d.trigger('bind-tag-popover-events');			
-		});
-		d.on('hide-tag-popover', function() {
-			d.trigger('unbind-tag-popover-events');
-			applyTagInput.popover('hide');
-			popoverIsActive = false;
-		});
+	
 		d.on('hide-apply-tag-input', function() {
-			applyTagInput.fadeOut(function() {
-				applyTagInput.val('');
-				applyTagBtn.fadeIn();
-			});			
+			hideTagInput();		
 		});			
 	},
 	init : function() {
 		var me = this;
 		
 		me.populateTypeahead();
-		me.addPopovers();
+		me.activeTags = $('#active-tags-list');
+		//me.addPopovers();
 		me.bindHandlers();
 	}
 };
@@ -1526,20 +1479,25 @@ BM.Bookmarks.Sorter = (function() {
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
 					if (b) {
-						byFolder = b;
+						byFolder.push(b);
 					}
 				});
 				
 				_(active.tag).each(function(t) {
 					var b = storage.bookmarksByTag[t];
 					if (b) {
-						byTag = t;
+						byTag.push(b);
 					}
 				});
+
 				if (byTag.length == 0) {
-					r = byFolder;
+					r = _.chain(byFolder).flatten().uniq().value();
+				} else if (byFolder.length == 0) {
+					r = _.chain(byTag).flatten().uniq().value();
 				} else {
-					r = _.intersection(byFolder, byTag);
+					var byF = _.chain(byFolder).flatten().uniq().value();
+					var byT = _.chain(byTag).flatten().uniq().value();
+					r = _.intersection(byF, byT);
 				}
 				
 				BM.Bookmarks.View.showBookmarks(r);
@@ -1562,7 +1520,7 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			diactivateFolder : function(id) {
+			diactivateFolder : function(id, callback) {
 				var r = _.reject(filters.active.folder, function(num) {
 					return num == id;
 				});
@@ -1584,16 +1542,30 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				//d.trigger('sort-bookmarks');
 			},
-			activateTag : function(id) {
+			activateTag : function(id, callback) {
 				filters.active.tag.push(id);
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}				
 			},
-			diactivateTag : function(id) {
-				/**
-				 * diactivation code here
-				 */
+			diactivateTag : function(tag, callback) {
+				var r = _.reject(filters.active.tag, function(value) {
+					return value === tag;
+				});
+				
+				filters.active.tag = r;
+
+				if (callback !== undefined) {
+					BM.e(callback);
+				}				
 			},
-			activateType : function(id) {
+			activateType : function(id, callback) {
 				filters.active.type.push(id);
+				
+				if (callback !== undefined) {
+					BM.e(callback);
+				}
 			},
 			diactivateType : function(id) {
 				/**
@@ -1624,28 +1596,32 @@ BM.Bookmarks.Sorter = (function() {
 
 BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
-		var bookmarks = BM.Storage.g().bookmarks,
-			t = BM.Templater.Bookmarks,
-			bHolder = t.bookmarksList(),
-			bHolderParent = bHolder.parent(),
-			html = '',
-			i = bookmarks.length;
-		bHolder.detach();
-		bHolder.empty();
-		_(bookmarks).each(function(obj, key) {
-			var bookmark = obj.bookmark.proxy;
-			var img = "<img src='../resources/img/160x120.gif' alt=''>";
-			var title = "<h5>" + bookmark.name + "</h5>";
-			html += "<li class='span2' bookmark-id='" + key + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"  
+		var folders = BM.Storage.g().foldersId;
+		console.log(folders);
+		BM.Bookmarks.Sorter.g().activateMultipleFolder(folders, function() {
+			$(document).trigger('sort-bookmarks');
 		});
-		// for (; i > 0; i--) {
-			// var bookmark = bookmarks[i-1].bookmark.proxy;			
+			// t = BM.Templater.Bookmarks,
+			// bHolder = t.bookmarksList(),
+			// bHolderParent = bHolder.parent(),
+			// html = '',
+			// i = bookmarks.length;
+		// bHolder.detach();
+		// bHolder.empty();
+		// _(bookmarks).each(function(obj, key) {
+			// var bookmark = obj.bookmark.proxy;
 			// var img = "<img src='../resources/img/160x120.gif' alt=''>";
 			// var title = "<h5>" + bookmark.name + "</h5>";
-			// html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
-		// }		
-		bHolder.html(html);
-		bHolderParent.append(bHolder);
+			// html += "<li class='span2' bookmark-id='" + key + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"  
+		// });
+		// // for (; i > 0; i--) {
+			// // var bookmark = bookmarks[i-1].bookmark.proxy;			
+			// // var img = "<img src='../resources/img/160x120.gif' alt=''>";
+			// // var title = "<h5>" + bookmark.name + "</h5>";
+			// // html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
+		// // }		
+		// bHolder.html(html);
+		// bHolderParent.append(bHolder);
 		if (callback != undefined) {
 			BM.e(callback);
 		}
@@ -1693,7 +1669,6 @@ BM.Bookmarks.View = {
 //		var addPopoverIsActive = false;
 		var addBookmarkBtn = $('.bookmark-action');
 		d.on('show-root-folders', function() {
-			console.log('showing all bookmarks');
 			me.listBookmarks();
 		});
 		// d.on('show-add-bookmark-popover', function() {
@@ -1839,7 +1814,7 @@ BM.Mediator.Tags = {
 				// return;
 			// }
 			// d.trigger('add-tag', [modal.name.val()]);
-		// });		
+		// });
 	}
 };
 BM.Mediator.Folders = {
@@ -1935,7 +1910,22 @@ BM.Mediator.Bookmarks = {
 				// d.trigger('sort-bookmarks');
 			// });
 		});
-		
+		d.on('sorter-activate-tag', function(event, tag) {
+			if (tag == '') {
+				return;
+			}
+			sorter.activateTag(tag, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});
+		d.on('sorter-diactivate-tag', function(event, tag) {
+			if (tag == '') {
+				return;
+			}
+			sorter.diactivateTag(tag, function() {
+				d.trigger('sort-bookmarks');
+			});
+		});		
 		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
 			// var foldersId = [folderId];
 			// var listHolder = $('.list-for-folder-' + folderId);

@@ -5,6 +5,7 @@
 BM.Tags.View = {
 	tagsList : [],
 	typeaheadObject : null,
+	activeTags : null,
 	/*
 	 * this method of displaing the tags is not used in
 	 * the latest version of the application all related templates are not used
@@ -84,14 +85,26 @@ BM.Tags.View = {
 			// BM.e(callback);		
 		// }	
 	// },
+	addToActiveTags : function(tag) {
+		var parent = this.activeTags.parent(),
+			item = "<li class='tag-active-item'><span tag-name='" + tag + "'>" + tag + "<a class='close tag-remove' href='#'>&times;</a></span></li>",  
+			html = this.activeTags.html();
+		this.activeTags.detach();
+		html += item;
+		this.activeTags.html(html);
+		parent.append(this.activeTags);		
+	},
 	bindHandlers : function() {
-		var me = this;
-		var d = $(document);
+		var me = this,
+			d = $(document),
+			applyTagInput = $('.apply-tag-input'),
+		 	applyTagBtn = $('.apply-tag-btn'),
+		 	toolbar = $('.tags-toolbar');
+		 	
 		$('.sort-tags').on('click', function(event) {
-			var item = $(this);
-			var active = item.hasClass('active');
-			var toolbar = $('.tags-toolbar');
-			
+			var item = $(this),
+				active = item.hasClass('active');
+					
 			if (active) {
 				toolbar.animate({
 					'marginTop' : '-51px'
@@ -102,17 +115,25 @@ BM.Tags.View = {
 				}, 300, 'linear');				
 			}
 		});
-		
-		var applyTagInput = $('.apply-tag-input');
-		var applyTagBtn = $('.apply-tag-btn');
-		var popoverIsActive = false; 
+		$('#active-tags-list').on('click', '.tag-remove', function(event) {
+			var item = $(this),
+				parent = item.parent(),
+				value = parent.attr('tag-name');
+			parent.remove();
+			d.trigger('sorter-diactivate-tag', [value]);
+			
+			return false;
+		});
+		function hideTagInput() {
+			applyTagInput.fadeOut(function() {
+				applyTagInput.val('');
+				applyTagBtn.fadeIn();
+			});			
+		}
+
 		applyTagInput.keyup(function(e) {
 			if (e.keyCode == 27) {
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');					
-					popoverIsActive = false;
-					applyTagBtn.fadeIn();
-				});
+				hideTagInput();
 			}
 		});
 		applyTagInput.on('keypress', function(event) {
@@ -127,49 +148,15 @@ BM.Tags.View = {
 				return item == value;
 			});
 			if (!r) {
-				// popoverIsActive = true;
-				// applyTagInput.popover('show');
-				// d.trigger('bind-tag-popover-events');
-				d.trigger('show-tag-popover');				
+				hideTagInput();
 			} else {
-				//d.trigger('apply-tag', [value]);
-				popoverIsActive = false;
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');
-					applyTagBtn.fadeIn();
-				});				
+				me.addToActiveTags(value);
+				d.trigger('sorter-activate-tag', [value]);
+				hideTagInput();			
 			}			
 		});
-		// applyTagInput.on('change', function() {
-			// if (popoverIsActive) {
-				// applyTagInput.fadeOut(function() {
-					// applyTagInput.popover('hide');
-					// popoverIsActive = false;
-					// applyTagInput.val('');
-					// applyTagBtn.fadeIn();
-				// });	
-			// }
-		// });
-		applyTagInput.on('input', function(e) {
-			if (popoverIsActive) {
-				// d.trigger('unbind-tag-popover-events');
-				// applyTagInput.popover('hide');				
-				// popoverIsActive = false;
-				d.trigger('hide-tag-popover');
-				applyTagInput.fadeOut(function() {
-					applyTagInput.val('');
-					applyTagBtn.fadeIn();
-				});					
-			}
-		});
 		applyTagInput.blur(function() {
-			if (popoverIsActive) {
-				return;
-			}
-			applyTagInput.fadeOut(function() {
-				applyTagInput.val('');
-				applyTagBtn.fadeIn();
-			});
+			hideTagInput();
 		});
 		applyTagBtn.on('click', function() {
 			$(this).fadeOut(function() {
@@ -179,53 +166,17 @@ BM.Tags.View = {
 			
 			return false;
 		});
-		d.on('bind-tag-popover-events', function() {
-			var popConfirm = $('.tag-popover-confirm');
-			popConfirm.on('click', function(event) {
-				d.trigger('add-tag', [applyTagInput.val()]);
-				
-				return false;
-			});
-			var popClose = $('.tag-popover-close');
-			popClose.on('click', function(event) {
-				// d.trigger('unbind-tag-popover-events');
-				// applyTagInput.popover('hide');
-				// popoverIsActive = false;
-				d.trigger('hide-tag-popover');
-				applyTagInput.val('');
-				applyTagInput.focus();
-				
-				return false;		
-			});			
-		});
-		d.on('unbind-tag-popover-events', function() {
-			var popConfirm = $('.tag-popover-confirm');
-			popConfirm.off('click');
-			var popClose = $('.tag-popover-close');
-			popClose.off('click');						
-		});
-		d.on('show-tag-popover', function() {
-			popoverIsActive = true;
-			applyTagInput.popover('show');
-			d.trigger('bind-tag-popover-events');			
-		});
-		d.on('hide-tag-popover', function() {
-			d.trigger('unbind-tag-popover-events');
-			applyTagInput.popover('hide');
-			popoverIsActive = false;
-		});
+	
 		d.on('hide-apply-tag-input', function() {
-			applyTagInput.fadeOut(function() {
-				applyTagInput.val('');
-				applyTagBtn.fadeIn();
-			});			
+			hideTagInput();		
 		});			
 	},
 	init : function() {
 		var me = this;
 		
 		me.populateTypeahead();
-		me.addPopovers();
+		me.activeTags = $('#active-tags-list');
+		//me.addPopovers();
 		me.bindHandlers();
 	}
 };

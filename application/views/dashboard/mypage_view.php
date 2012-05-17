@@ -93,15 +93,8 @@
 			<div class='right-content'>
 				<div class='tags-toolbar'>
 					<ul class='toolbar'>
-<!-- 						<li>
-							<div class="btn-group toolbar-item">
-								<button class="btn dropdown-toggle" data-toggle='dropdown'><i class='icon-tags'></i></button>
-							  	<ul class='dropdown-menu tags-dropdown'>
-							  	</ul>
-							</div>
-						</li> -->
 						<li>
-							<ul class="tags-group toolbar-item">
+							<ul id='active-tags-list' class="tags-group toolbar-item">
 							</ul>						
 						</li>
 						<li>

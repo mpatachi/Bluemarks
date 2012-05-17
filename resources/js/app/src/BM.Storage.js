@@ -70,6 +70,7 @@ BM.Storage = (function() {
 			tagsRef : [],
 			folderTree : [],
 			tagsName : [],
+			foldersId : [0],
 						
 			storeBookmark : function($b) {
 				var me = this;
@@ -212,6 +213,7 @@ BM.Storage = (function() {
 					};					
 					this.foldersRef.push(ref);
 					returnId = folderCount;
+					this.foldersId.push(returnId);
 				} else {
 					dir.intId = $id;
 					this.folders[$id] = {

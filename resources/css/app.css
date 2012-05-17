@@ -390,6 +390,13 @@ html, body {
 	text-decoration: none;
 	color:#222222;
 }
+/* tags */
+.tag-active-item:hover .tag-remove {
+	visibility: visible;
+}
+.tag-remove {
+	visibility: hidden;
+}
 /* other stuff */
 .no-select {
 	-webkit-user-select: none;
