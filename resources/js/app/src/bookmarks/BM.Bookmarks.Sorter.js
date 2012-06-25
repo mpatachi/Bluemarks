@@ -3,21 +3,25 @@
  */
 
 BM.Bookmarks.Sorter = (function() {
-	var instantiated = false;
-	var d = $(document);
-	var storage = BM.Storage.g();
-	var bookmarks = {
-		active : [],
-		cache : []	
-	};
-	var filters = {
-		active : {
-			folder : [],
-			tag : [],
-			type : []
+	var instantiated = false,
+		d = $(document),
+		storage = BM.Storage.g(),
+		bookmarks = {
+			active : [],
+			cache : [],
+			more : false,
+			max : 15,
+			last : 0,
+			counter : 0	
 		},
-		noActive : true
-	};
+		filters = {
+			active : {
+				folder : [],
+				tag : [],
+				type : []
+			},
+			noActive : true
+		};
 	function init() {
 		return {
 			filters : filters,
@@ -28,6 +32,12 @@ BM.Bookmarks.Sorter = (function() {
 				var byTag = [];
 				var active = filters.active;
 				var r;
+				bookmarks.active = [],
+				bookmarks.cache = [],
+				bookmarks.more = false,
+				bookmarks.max = 15,
+				bookmarks.last = 0,
+				bookmarks.counter = 0;				
 				
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
@@ -53,8 +63,50 @@ BM.Bookmarks.Sorter = (function() {
 					r = _.intersection(byF, byT);
 				}
 				
-				BM.Bookmarks.View.showBookmarks(r);
-				console.log(byFolder, byTag, r);
+				bookmarks.cache = r;
+				// var rest = r;
+				// if (r.length > 15) {
+					// rest = r.slice(0,15)
+					// bookmarks.more = true;
+					// bookmarks.last = 15;
+					// d.trigger('more-bookmarks-available');
+				// }
+				// bookmarks.active = rest;
+// 				
+				// BM.Bookmarks.View.showBookmarks(rest);
+				this.showBookmarks();
+				//console.log(byFolder, byTag, r);
+			},
+			showBookmarks : function() {
+				var	r = bookmarks.cache,
+					len = bookmarks.cache.length;
+				if (bookmarks.last > len) {
+					d.trigger('more-bookmarks-available', [false]);
+					
+					return;
+				}
+				if (len > bookmarks.max) {
+					bookmarks.counter += 1;
+					var maxy = 	bookmarks.counter * bookmarks.max;				
+					r = bookmarks.cache.slice(bookmarks.last,maxy);
+					bookmarks.last = maxy;
+					bookmarks.more = true;
+					if (bookmarks.last > len) {
+						bookmarks.more = false;
+						d.trigger('more-bookmarks-available', [false]);
+					} else {
+						bookmarks.more = true;
+						d.trigger('more-bookmarks-available', [true]);						
+					}					
+				} else {
+					bookmarks.more = false;
+					d.trigger('more-bookmarks-available', [false]);							
+				}
+				
+				bookmarks.active = r;
+		
+				console.log('###');				
+				BM.Bookmarks.View.showBookmarks(bookmarks.active);
 			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];

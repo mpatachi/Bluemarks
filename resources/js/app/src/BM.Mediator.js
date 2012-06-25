@@ -6,13 +6,9 @@ BM.Mediator = {};
 
 BM.Mediator.Tags = {
 	provide : function() {
-		var d = $(document);
-		var tags = BM.Tags;
-		var t = BM.Templater;
-		//var modal = t.Tags.getAddModal();
-		//var nameGroup = modal.nameGroup;
-		//var storage = BM.Storage.g();
-		//var utils = BM.utils;
+		var d = $(document),
+			tags = BM.Tags;
+			
 		d.on('apply-tag', function(event, name) {
 			if (name == '') {
 				return;
@@ -31,46 +27,19 @@ BM.Mediator.Tags = {
 		 * displays error message if adding a tag fails
 		 */
 		// d.on('add-tag-error', function(event, msg) {
-			// nameGroup.removeClass('success'); 
-			// nameGroup.addClass('error');
-			// nameGroup.children('span').text(msg);
 		// });		
 		/**
 		 * hide the modal if the tag is added with success
 		 */
 		d.on('add-tag-success', function(event, msg) {
 			tags.View.updateTypeahead();
-			d.trigger('hide-tag-popover');
-			d.trigger('hide-apply-tag-input');
 		});
-		/** fires when the modal is hiding
-		 * 
-		 */
-		// modal.el.on('hide', function() {
-			// modal.name.val('');
-			// nameGroup.children('span').text('');
-			// nameGroup.removeClass('error').removeClass('success');
-		// });
-		/**
-		 *  what happens on enter key press on the modal
-		 */
-		// modal.el.on('keypress', function(event) {
-			// if (event.keyCode !== 13) {
-				// return;
-			// }
-			// d.trigger('add-tag', [modal.name.val()]);
-		// });
 	}
 };
 BM.Mediator.Folders = {
 	provide : function() {
-		var d = $(document);
-		var folders = BM.Folders;
-		var t = BM.Templater;
-		var modal = t.Folders.getAddModal();
-		var nameGroup = modal.nameGroup;
-		//var storage = BM.Storage.g();
-		//var utils = BM.utils;
+		var d = $(document),
+			folders = BM.Folders;
 		
 		/**
 		 * bind the add folder event to the document
@@ -85,50 +54,64 @@ BM.Mediator.Folders = {
 		 * displays error message if adding a folder fails
 		 */
 		d.on('add-folder-error', function(event, msg) {
-			nameGroup.removeClass('success'); 
-			nameGroup.addClass('error');
-			nameGroup.children('span').text(msg);
+			/*
+			 * some error message here
+			 */
 		});
 		/**
 		 * hides the add folder modal when the success event is triggered
 		 */
 		d.on('add-folder-success', function(event, msg) {
-			// nameGroup.removeClass('error');
-			// nameGroup.addClass('success');
-			// nameGroup.children('span').text(msg);
-			modal.el.modal('hide');
-		});
-		/**
-		 * resets the add folder modal on hide event
-		 */
-		modal.el.on('hide', function() {
-			modal.name.val('');
-			nameGroup.children('span').text('');
-			nameGroup.removeClass('error').removeClass('success');
-			modal.selector.val(modal.selector.prop('defaultSelected'));
-		});
-		/**
-		 * adds an enter keypress event to the add folder modal 
-		 */
-		modal.el.on('keypress', function(event) {
-			if (event.keyCode !== 13) {
-				return;
-			}
-			d.trigger('add-folder', [modal.name.val(), modal.selector.val()]);
+			/*
+			 * what happend when success
+			 */
 		});
 	}
 };
 
 BM.Mediator.Bookmarks = {
 	provide : function() {
-		var d = $(document);
-		var bookmarks = BM.Bookmarks;
-		var view = bookmarks.View;
-		var foldersView = BM.Folders.View;
-		var sorter = bookmarks.Sorter.g();
-		var t = BM.Templater;
-		var addBmActive = false;
-		
+		var d = $(document),
+			//p = BM.Promiser.g(),
+			bookmarks = BM.Bookmarks,
+			view = bookmarks.View,
+			foldersView = BM.Folders.View,
+			sorter = bookmarks.Sorter.g(),
+			t = BM.Templater,
+			more = false;
+			//loadingTemplate = $("<div id='bookmark-loading' class='loading'><div class='body'><span class='loader'>&nbsp;</span><span class='text'>application is starting...</span></div></div>");
+		/*
+		 * 
+		 */
+		// d.on('apply-loading-bookmarks', function(event) {
+			// $('#wall').append(loadingTemplate);
+		// });
+		// d.on('remove-loading-bookmarks', function(event) {
+			// $('#bookmark-loading').remove();
+		// });
+		d.on('more-bookmarks-available', function(event, ok) {
+			if (ok) {
+				more = true;
+				$('#show-more-bookmarks').removeClass('disabled');
+			} else {
+				more = false;
+				$('#show-more-bookmarks').addClass('disabled');				
+			}
+		});
+		d.on('show-more-bookmarks', function(event) {
+			if (more) {
+				//d.trigger('apply-loading-bookmarks');
+				sorter.showBookmarks();
+			}
+		});
+		$('#show-more-bookmarks').on('click', function() {
+			d.trigger('show-more-bookmarks');
+
+			return false;
+		});		
+		/*
+		 * event for activating a folder(s) as the current filter(s)
+		 */
 		d.on('sorter-activate-folder', function(event) {
 			var current = foldersView.currentFolder;
 			var node = $(".folder-btn[node-id='" + current + "']");
@@ -151,10 +134,10 @@ BM.Mediator.Bookmarks = {
 					d.trigger('sort-bookmarks');
 				});				
 			}
-			// sorter.activateFolder(folderId, function() {
-				// d.trigger('sort-bookmarks');
-			// });
 		});
+		/*
+		 * this event fires when we add tags to the selected tags list
+		 */
 		d.on('sorter-activate-tag', function(event, tag) {
 			if (tag == '') {
 				return;
@@ -163,6 +146,9 @@ BM.Mediator.Bookmarks = {
 				d.trigger('sort-bookmarks');
 			});
 		});
+		/*
+		 * this event fires when we remove a tag from the selected tags list
+		 */
 		d.on('sorter-diactivate-tag', function(event, tag) {
 			if (tag == '') {
 				return;
@@ -171,37 +157,16 @@ BM.Mediator.Bookmarks = {
 				d.trigger('sort-bookmarks');
 			});
 		});		
-		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
-			// var foldersId = [folderId];
-			// var listHolder = $('.list-for-folder-' + folderId);
-			// var listItems = listHolder.find('.folder-btn');
-			// listItems.each(function() {
-				// var index = parseInt($(this).attr('node-id'), 10);
-				// foldersId.push(index);
-			// });
-// 			
-			// sorter.activateMultipleFolder(foldersId, function() {
-				// d.trigger('sort-bookmarks');
-			// });
-		// });
-// 		
-		// d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
-			// var foldersId = [folderId];
-			// var listHolder = $('.list-for-folder-' + folderId);
-			// var listItems = listHolder.find('.folder-btn');
-			// listItems.each(function() {
-				// var index = parseInt($(this).attr('node-id'), 10);
-				// foldersId.push(index);
-			// });
-// 			
-			// sorter.diactivateMultipleFolder(foldersId);
-		// });
-		
+		/*
+		 * this is a generic bookmark sorter event
+		 */
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
 			sorter.sortBookmarks();
 		});
-		
+		/*
+		 * fires when we want to add a bookmark
+		 */
 		d.on('add-bookmark', function(event, url, folder, tags) {
 			console.log(url, folder, tags);
 			if (url == '') {
@@ -209,34 +174,27 @@ BM.Mediator.Bookmarks = {
 			}
 			bookmarks.addBookmark(url, folder, tags);
 		});
-		// var bookmarkAction = $('.main-bookmark-action');
-		// var bookmarkExecutor = $('.main-action-executor')
-		// bookmarkAction.on('click', function() {
-			// if (!addBmActive) {
-				// bookmarkAction.children('i').addClass('icon-white');
-				// addBmActive = true;
-				// setTimeout(function() {
-					// $('.main-action-bar-input').focus();
-					// bookmarkExecutor.children('i').addClass('icon-plus');
-				// }, 50);
-			// } else {
-				// addBmActive = false;
-				// bookmarkAction.children('i').removeClass('icon-white');
-				// bookmarkExecutor.children('i').removeClass('icon-plus');
-			// }
+		
+		// p.savingBookmarks.done(function(b) {
+			// console.log(b);
 		// });
-		// $('.main-action-bar-input').blur(function() {
-			// if (!addBmActive) { return; }
-			// setTimeout(function() {
-				// if (addBmActive) {
-					// addBmActive = false;
-					// bookmarkAction.button('toggle');
-					// bookmarkAction.children('i').removeClass('icon-white');
-					// bookmarkExecutor.children('i').removeClass('icon-plus');
-				// }				
-			// }, 100);
-// 
-		// });
+		
+		d.on('done-add-bookmark', function(event, b) {
+			d.trigger('add-bookmark-to-view', [b]);
+		});
+		d.on('fail-add-bookmark', function(event) {
+			
+		});
+		
+		d.on('add-bookmark-to-view', function(event, b) {
+			var cur;
+			if (foldersView.currentFolder == null) {
+				cur = 0;
+			}
+			if (foldersView.currentFolder == b.folderId) {
+				view.addBookmarkToView(b);
+			}
+		});
 	}
 };
 

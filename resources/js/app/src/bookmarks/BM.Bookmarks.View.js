@@ -5,7 +5,6 @@
 BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
 		var folders = BM.Storage.g().foldersId;
-		console.log(folders);
 		BM.Bookmarks.Sorter.g().activateMultipleFolder(folders, function() {
 			$(document).trigger('sort-bookmarks');
 		});
@@ -44,80 +43,47 @@ BM.Bookmarks.View = {
 		bHolder.detach();
 		bHolder.empty();	
 		if (i == 0) {
-			bHolder.html('<p>looks like there is no bookmarks</p>');
+			bHolder.html("<p class='no-bookmarks'>looks like there is no bookmarks</p>");
 			bHolderParent.append(bHolder);
 			return;
 		}
 		for (; i > 0; i--) {
-			var bookmark = bookmarks[list[i-1]].bookmark.proxy;			
-			var img = "<img src='../resources/img/160x120.gif' alt=''>";
-			var title = "<h5>" + bookmark.name + "</h5>";
-			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
-		}
+			var bookmark = bookmarks[list[i-1]].bookmark.proxy,		
+				//img = "<img src='../resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+				img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+				title = "<h5>" + bookmark.name + "</h5>",
+				mark = "",
+				buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
+			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+		}		
 		bHolder.html(html);
-		bHolderParent.append(bHolder);
+		bHolderParent.append(bHolder);				
 	},
-	addPopovers : function() {
-		var popoverContent = $('#add-bookmark-popover');
-		var target = $('.bookmark-action');
-		target.popover({
-			placement : 'bottom',
-			trigger : 'manual',
-			title : function() {
-				return popoverContent.children('.title').html();
-			},
-			content : function() {
-				return popoverContent.children('.content').html();
-			}
-		});		
+	addBookmarkToView : function(bookmark) { 
+		var	img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+			title = "<h5>" + bookmark.name + "</h5>",
+			mark = "",
+			buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
+			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+		var $obj = $(html);
+		BM.Templater.Bookmarks.bookmarksList().prepend($obj);
 	},
 	bindHandlers : function() {
-		var me = this;
-		var d = $(document);
-//		var addPopoverIsActive = false;
-		var addBookmarkBtn = $('.bookmark-action');
+		var me = this,
+			d = $(document),
+			addBookmark = $('#add-bookmark'),
+			shareAll = $('#share-all'),
+			openAll = $('#open-all');
 		d.on('show-root-folders', function() {
 			me.listBookmarks();
 		});
-		// d.on('show-add-bookmark-popover', function() {
-			// addPopoverIsActive = true;
-			// addBookmarkBtn.popover('show');
-			// d.trigger('bind-add-bookmark-popover-events');			
-		// });
-		// d.on('hide-add-bookmark-popover', function() {
-			// d.trigger('unbind-add-bookmark-popover-events');
-			// addBookmarkBtn.popover('hide');
-			// addPopoverIsActive = false;
-		// });
-		// d.on('bind-add-bookmark-popover-events', function() {
-			// var popConfirm = $('.add-bookmark-popover-confirm');
-			// popConfirm.on('click', function(event) {
-				// //d.trigger('add-bookmark', [applyTagInput.val()]);
-				// console.log('this will be for adding bookmarks');
-				// return false;
-			// });
-			// var popClose = $('.add-bookmark-popover-close');
-			// popClose.on('click', function(event) {
-				// d.trigger('hide-add-bookmark-popover');
-				// //applyTagInput.val('');
-				// //applyTagInput.focus();
-// 				
-				// return false;		
-			// });			
-		// });
-		// d.on('unbind-add-bookmark-popover-events', function() {
-			// var popConfirm = $('.add-bookmark-popover-confirm');
-			// popConfirm.off('click');
-			// var popClose = $('.add-bookmark-popover-close');
-			// popClose.off('click');						
-		// });			
-		// addBookmarkBtn.on('click', function() {
-			// if (addPopoverIsActive) {
-				// d.trigger('hide-add-bookmark-popover');
-			// } else {
-				// d.trigger('show-add-bookmark-popover');
-			// }
-		// });	
+		
+		shareAll.on('click', function(event) {
+			return false;
+		});
+		openAll.on('click', function(event) {
+			return false;
+		});
 	},
 	init : function() {
 		var me = this;

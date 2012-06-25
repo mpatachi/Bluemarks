@@ -32,12 +32,40 @@ class Login extends CI_Controller {
 			}
 		}
 
-		$this->load->view('dashboard/login_view');
+		$data['main_content'] = 'dashboard/login_view';
+		$this->load->view('dashboard/templates/shared', $data);
+	}
+	
+	function signup() {		
+		$data['main_content'] = 'dashboard/signup_view';
+		$this->load->view('dashboard/templates/shared', $data);
+	}
+	
+	function validate_signup() {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('username', 'Username', 'trim|required|xss_clean');
+		$this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[5]');
+		$this->form_validation->set_rules('rpassword', 'Password confirmation', 'trim|required|matches[password]');
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
+		
+		if ( $this->form_validation->run() !== FALSE) {
+			$action = $this
+						->mylogin
+						->createUser(
+							$this->input->post('username'),
+							$this->input->post('email'), 
+							$this->input->post('password')
+						);
+			
+			if ( $action !== FALSE) {
+				redirect('login');
+			}
+		}				
 	}
 	
 	function logout()
 	{
 		$this->mylogin->logout();
-		$this->load->view('dashboard/login_view');
+		redirect('login');
 	}
 }

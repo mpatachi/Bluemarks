@@ -14,8 +14,8 @@
 | path to your installation.
 |
 */
-$config['base_url']	= 'http://192.168.0.176/bluemarks/';
-
+//$config['base_url']	= 'http://192.168.0.176/bluemarks/';
+$config['base_url']	= 'http://localhost/bluemarks/';
 /*
 |--------------------------------------------------------------------------
 | Index File

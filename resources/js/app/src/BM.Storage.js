@@ -72,7 +72,7 @@ BM.Storage = (function() {
 			tagsName : [],
 			foldersId : [0],
 						
-			storeBookmark : function($b) {
+			storeBookmark : function($b, callback) {
 				var me = this;
 				var dirId;		
 				bookmarkCount++;
@@ -135,7 +135,14 @@ BM.Storage = (function() {
 					me.bookmarksByTag[item] = me.bookmarksByTag[item] || [];
 					me.bookmarksByTag[item].push(bookmarkCount);
 				});
-				return me.bookmarks[bookmarkCount];			
+				
+				var retBookmark = me.bookmarks[bookmarkCount];
+
+				if (callback != undefined) {
+					BM.e(callback(retBookmark));
+				}				
+				
+				return retBookmark;			
 			},
 			storeAllBookmarks : function($list) {
 				var me = this;

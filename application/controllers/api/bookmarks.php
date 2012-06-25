@@ -48,7 +48,8 @@ class Bookmarks extends REST_Controller
 						->quickAddBookmark($name, 
 										   $this->post('url'), 
 										   $this->post('folderId'), 
-										   $this->post('tags'));
+										   $this->post('tags'),
+										   $this->post('base_url'));
 			
 			if (FALSE != $bookmark) {
 				$this->response(array('status' => 'ok', 'msg' => 'Bookmark created successfuly.', 'data' => $bookmark), 200);

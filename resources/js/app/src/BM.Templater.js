@@ -20,43 +20,10 @@ BM.Templater.Folders = {
 		var holder = $("<ul class='list-for-" + name + " folders-list' node='" + name + "'></ul>");
 		
 		return holder;
-	},
-	getAddModal : function() {
-		var modal = $('#add-folder-modal');
-		var submitBtn = modal.find('.modal-folder-add');
-		var nameField = modal.find('.modal-folder-name');
-		var selector = modal.find('.modal-parent-selector');
-		var nameGroup = modal.find('.modal-name-group');
-		var parentGroup = modal.find('.modal-parent-group');
-		
-		return {
-			el : modal,
-			submit : submitBtn,
-			name : nameField,
-			selector : selector,
-			nameGroup : nameGroup,
-			parentGroup : parentGroup
-		};
-	}	
+	}
 };
 
 BM.Templater.Tags = {
-	// ddTagHolder : function() {
-		// return $('.categories-dropdown');
-	// },
-	// getAddModal : function() {
-		// var modal = $('#add-tag-modal');
-		// var submitBtn = modal.find('.modal-tag-add');
-		// var nameField = modal.find('.modal-tag-name');
-		// var nameGroup = modal.find('.modal-name-group');
-// 		
-		// return {
-			// el : modal,
-			// submit : submitBtn,
-			// name : nameField,
-			// nameGroup : nameGroup,
-		// };		
-	// },
 	tagTypeahead : function() {
 		return $('.apply-tag-input');
 	}

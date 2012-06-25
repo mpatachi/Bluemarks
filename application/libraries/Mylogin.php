@@ -11,11 +11,56 @@ class Mylogin {
 	 * @param string
 	 * @return string
 	 */
-	protected function encryptPassword($password) {
+	private function encryptPassword($password) {
 		//A simple hashing for now	
 		$encryptedPassword = sha1($password);
 		
 		return $encryptedPassword;
+	}
+	
+	private function randomString($len) {
+		$string = str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+		
+		return substr($string, 0, $len);
+	}
+	
+	/*
+	 * 
+	 */
+	private function userSpecificHash($password, $email) {
+		$subName = substr($email, 2, 6);
+		$subPass = substr($password, 0, 4);
+		$randomString = $this->randomString(16);
+		$special = md5($subName + $randomString + $subPass);
+		
+		return $special;
+	}
+	
+	/**
+	 * Create user
+	 * 
+	 * @access public
+	 * @param 
+	 */
+	public function createUser($name, $email, $password) {		
+		if ($name == '' OR $password == '' OR $email == '') {
+			return FALSE;
+		}
+		
+		$this->CI =& get_instance();
+		$specialHash = $this->userSpecificHash($password, $email);
+		$encryptedPassword = $this->encryptPassword($password); 
+		$data = array(
+			'username' => $name,
+			'email' => $email,
+			'password' => $encryptedPassword,
+			'user_hash' => $specialHash
+		);
+		$query = $this->CI->db->insert('users', $data);
+		
+		if ($query) {
+			return TRUE;
+		}		
 	}
 	
 	/**

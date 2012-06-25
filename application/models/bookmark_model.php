@@ -20,8 +20,9 @@ class Bookmark_model extends CI_Model {
 		//$userId = $this->session->userdata('id');
 		$query = $this
 					->db
-					->select('id, folderId, tagsId, typeId, noteId, name, description, url, image')
+					->select('id, folderId, tags, typeId, noteId, name, description, url, image')
 					->where('userId', $this->userId)
+					->where('id', $id)
 					->where('deleted', 0)
 					->limit(1)
 					->get('bookmarks');
@@ -48,13 +49,15 @@ class Bookmark_model extends CI_Model {
 	/**
 	 * method for adding bookmark from the app UI
 	 */
-	public function quickAddBookmark($name, $url, $folderId, $tags) {
+	public function quickAddBookmark($name, $url, $folderId, $tags, $baseUrl = null) {
+		$imageHash = md5($baseUrl);
+		
 		if ($folderId == 'null') {
 			$newBookmark = array('userId' => $this->userId, 'name' => $name, 
-								 'url' => $url, 'tags' => $tags);
+								 'url' => $url, 'tags' => $tags, 'image' => $imageHash);
 		} else {
 			$newBookmark = array('userId' => $this->userId, 'name' => $name, 
-								 'url' => $url, 'folderId' => $folderId, 'tags' => $tags);			
+								 'url' => $url, 'folderId' => $folderId, 'tags' => $tags, 'image' => $imageHash);			
 		}
 		
 		$action = $this
@@ -62,9 +65,10 @@ class Bookmark_model extends CI_Model {
 					->insert('bookmarks', $newBookmark);
 					
 		if($action) {
+			$returnId = $this->db->insert_id();			
+			$bookmarkToReturn = $this->getBookmark($returnId);
+			
 			$this->load->model('tag_model','',TRUE);
-						
-			$returnId = array('id' => $this->db->insert_id());			
 			
 			$tags = explode(",",$tags);
 			$count = count($tags);
@@ -83,10 +87,10 @@ class Bookmark_model extends CI_Model {
 				
 				$this
 					->tag_model
-					->tagBookmark($tagId, $returnId["id"]);			
+					->tagBookmark($tagId, $returnId);			
 			}			
 
-			return $returnId;
+			return $bookmarkToReturn;
 		} else {
 			return FALSE;
 		}					

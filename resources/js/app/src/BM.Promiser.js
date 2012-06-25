@@ -10,6 +10,7 @@ BM.Promiser = (function() {
 	storingTags = new $.Deferred(),
 	storingBookmarsk = new $.Deferred(),
 	fixingNoFolder = new $.Deferred(),
+	savingBookmark,
 	instantiated = null;
 
 	function init() {
@@ -21,7 +22,13 @@ BM.Promiser = (function() {
 			gettingBookmarks : gettingBookmarks,
 			storingFolders : storingFolders,
 			storingTags : storingTags,
-			storingBookmarsk : storingBookmarsk
+			storingBookmarsk : storingBookmarsk,
+			savingBookmark : savingBookmark,
+			promise : {
+				saveBookmark : function() {
+					savingBookmark = new $.Deferred();
+				}
+			}
 		};
 	}
 	

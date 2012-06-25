@@ -121,12 +121,11 @@ BM.Folders = {
  			storage.folders[0] = {
  				folder : folder 		
  			};
- 			storage.storeAllFolders(data);	
+ 			storage.storeAllFolders(data);
  		});
  		p.storingFolders.done(function() {
  			console.log('# done storing folders');
  			BM.Folders.View.init();
- 			BM.Folders.View.AddFolder.init(); 			
  		});
  		me.getFolders(); 		
 	}

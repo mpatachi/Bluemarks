@@ -49,7 +49,6 @@ BM.Tags = {
 		p.storingTags.done(function() {
 			console.log('# done storing tags');
 			BM.Tags.View.init();
-			//BM.Tags.View.AddTag.init();			
 		});
 		me.getTags();			
 	}

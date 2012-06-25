@@ -175,6 +175,7 @@ BM.Promiser = (function() {
 	storingTags = new $.Deferred(),
 	storingBookmarsk = new $.Deferred(),
 	fixingNoFolder = new $.Deferred(),
+	savingBookmark,
 	instantiated = null;
 
 	function init() {
@@ -186,7 +187,13 @@ BM.Promiser = (function() {
 			gettingBookmarks : gettingBookmarks,
 			storingFolders : storingFolders,
 			storingTags : storingTags,
-			storingBookmarsk : storingBookmarsk
+			storingBookmarsk : storingBookmarsk,
+			savingBookmark : savingBookmark,
+			promise : {
+				saveBookmark : function() {
+					savingBookmark = new $.Deferred();
+				}
+			}
 		};
 	}
 	
@@ -274,7 +281,7 @@ BM.Storage = (function() {
 			tagsName : [],
 			foldersId : [0],
 						
-			storeBookmark : function($b) {
+			storeBookmark : function($b, callback) {
 				var me = this;
 				var dirId;		
 				bookmarkCount++;
@@ -337,7 +344,14 @@ BM.Storage = (function() {
 					me.bookmarksByTag[item] = me.bookmarksByTag[item] || [];
 					me.bookmarksByTag[item].push(bookmarkCount);
 				});
-				return me.bookmarks[bookmarkCount];			
+				
+				var retBookmark = me.bookmarks[bookmarkCount];
+
+				if (callback != undefined) {
+					BM.e(callback(retBookmark));
+				}				
+				
+				return retBookmark;			
 			},
 			storeAllBookmarks : function($list) {
 				var me = this;
@@ -593,43 +607,10 @@ BM.Templater.Folders = {
 		var holder = $("<ul class='list-for-" + name + " folders-list' node='" + name + "'></ul>");
 		
 		return holder;
-	},
-	getAddModal : function() {
-		var modal = $('#add-folder-modal');
-		var submitBtn = modal.find('.modal-folder-add');
-		var nameField = modal.find('.modal-folder-name');
-		var selector = modal.find('.modal-parent-selector');
-		var nameGroup = modal.find('.modal-name-group');
-		var parentGroup = modal.find('.modal-parent-group');
-		
-		return {
-			el : modal,
-			submit : submitBtn,
-			name : nameField,
-			selector : selector,
-			nameGroup : nameGroup,
-			parentGroup : parentGroup
-		};
-	}	
+	}
 };
 
 BM.Templater.Tags = {
-	// ddTagHolder : function() {
-		// return $('.categories-dropdown');
-	// },
-	// getAddModal : function() {
-		// var modal = $('#add-tag-modal');
-		// var submitBtn = modal.find('.modal-tag-add');
-		// var nameField = modal.find('.modal-tag-name');
-		// var nameGroup = modal.find('.modal-name-group');
-// 		
-		// return {
-			// el : modal,
-			// submit : submitBtn,
-			// name : nameField,
-			// nameGroup : nameGroup,
-		// };		
-	// },
 	tagTypeahead : function() {
 		return $('.apply-tag-input');
 	}
@@ -794,12 +775,11 @@ BM.Folders = {
  			storage.folders[0] = {
  				folder : folder 		
  			};
- 			storage.storeAllFolders(data);	
+ 			storage.storeAllFolders(data);
  		});
  		p.storingFolders.done(function() {
  			console.log('# done storing folders');
  			BM.Folders.View.init();
- 			BM.Folders.View.AddFolder.init(); 			
  		});
  		me.getFolders(); 		
 	}
@@ -1068,48 +1048,6 @@ BM.Folders.View = {
 	} 
 };	/**
  * @author Robert
- * Folders.View.AddFolder.js
- */
-
-BM.Folders.View.AddFolder = {
-	modal : function() {
-		return $('#add-folder-modal');
-	},
-	bindHandlers : function() {
-		var modal = $('#add-folder-modal');
-		var submitBtn = modal.find('.modal-folder-add');
-		var nameField = modal.find('.modal-folder-name');
-		var selector = modal.find('.modal-parent-selector');
-		var d = $(document);
-		
-		submitBtn.on('click', function() {
-			d.trigger('add-folder', [nameField.val(), selector.val()]);
-			
-			return false;
-		});
-	},
-	listParents : function(callback) {
-		var storage = BM.Storage.g().folders;
-		var selector = this.modal().find('.modal-parent-selector');
-
-		_(storage).each(function(obj) {
-			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
-			selector.append(item);
-		});
-		
-		if (callback != undefined) {
-			BM.e(callback);
-		}
-	},
-	init : function() {
-		var me = this;
-		
-		me.listParents();
-		me.bindHandlers();
-	}
-};
-/**
- * @author Robert
  */
 
 BM.Tags = {
@@ -1159,7 +1097,6 @@ BM.Tags = {
 		p.storingTags.done(function() {
 			console.log('# done storing tags');
 			BM.Tags.View.init();
-			//BM.Tags.View.AddTag.init();			
 		});
 		me.getTags();			
 	}
@@ -1349,32 +1286,12 @@ BM.Tags.View = {
 /**
  * @author Robert
  */
-BM.Tags.View.AddTag = {
-	bindHandlers : function() {
-		var t = BM.Templater.Tags;
-		var modal = t.getAddModal();
-		//var submitBtn = modal.find('.modal-directory-add');
-		//var nameField = modal.find('.modal-directory-name');
-		//var selector = modal.find('.modal-parent-selector');
-		var d = $(document);
-		
-		modal.submit.on('click', function() {
-			d.trigger('add-tag', [modal.name.val()]);
-			
-			return false;
-		});
-	},
-	init : function() {
-		var me = this;
-		
-		me.bindHandlers();
-	}	
-};
-/**
- * @author Robert
- */
 
 BM.Bookmarks = {
+	/*
+	 * Gets all bookmarks from the server,
+	 * if the status is ok then the Promise is resolved
+	 */
 	getBookmarks : function(callback, limit) {
 		BM.p('bookmarks/list_all', function(response) {
 			if (response.status === 'ok') {
@@ -1387,6 +1304,13 @@ BM.Bookmarks = {
 			}
 		});
 	},
+	/*
+	 * Formats the url, if there is no protocol present in the url,
+	 * default http protocol is added to the url
+	 * 
+	 * @param string url
+	 * @return string url 
+	 */
 	formatUrl : function(url) {
 		var reg = url.match(/(http:\/\/|https:\/\/|ftp:\/\/)+\b/);
 		
@@ -1398,39 +1322,78 @@ BM.Bookmarks = {
 		
 		return protocol + url;
 	},
+	/*
+	 * Substracts the base url from a given url.
+	 * 
+	 * @param string url
+	 * @return string url
+	 */
+	baseUrl : function(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
+		
+		return url.match(re)[0].toString();
+	},
+	/*
+	 * Adding a bookmark logic
+	 * 
+	 * @param string url
+	 * @param string folderId
+	 * @param string tags
+	 * @param function callback
+	 */
 	addBookmark : function(url, folderId, tags, callback) {
 		var storage = BM.Storage.g();
+		var promiser = BM.Promiser.g();
 		var folder;
+		var d = $(document)
 		if (folderId == 'null') {
 			folder = null;
 		} else {
 			folder = storage.folders[folderId].folder.id;
 		}
 		var formatedUrl = this.formatUrl(url);
+		var baseUrl = this.baseUrl(formatedUrl);
 		
 		var params = {
 			url : formatedUrl,
 			folderId : folder,
-			tags : tags
+			tags : tags,
+			base_url : baseUrl
 		};
-		console.log(params);
+		//generates a promise for saving the bookmark before we send a request to the server.
+		//promiser.promise.saveBookmark();
+		
 		BM.p('bookmarks/add', function(response) {
 			if (response.status === 'ok') {
-				console.log('bookmark added', response.data);
-			} else {
+				storage.storeBookmark(response.data, function(bookmark) {
+					//promiser.promise.savingBookmark.resolve(bookmark);	//if the status is ok we can resolve the promise
+					d.trigger('done-add-bookmark', [bookmark.bookmark.proxy]);				
+				});
 				
-			}
+			} else {
+				//promiser.promise.savingBookmark.reject();		//if the status is error promise is rejected
+				d.trigger('fail-add-bookmark');
+			}	
 		}, params);
+		
+		var params2 = {
+			url : baseUrl
+		};
+		BM.p('thumbs/save', function(response) {
+			if (response.status === 'ok') {
+				console.log(response.msg);
+			} else {
+				console.log(response.msg);
+			}
+		}, params2);
 	},
 	init : function() {
-		var me = this;
-		var p = BM.Promiser.g();
-		// me.getBookmarks(function() {
-			// BM.Bookmarks.View.init();
-		// });
+		var me = this,
+			p = BM.Promiser.g(),
+			d = $(document);
+			
 		p.gettingBookmarks.done(function(data) {
 			console.log('# done getting bookmarks');
-			
 			$.when(p.storingTags, p.storingFolders).done(function() {
 				BM.Storage.g().storeAllBookmarks(data);
 			});	
@@ -1441,6 +1404,7 @@ BM.Bookmarks = {
 		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
 			BM.Bookmarks.View.AddBookmark.init();
+			d.trigger('remove-main-loading');
 		});
 		me.getBookmarks();
 	}
@@ -1450,21 +1414,25 @@ BM.Bookmarks = {
  */
 
 BM.Bookmarks.Sorter = (function() {
-	var instantiated = false;
-	var d = $(document);
-	var storage = BM.Storage.g();
-	var bookmarks = {
-		active : [],
-		cache : []	
-	};
-	var filters = {
-		active : {
-			folder : [],
-			tag : [],
-			type : []
+	var instantiated = false,
+		d = $(document),
+		storage = BM.Storage.g(),
+		bookmarks = {
+			active : [],
+			cache : [],
+			more : false,
+			max : 15,
+			last : 0,
+			counter : 0	
 		},
-		noActive : true
-	};
+		filters = {
+			active : {
+				folder : [],
+				tag : [],
+				type : []
+			},
+			noActive : true
+		};
 	function init() {
 		return {
 			filters : filters,
@@ -1475,6 +1443,12 @@ BM.Bookmarks.Sorter = (function() {
 				var byTag = [];
 				var active = filters.active;
 				var r;
+				bookmarks.active = [],
+				bookmarks.cache = [],
+				bookmarks.more = false,
+				bookmarks.max = 15,
+				bookmarks.last = 0,
+				bookmarks.counter = 0;				
 				
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
@@ -1500,8 +1474,50 @@ BM.Bookmarks.Sorter = (function() {
 					r = _.intersection(byF, byT);
 				}
 				
-				BM.Bookmarks.View.showBookmarks(r);
-				console.log(byFolder, byTag, r);
+				bookmarks.cache = r;
+				// var rest = r;
+				// if (r.length > 15) {
+					// rest = r.slice(0,15)
+					// bookmarks.more = true;
+					// bookmarks.last = 15;
+					// d.trigger('more-bookmarks-available');
+				// }
+				// bookmarks.active = rest;
+// 				
+				// BM.Bookmarks.View.showBookmarks(rest);
+				this.showBookmarks();
+				//console.log(byFolder, byTag, r);
+			},
+			showBookmarks : function() {
+				var	r = bookmarks.cache,
+					len = bookmarks.cache.length;
+				if (bookmarks.last > len) {
+					d.trigger('more-bookmarks-available', [false]);
+					
+					return;
+				}
+				if (len > bookmarks.max) {
+					bookmarks.counter += 1;
+					var maxy = 	bookmarks.counter * bookmarks.max;				
+					r = bookmarks.cache.slice(bookmarks.last,maxy);
+					bookmarks.last = maxy;
+					bookmarks.more = true;
+					if (bookmarks.last > len) {
+						bookmarks.more = false;
+						d.trigger('more-bookmarks-available', [false]);
+					} else {
+						bookmarks.more = true;
+						d.trigger('more-bookmarks-available', [true]);						
+					}					
+				} else {
+					bookmarks.more = false;
+					d.trigger('more-bookmarks-available', [false]);							
+				}
+				
+				bookmarks.active = r;
+		
+				console.log('###');				
+				BM.Bookmarks.View.showBookmarks(bookmarks.active);
 			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];
@@ -1597,7 +1613,6 @@ BM.Bookmarks.Sorter = (function() {
 BM.Bookmarks.View = {
 	listBookmarks : function(callback) {
 		var folders = BM.Storage.g().foldersId;
-		console.log(folders);
 		BM.Bookmarks.Sorter.g().activateMultipleFolder(folders, function() {
 			$(document).trigger('sort-bookmarks');
 		});
@@ -1636,80 +1651,47 @@ BM.Bookmarks.View = {
 		bHolder.detach();
 		bHolder.empty();	
 		if (i == 0) {
-			bHolder.html('<p>looks like there is no bookmarks</p>');
+			bHolder.html("<p class='no-bookmarks'>looks like there is no bookmarks</p>");
 			bHolderParent.append(bHolder);
 			return;
 		}
 		for (; i > 0; i--) {
-			var bookmark = bookmarks[list[i-1]].bookmark.proxy;			
-			var img = "<img src='../resources/img/160x120.gif' alt=''>";
-			var title = "<h5>" + bookmark.name + "</h5>";
-			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a>" + "</li>"
-		}
+			var bookmark = bookmarks[list[i-1]].bookmark.proxy,		
+				//img = "<img src='../resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+				img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+				title = "<h5>" + bookmark.name + "</h5>",
+				mark = "",
+				buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
+			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+		}		
 		bHolder.html(html);
-		bHolderParent.append(bHolder);
+		bHolderParent.append(bHolder);				
 	},
-	addPopovers : function() {
-		var popoverContent = $('#add-bookmark-popover');
-		var target = $('.bookmark-action');
-		target.popover({
-			placement : 'bottom',
-			trigger : 'manual',
-			title : function() {
-				return popoverContent.children('.title').html();
-			},
-			content : function() {
-				return popoverContent.children('.content').html();
-			}
-		});		
+	addBookmarkToView : function(bookmark) { 
+		var	img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+			title = "<h5>" + bookmark.name + "</h5>",
+			mark = "",
+			buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
+			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+		var $obj = $(html);
+		BM.Templater.Bookmarks.bookmarksList().prepend($obj);
 	},
 	bindHandlers : function() {
-		var me = this;
-		var d = $(document);
-//		var addPopoverIsActive = false;
-		var addBookmarkBtn = $('.bookmark-action');
+		var me = this,
+			d = $(document),
+			addBookmark = $('#add-bookmark'),
+			shareAll = $('#share-all'),
+			openAll = $('#open-all');
 		d.on('show-root-folders', function() {
 			me.listBookmarks();
 		});
-		// d.on('show-add-bookmark-popover', function() {
-			// addPopoverIsActive = true;
-			// addBookmarkBtn.popover('show');
-			// d.trigger('bind-add-bookmark-popover-events');			
-		// });
-		// d.on('hide-add-bookmark-popover', function() {
-			// d.trigger('unbind-add-bookmark-popover-events');
-			// addBookmarkBtn.popover('hide');
-			// addPopoverIsActive = false;
-		// });
-		// d.on('bind-add-bookmark-popover-events', function() {
-			// var popConfirm = $('.add-bookmark-popover-confirm');
-			// popConfirm.on('click', function(event) {
-				// //d.trigger('add-bookmark', [applyTagInput.val()]);
-				// console.log('this will be for adding bookmarks');
-				// return false;
-			// });
-			// var popClose = $('.add-bookmark-popover-close');
-			// popClose.on('click', function(event) {
-				// d.trigger('hide-add-bookmark-popover');
-				// //applyTagInput.val('');
-				// //applyTagInput.focus();
-// 				
-				// return false;		
-			// });			
-		// });
-		// d.on('unbind-add-bookmark-popover-events', function() {
-			// var popConfirm = $('.add-bookmark-popover-confirm');
-			// popConfirm.off('click');
-			// var popClose = $('.add-bookmark-popover-close');
-			// popClose.off('click');						
-		// });			
-		// addBookmarkBtn.on('click', function() {
-			// if (addPopoverIsActive) {
-				// d.trigger('hide-add-bookmark-popover');
-			// } else {
-				// d.trigger('show-add-bookmark-popover');
-			// }
-		// });	
+		
+		shareAll.on('click', function(event) {
+			return false;
+		});
+		openAll.on('click', function(event) {
+			return false;
+		});
 	},
 	init : function() {
 		var me = this;
@@ -1761,13 +1743,9 @@ BM.Mediator = {};
 
 BM.Mediator.Tags = {
 	provide : function() {
-		var d = $(document);
-		var tags = BM.Tags;
-		var t = BM.Templater;
-		//var modal = t.Tags.getAddModal();
-		//var nameGroup = modal.nameGroup;
-		//var storage = BM.Storage.g();
-		//var utils = BM.utils;
+		var d = $(document),
+			tags = BM.Tags;
+			
 		d.on('apply-tag', function(event, name) {
 			if (name == '') {
 				return;
@@ -1786,46 +1764,19 @@ BM.Mediator.Tags = {
 		 * displays error message if adding a tag fails
 		 */
 		// d.on('add-tag-error', function(event, msg) {
-			// nameGroup.removeClass('success'); 
-			// nameGroup.addClass('error');
-			// nameGroup.children('span').text(msg);
 		// });		
 		/**
 		 * hide the modal if the tag is added with success
 		 */
 		d.on('add-tag-success', function(event, msg) {
 			tags.View.updateTypeahead();
-			d.trigger('hide-tag-popover');
-			d.trigger('hide-apply-tag-input');
 		});
-		/** fires when the modal is hiding
-		 * 
-		 */
-		// modal.el.on('hide', function() {
-			// modal.name.val('');
-			// nameGroup.children('span').text('');
-			// nameGroup.removeClass('error').removeClass('success');
-		// });
-		/**
-		 *  what happens on enter key press on the modal
-		 */
-		// modal.el.on('keypress', function(event) {
-			// if (event.keyCode !== 13) {
-				// return;
-			// }
-			// d.trigger('add-tag', [modal.name.val()]);
-		// });
 	}
 };
 BM.Mediator.Folders = {
 	provide : function() {
-		var d = $(document);
-		var folders = BM.Folders;
-		var t = BM.Templater;
-		var modal = t.Folders.getAddModal();
-		var nameGroup = modal.nameGroup;
-		//var storage = BM.Storage.g();
-		//var utils = BM.utils;
+		var d = $(document),
+			folders = BM.Folders;
 		
 		/**
 		 * bind the add folder event to the document
@@ -1840,50 +1791,64 @@ BM.Mediator.Folders = {
 		 * displays error message if adding a folder fails
 		 */
 		d.on('add-folder-error', function(event, msg) {
-			nameGroup.removeClass('success'); 
-			nameGroup.addClass('error');
-			nameGroup.children('span').text(msg);
+			/*
+			 * some error message here
+			 */
 		});
 		/**
 		 * hides the add folder modal when the success event is triggered
 		 */
 		d.on('add-folder-success', function(event, msg) {
-			// nameGroup.removeClass('error');
-			// nameGroup.addClass('success');
-			// nameGroup.children('span').text(msg);
-			modal.el.modal('hide');
-		});
-		/**
-		 * resets the add folder modal on hide event
-		 */
-		modal.el.on('hide', function() {
-			modal.name.val('');
-			nameGroup.children('span').text('');
-			nameGroup.removeClass('error').removeClass('success');
-			modal.selector.val(modal.selector.prop('defaultSelected'));
-		});
-		/**
-		 * adds an enter keypress event to the add folder modal 
-		 */
-		modal.el.on('keypress', function(event) {
-			if (event.keyCode !== 13) {
-				return;
-			}
-			d.trigger('add-folder', [modal.name.val(), modal.selector.val()]);
+			/*
+			 * what happend when success
+			 */
 		});
 	}
 };
 
 BM.Mediator.Bookmarks = {
 	provide : function() {
-		var d = $(document);
-		var bookmarks = BM.Bookmarks;
-		var view = bookmarks.View;
-		var foldersView = BM.Folders.View;
-		var sorter = bookmarks.Sorter.g();
-		var t = BM.Templater;
-		var addBmActive = false;
-		
+		var d = $(document),
+			//p = BM.Promiser.g(),
+			bookmarks = BM.Bookmarks,
+			view = bookmarks.View,
+			foldersView = BM.Folders.View,
+			sorter = bookmarks.Sorter.g(),
+			t = BM.Templater,
+			more = false;
+			//loadingTemplate = $("<div id='bookmark-loading' class='loading'><div class='body'><span class='loader'>&nbsp;</span><span class='text'>application is starting...</span></div></div>");
+		/*
+		 * 
+		 */
+		// d.on('apply-loading-bookmarks', function(event) {
+			// $('#wall').append(loadingTemplate);
+		// });
+		// d.on('remove-loading-bookmarks', function(event) {
+			// $('#bookmark-loading').remove();
+		// });
+		d.on('more-bookmarks-available', function(event, ok) {
+			if (ok) {
+				more = true;
+				$('#show-more-bookmarks').removeClass('disabled');
+			} else {
+				more = false;
+				$('#show-more-bookmarks').addClass('disabled');				
+			}
+		});
+		d.on('show-more-bookmarks', function(event) {
+			if (more) {
+				//d.trigger('apply-loading-bookmarks');
+				sorter.showBookmarks();
+			}
+		});
+		$('#show-more-bookmarks').on('click', function() {
+			d.trigger('show-more-bookmarks');
+
+			return false;
+		});		
+		/*
+		 * event for activating a folder(s) as the current filter(s)
+		 */
 		d.on('sorter-activate-folder', function(event) {
 			var current = foldersView.currentFolder;
 			var node = $(".folder-btn[node-id='" + current + "']");
@@ -1906,10 +1871,10 @@ BM.Mediator.Bookmarks = {
 					d.trigger('sort-bookmarks');
 				});				
 			}
-			// sorter.activateFolder(folderId, function() {
-				// d.trigger('sort-bookmarks');
-			// });
 		});
+		/*
+		 * this event fires when we add tags to the selected tags list
+		 */
 		d.on('sorter-activate-tag', function(event, tag) {
 			if (tag == '') {
 				return;
@@ -1918,6 +1883,9 @@ BM.Mediator.Bookmarks = {
 				d.trigger('sort-bookmarks');
 			});
 		});
+		/*
+		 * this event fires when we remove a tag from the selected tags list
+		 */
 		d.on('sorter-diactivate-tag', function(event, tag) {
 			if (tag == '') {
 				return;
@@ -1926,37 +1894,16 @@ BM.Mediator.Bookmarks = {
 				d.trigger('sort-bookmarks');
 			});
 		});		
-		// d.on('sorter-activate-multiple-folders', function(event, folderId) {
-			// var foldersId = [folderId];
-			// var listHolder = $('.list-for-folder-' + folderId);
-			// var listItems = listHolder.find('.folder-btn');
-			// listItems.each(function() {
-				// var index = parseInt($(this).attr('node-id'), 10);
-				// foldersId.push(index);
-			// });
-// 			
-			// sorter.activateMultipleFolder(foldersId, function() {
-				// d.trigger('sort-bookmarks');
-			// });
-		// });
-// 		
-		// d.on('sorter-diactivate-multiple-folders', function(event, folderId) {
-			// var foldersId = [folderId];
-			// var listHolder = $('.list-for-folder-' + folderId);
-			// var listItems = listHolder.find('.folder-btn');
-			// listItems.each(function() {
-				// var index = parseInt($(this).attr('node-id'), 10);
-				// foldersId.push(index);
-			// });
-// 			
-			// sorter.diactivateMultipleFolder(foldersId);
-		// });
-		
+		/*
+		 * this is a generic bookmark sorter event
+		 */
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
 			sorter.sortBookmarks();
 		});
-		
+		/*
+		 * fires when we want to add a bookmark
+		 */
 		d.on('add-bookmark', function(event, url, folder, tags) {
 			console.log(url, folder, tags);
 			if (url == '') {
@@ -1964,34 +1911,27 @@ BM.Mediator.Bookmarks = {
 			}
 			bookmarks.addBookmark(url, folder, tags);
 		});
-		// var bookmarkAction = $('.main-bookmark-action');
-		// var bookmarkExecutor = $('.main-action-executor')
-		// bookmarkAction.on('click', function() {
-			// if (!addBmActive) {
-				// bookmarkAction.children('i').addClass('icon-white');
-				// addBmActive = true;
-				// setTimeout(function() {
-					// $('.main-action-bar-input').focus();
-					// bookmarkExecutor.children('i').addClass('icon-plus');
-				// }, 50);
-			// } else {
-				// addBmActive = false;
-				// bookmarkAction.children('i').removeClass('icon-white');
-				// bookmarkExecutor.children('i').removeClass('icon-plus');
-			// }
+		
+		// p.savingBookmarks.done(function(b) {
+			// console.log(b);
 		// });
-		// $('.main-action-bar-input').blur(function() {
-			// if (!addBmActive) { return; }
-			// setTimeout(function() {
-				// if (addBmActive) {
-					// addBmActive = false;
-					// bookmarkAction.button('toggle');
-					// bookmarkAction.children('i').removeClass('icon-white');
-					// bookmarkExecutor.children('i').removeClass('icon-plus');
-				// }				
-			// }, 100);
-// 
-		// });
+		
+		d.on('done-add-bookmark', function(event, b) {
+			d.trigger('add-bookmark-to-view', [b]);
+		});
+		d.on('fail-add-bookmark', function(event) {
+			
+		});
+		
+		d.on('add-bookmark-to-view', function(event, b) {
+			var cur;
+			if (foldersView.currentFolder == null) {
+				cur = 0;
+			}
+			if (foldersView.currentFolder == b.folderId) {
+				view.addBookmarkToView(b);
+			}
+		});
 	}
 };
 
@@ -2011,22 +1951,38 @@ BM.AppBoot = {
 	getInfo : function() {
 		var me = this;		
 		var info = BM.p('info/app_boot', function(response) {
-			me.user = response.data;
-			me.displayUser();
+			if (response.status == 'ok') {
+				me.user = response.data;
+				me.displayUser();
+			}			
 		});
 	},
 	displayUser : function() {
 		var holder = $('.current-user .username');
 		holder.text(this.user.email);
 	},
+	removeLoading : function() {
+		var loading = $('#main-loading'),
+			app = $('#app-container'),
+			d = $(document);
+		d.on('remove-main-loading', function() {
+			setTimeout(function() {
+				loading.hide();
+				app.fadeIn();
+			}, 400);
+		});
+		d.on('change-main-loading', function(event, msg) {
+			loading.find('span').html(msg);
+		});
+	},
 	init : function() {
 		var me = this;
 		me.getInfo();
+		me.removeLoading();
 		BM.Folders.init();
 		BM.Tags.init();
 		BM.Bookmarks.init();
 		BM.Mediator.init();					
-
 	},
 	end : function() {
 		

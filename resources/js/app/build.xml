@@ -19,10 +19,8 @@
 			<fileset dir="${SRC_JS_DIR}" includes="BM.Templater.js" />			
 			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.View.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="folders/BM.Folders.View.AddFolder.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.View.js" />
-			<fileset dir="${SRC_JS_DIR}" includes="tags/BM.Tags.View.AddTag.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.Sorter.js" />
 			<fileset dir="${SRC_JS_DIR}" includes="bookmarks/BM.Bookmarks.View.js" />

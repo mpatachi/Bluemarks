@@ -42,6 +42,7 @@ $route['default_controller'] = "welcome";
 $route['404_override'] = '';
 $route['login'] = 'dashboard/login';
 $route['logout'] = 'dashboard/login/logout';
+$route['signup'] = 'dashboard/login/signup';
 
 
 /* End of file routes.php */

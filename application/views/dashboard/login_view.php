@@ -1,12 +1,4 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<title>Login</title>
-	<style>label {display: block;}</style>
-</head>
-<body>
+<div class='container'>
 	<h1>Login</h1>
 	<?php echo form_open('dashboard/login');?>
 	<p>
@@ -27,5 +19,4 @@
 		?>
 	</p>
 	<?php echo form_close(); ?>
-</body>
-</html>
+</div>
