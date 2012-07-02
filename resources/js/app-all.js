@@ -640,6 +640,35 @@ BM.Templater.Bookmarks = {
 			folderGroup : folderGroup,
 			tagsGroup : tagsGroup
 		};
+	},
+	getEditModal : function() {
+		var modal = $('#edit-bookmark-modal');
+		var submitBtn = modal.find('.modal-bookmark-save-confirm');
+		var titleField = modal.find('.modal-bookmark-title');
+		var urlField = modal.find('.modal-bookmark-url');
+		var folderField = modal.find('.modal-bookmark-folder');
+		var tagsField = modal.find('.modal-bookmark-tags');
+		var descField = modal.find('.modal-bookmark-description');
+		var titleGroup = modal.find('.modal-title-group');
+		var urlGroup = modal.find('.modal-url-group');
+		var folderGroup = modal.find('.modal-folder-group');
+		var tagsGroup = modal.find('.modal-tags-group');
+		var descGroup = modal.find('.modal-description-group');
+		
+		return {
+			el : modal,
+			submit : submitBtn,
+			title : titleField,
+			url : urlField,
+			folder : folderField,
+			tags : tagsField,
+			description : descriptionField,
+			titleGroup : titleGroup,
+			urlGroup : urlGroup,
+			folderGroup : folderGroup,
+			tagsGroup : tagsGroup,
+			descriptionGroup : descGroup
+		};		
 	},	
 	bookmarkTemplate : function(id, name, url, folder, tag, type, image) {
 		var li = $("<li class='span2' bookmark-id='" + id + "' bookmark-folder='" + folder + "' bookmark-tag='" + tag + "' bookmark-type='" + type + "' ></li>");
@@ -846,7 +875,7 @@ BM.Folders.View = {
 		
 		_(storage.folderTree).each(function(obj) {
 			var listTemplate = t.listTemplate(obj.ref);
-
+			var folderItemList = [];
 			_(obj.children).each(function(index) {
 				var item = storage.getFolder(index).folder;
 				var dirRef = 'folder-' + item.intId;
@@ -856,10 +885,13 @@ BM.Folders.View = {
 				if (-1 === r) {
 					dirRef = 'none';
 				}
-				var listItem = t.itemTemplate(item.name, item.intId, dirRef, obj.ref);
-				listTemplate.append(listItem);
+				//var listItem = t.itemTemplate(item.name, item.intId, dirRef, obj.ref);
+				//listTemplate.append(listItem);
+				var listItem = "<li><a href='#' class='folder-btn' node-id='" + item.intId + "' node-target='" + dirRef + "' node-parent='" + obj.ref + "'>" + item.name + "</a></li>"
+				folderItemList.push(listItem);
 			});
-			
+			var toAppend = folderItemList.join('');
+			listTemplate.html(toAppend);
 			t.foldersListHolder().append(listTemplate);
 		});
 
@@ -1404,6 +1436,7 @@ BM.Bookmarks = {
 		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
 			BM.Bookmarks.View.AddBookmark.init();
+			BM.Bookmarks.View.EditBookmark.init();
 			d.trigger('remove-main-loading');
 		});
 		me.getBookmarks();
@@ -1423,7 +1456,8 @@ BM.Bookmarks.Sorter = (function() {
 			more : false,
 			max : 15,
 			last : 0,
-			counter : 0	
+			counter : 0,
+			list : {}	
 		},
 		filters = {
 			active : {
@@ -1448,7 +1482,10 @@ BM.Bookmarks.Sorter = (function() {
 				bookmarks.more = false,
 				bookmarks.max = 15,
 				bookmarks.last = 0,
-				bookmarks.counter = 0;				
+				bookmarks.counter = 0,
+				bookmarks.list = {};				
+				
+				d.trigger('reset-bookmark-nav-history');
 				
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
@@ -1475,6 +1512,19 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				
 				bookmarks.cache = r;
+				console.log('bookmarks cache: ', bookmarks.cache);
+				console.log('current bookmark count: ', bookmarks.cache.length, ' max bookmark to show: ', bookmarks.max);
+				console.log('pages: ', Math.ceil(bookmarks.cache.length / bookmarks.max));
+				console.log('slicing: ',bookmarks.cache.slice(bookmarks.last,1 * 15));
+				var len = bookmarks.cache.length;
+				var pageCount = Math.ceil(len / bookmarks.max);
+				for (var i = 1; i < pageCount + 1; i++) {
+					var it = i * bookmarks.max;
+					bookmarks.list[i] = bookmarks.cache.slice(bookmarks.last,it);
+					bookmarks.last = it;
+				}
+				console.log('bookmarks cache: ', bookmarks.cache);
+				console.log('bookmarks list: ',bookmarks.list);
 				// var rest = r;
 				// if (r.length > 15) {
 					// rest = r.slice(0,15)
@@ -1489,35 +1539,44 @@ BM.Bookmarks.Sorter = (function() {
 				//console.log(byFolder, byTag, r);
 			},
 			showBookmarks : function() {
-				var	r = bookmarks.cache,
-					len = bookmarks.cache.length;
-				if (bookmarks.last > len) {
-					d.trigger('more-bookmarks-available', [false]);
-					
-					return;
-				}
-				if (len > bookmarks.max) {
-					bookmarks.counter += 1;
-					var maxy = 	bookmarks.counter * bookmarks.max;				
-					r = bookmarks.cache.slice(bookmarks.last,maxy);
-					bookmarks.last = maxy;
-					bookmarks.more = true;
-					if (bookmarks.last > len) {
-						bookmarks.more = false;
-						d.trigger('more-bookmarks-available', [false]);
-					} else {
-						bookmarks.more = true;
-						d.trigger('more-bookmarks-available', [true]);						
-					}					
+				// var	r = bookmarks.cache,
+					// len = bookmarks.cache.length;
+				// if (bookmarks.last > len) {
+					// d.trigger('more-bookmarks-available', [false]);
+// 					
+					// return;
+				// }
+				// if (len > bookmarks.max) {
+					// bookmarks.counter += 1;
+					// var maxy = 	bookmarks.counter * bookmarks.max;				
+					// r = bookmarks.cache.slice(bookmarks.last,maxy);
+					// bookmarks.last = maxy;
+					// bookmarks.more = true;
+					// if (bookmarks.last > len) {
+						// bookmarks.more = false;
+						// d.trigger('more-bookmarks-available', [false]);
+					// } else {
+						// bookmarks.more = true;
+						// d.trigger('more-bookmarks-available', [true]);						
+					// }					
+				// } else {
+					// bookmarks.more = false;
+					// d.trigger('more-bookmarks-available', [false]);							
+				// }
+				// bookmarks.list[bookmarks.counter] = r;
+				// bookmarks.active = r;
+// 		
+				// console.log('###');
+				// if (bookmarks.counter > 1) {
+					// d.trigger('show-bookmark-nav-history');
+				// }
+				if (bookmarks.cache.length == 0) {
+					d.trigger('reset-bookmark-nav-history');
+					BM.Bookmarks.View.showBookmarks([]);
 				} else {
-					bookmarks.more = false;
-					d.trigger('more-bookmarks-available', [false]);							
+					d.trigger('show-bookmark-nav-history');				
+					BM.Bookmarks.View.showBookmarks(bookmarks.list[1]);
 				}
-				
-				bookmarks.active = r;
-		
-				console.log('###');				
-				BM.Bookmarks.View.showBookmarks(bookmarks.active);
 			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];
@@ -1641,11 +1700,27 @@ BM.Bookmarks.View = {
 			BM.e(callback);
 		}
 	},
+	showBookmarkNavHistory : function() {
+		var nav = $('#bookmark-nav-history');
+		var list = BM.Bookmarks.Sorter.g().bookmarks.list;
+		var html = [];
+		var i = 0;
+		_(list).each(function(obj) {
+			i++;
+			var item = "<a href='#' data-list='" + obj + "' data-page='" + i + "'></a>";
+			html.push(item);
+		});
+		nav.html(html.join(''));
+	},
+	resetBookmarkNavHistory : function() {
+		var nav = $('#bookmark-nav-history');
+		nav.html('');
+	},
 	showBookmarks : function(list, callback) {
 		var t = BM.Templater.Bookmarks,
 			bHolder = t.bookmarksList(),
 			bHolderParent = bHolder.parent(),
-			html = '',
+			html = [],
 			bookmarks = BM.Storage.g().bookmarks,
 			i = list.length;
 		bHolder.detach();
@@ -1658,21 +1733,31 @@ BM.Bookmarks.View = {
 		for (; i > 0; i--) {
 			var bookmark = bookmarks[list[i-1]].bookmark.proxy,		
 				//img = "<img src='../resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
-				img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+				img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='' alt=''>",
 				title = "<h5>" + bookmark.name + "</h5>",
-				mark = "",
-				buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
-			html += "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+				buttons = "<div class='action-group'><a href='#' data-id='" + bookmark.intId + "' class='action-group-btn delete' title='delete'><i class='icon-trash'></i></a><div class='btn-group-right'><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn edit' title='edit'><i class='icon-pencil'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn share' title='share'><i class='icon-share-alt'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn mark' title='mark'><i class='icon-ok'></i></a></div></div>";
+			html.push("<li draggable='true' class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + buttons + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a></li>");
 		}		
-		bHolder.html(html);
-		bHolderParent.append(bHolder);				
+		bHolder.html(html.join(''));
+		bHolderParent.append(bHolder);
+		/*
+		 * check if the thumbnail has loaded
+		 * if not set the default image
+		 */
+		var wall = bHolder.find('.bookmark-thumb');
+		for (i = 0, l = wall.length; i < l; i++) {
+			wall[i].src = wall[i].dataset.original;
+			$(wall[i]).error(function() {
+				console.log(this);
+				this.src = '/bluemarks/resources/img/default_thumb.jpg';
+			});
+		}				
 	},
 	addBookmarkToView : function(bookmark) { 
-		var	img = "<img src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+		var	img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
 			title = "<h5>" + bookmark.name + "</h5>",
-			mark = "",
-			buttons = "<div class='action-group'><button class='btn btn-mini' title='delete'><i class='icon-trash'></i></button><div class='btn-group'><button class='btn btn-mini' title='edit'><i class='icon-pencil'></i></button><button class='btn btn-mini' title='share'><i class='icon-share-alt'></i></button><button class='btn btn-mini rigth mark' title='mark'><i class='icon-ok'></i></button></div></div>";
-			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + mark + img + title + buttons + "</a></li>";
+			buttons = "<div class='action-group'><a href='#' data-id='" + bookmark.intId + "' class='action-group-btn delete' title='delete'><i class='icon-trash'></i></a><div class='btn-group-right'><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn edit' title='edit'><i class='icon-pencil'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn share' title='share'><i class='icon-share-alt'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn mark' title='mark'><i class='icon-ok'></i></a></div></div>";
+			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + buttons + "</a></li>";
 		var $obj = $(html);
 		BM.Templater.Bookmarks.bookmarksList().prepend($obj);
 	},
@@ -1681,7 +1766,10 @@ BM.Bookmarks.View = {
 			d = $(document),
 			addBookmark = $('#add-bookmark'),
 			shareAll = $('#share-all'),
-			openAll = $('#open-all');
+			openAll = $('#open-all'),
+			wall = $('#wall'),
+			editModal = $('#edit-bookmark-modal'),
+			storage = BM.Storage.g();
 		d.on('show-root-folders', function() {
 			me.listBookmarks();
 		});
@@ -1692,13 +1780,44 @@ BM.Bookmarks.View = {
 		openAll.on('click', function(event) {
 			return false;
 		});
+		// wall.on('error', '.bookmark-thumb', function() {
+			// console.log('error loading image', this.dataset.original);
+		// });
+		wall.on('click', '.edit', function() {
+			editModal.modal('toggle');
+			var bookmark = storage.bookmarks[this.dataset.id].bookmark;
+			console.log(bookmark);
+			editModal.find('.modal-bookmark-title').val(bookmark.proxy.name);
+			editModal.find('.modal-bookmark-url').val(bookmark.proxy.url);
+			editModal.find('.modal-bookmark-tags').val(bookmark.proxy.tags);
+			editModal.find('.modal-bookmark-folder').val(this.dataset.id);
+			editModal.find('.modal-bookmark-description').val(bookmark.real.description);
+			return false;
+		});
+		$('#bookmark-nav-history').on('click', 'a', function() {
+			var array = this.dataset.list.split(',');
+			me.showBookmarks(array);
+			$(this).parent()[0].dataset.page = this.dataset.page;
+			return false;
+		});
+		$('#show-more-bookmarks').on('click', function() {
+			d.trigger('show-more-bookmarks');
+
+			return false;
+		});		
 	},
 	init : function() {
 		var me = this;
-		
+		// $('#wall').on('error', '.bookmark-thumb', function() {
+			// console.log('error loading image', this.dataset.original);
+		// });
+		$('.bookmark-thumb').live('error', function() {
+			console.log('errrorasdada');
+		});	
 		me.listBookmarks(function() {
 //			console.log('done listing bookmarks');
 		});
+		me.showBookmarkNavHistory();
 		//me.addPopovers();
 		me.bindHandlers();
 	}
@@ -1728,6 +1847,42 @@ BM.Bookmarks.View.AddBookmark = {
 			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
 			modal.folder.append(item);
 		});		
+	},
+	init : function() {
+		var me = this;
+		me.listFolders();
+		me.bindHandlers();
+	}
+};
+/**
+ * @author Robert
+ */
+
+BM.Bookmarks.View.EditBookmark = {
+	modal : $('#edit-bookmark-modal'),
+	bindHandlers : function() {
+		// var me = this;
+		// var t = BM.Templater.Bookmarks;
+		// var modal = me.modal;
+		// var d = $(document);
+// 		
+		// modal.submit.on('click', function() {
+			// d.trigger('add-bookmark', [modal.url.val(), modal.folder.val(), modal.tags.val()]);
+// 			
+			// return false;
+		// });
+	},
+	listFolders : function() {
+		var folders = BM.Storage.g().folders;
+		var modal = this.modal;
+		var foldersSel = modal.find('.modal-bookmark-folder');
+		var html = [foldersSel.html()];	
+		_(folders).each(function(obj) {
+			var item = "<option value='" + obj.folder.intId + "'>" + obj.folder.name + "</option>";
+			html.push(item);
+		});
+		
+		foldersSel.html(html.join(''));
 	},
 	init : function() {
 		var me = this;
@@ -1815,7 +1970,8 @@ BM.Mediator.Bookmarks = {
 			foldersView = BM.Folders.View,
 			sorter = bookmarks.Sorter.g(),
 			t = BM.Templater,
-			more = false;
+			more = false,
+			navHistory = false;
 			//loadingTemplate = $("<div id='bookmark-loading' class='loading'><div class='body'><span class='loader'>&nbsp;</span><span class='text'>application is starting...</span></div></div>");
 		/*
 		 * 
@@ -1840,11 +1996,6 @@ BM.Mediator.Bookmarks = {
 				//d.trigger('apply-loading-bookmarks');
 				sorter.showBookmarks();
 			}
-		});
-		$('#show-more-bookmarks').on('click', function() {
-			d.trigger('show-more-bookmarks');
-
-			return false;
 		});		
 		/*
 		 * event for activating a folder(s) as the current filter(s)
@@ -1932,6 +2083,15 @@ BM.Mediator.Bookmarks = {
 				view.addBookmarkToView(b);
 			}
 		});
+		
+		d.on('show-bookmark-nav-history', function(event) {
+				view.showBookmarkNavHistory();
+		});
+		
+		d.on('reset-bookmark-nav-history', function(event) {
+			view.resetBookmarkNavHistory();
+			navHistory = false;
+		});
 	}
 };
 
@@ -1939,6 +2099,73 @@ BM.Mediator.init = function() {
 		this.Tags.provide();
 		this.Folders.provide();
 		this.Bookmarks.provide();
+};
+/**
+ * @author Robert
+ */
+
+BM.Searcher = {
+	omnibar : null,
+	results : [],
+	config : {
+		tag : true,
+		folder : true,
+		bookmark : true,
+	},
+	bindHandlers : function() {
+		var me = this;
+		var bookmarks = BM.Storage.g().bookmarks;
+		me.omnibar.on('input', function(event) {
+			var value = this.value;
+			var len = value.length;
+			if (len == 0) {
+				me.omnibar.popover('hide');
+			}
+			me.results = [];
+			if (len >= 2) {
+				_(bookmarks).each(function(obj) {
+					var o = obj.bookmark.proxy;
+					var q = new RegExp(value, "i");
+					var s = o.name.search(q);
+					if (s > -1) {
+						me.results.push(o);
+					}
+				});
+				me.omnibar.popover('show');
+				console.log(me.results);
+			}
+		});
+	},
+	addPopovers : function() {
+		var me = this;
+		me.omnibar.popover({
+			placement : 'bottom',
+			trigger : 'manual',
+			title : function() {
+				return 'search results';
+				//return target.children('.title').html();
+			},
+			content : function() {
+				var r = me.results;
+				var html = [];
+				for (var i = 0, l = r.length; i < l; i++) {
+					html.push("<a href='#' class='search-result'>" + r[i].name + "</a><br />");
+				}
+
+				return html.join('');
+				//return target.children('.content').html();
+			}
+		});
+		$('.search-btn').on('click', function() {
+			return false;
+		});
+	},
+	init : function() {
+		var me = this;
+		me.omnibar = $('#omnibar-input');
+		me.bindHandlers();
+		me.addPopovers();
+	}
 };
 /**
  * @author Robert
@@ -1982,7 +2209,8 @@ BM.AppBoot = {
 		BM.Folders.init();
 		BM.Tags.init();
 		BM.Bookmarks.init();
-		BM.Mediator.init();					
+		BM.Mediator.init();	
+		BM.Searcher.init();				
 	},
 	end : function() {
 		

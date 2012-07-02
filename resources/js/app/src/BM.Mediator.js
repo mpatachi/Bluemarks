@@ -78,7 +78,8 @@ BM.Mediator.Bookmarks = {
 			foldersView = BM.Folders.View,
 			sorter = bookmarks.Sorter.g(),
 			t = BM.Templater,
-			more = false;
+			more = false,
+			navHistory = false;
 			//loadingTemplate = $("<div id='bookmark-loading' class='loading'><div class='body'><span class='loader'>&nbsp;</span><span class='text'>application is starting...</span></div></div>");
 		/*
 		 * 
@@ -103,11 +104,6 @@ BM.Mediator.Bookmarks = {
 				//d.trigger('apply-loading-bookmarks');
 				sorter.showBookmarks();
 			}
-		});
-		$('#show-more-bookmarks').on('click', function() {
-			d.trigger('show-more-bookmarks');
-
-			return false;
 		});		
 		/*
 		 * event for activating a folder(s) as the current filter(s)
@@ -194,6 +190,15 @@ BM.Mediator.Bookmarks = {
 			if (foldersView.currentFolder == b.folderId) {
 				view.addBookmarkToView(b);
 			}
+		});
+		
+		d.on('show-bookmark-nav-history', function(event) {
+				view.showBookmarkNavHistory();
+		});
+		
+		d.on('reset-bookmark-nav-history', function(event) {
+			view.resetBookmarkNavHistory();
+			navHistory = false;
 		});
 	}
 };

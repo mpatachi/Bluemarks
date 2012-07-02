@@ -60,7 +60,7 @@ BM.Folders.View = {
 		
 		_(storage.folderTree).each(function(obj) {
 			var listTemplate = t.listTemplate(obj.ref);
-
+			var folderItemList = [];
 			_(obj.children).each(function(index) {
 				var item = storage.getFolder(index).folder;
 				var dirRef = 'folder-' + item.intId;
@@ -70,10 +70,13 @@ BM.Folders.View = {
 				if (-1 === r) {
 					dirRef = 'none';
 				}
-				var listItem = t.itemTemplate(item.name, item.intId, dirRef, obj.ref);
-				listTemplate.append(listItem);
+				//var listItem = t.itemTemplate(item.name, item.intId, dirRef, obj.ref);
+				//listTemplate.append(listItem);
+				var listItem = "<li><a href='#' class='folder-btn' node-id='" + item.intId + "' node-target='" + dirRef + "' node-parent='" + obj.ref + "'>" + item.name + "</a></li>"
+				folderItemList.push(listItem);
 			});
-			
+			var toAppend = folderItemList.join('');
+			listTemplate.html(toAppend);
 			t.foldersListHolder().append(listTemplate);
 		});
 

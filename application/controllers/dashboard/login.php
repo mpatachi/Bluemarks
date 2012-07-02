@@ -60,7 +60,10 @@ class Login extends CI_Controller {
 			if ( $action !== FALSE) {
 				redirect('login');
 			}
-		}				
+		}
+		
+		$data['main_content'] = 'dashboard/signup_view';
+		$this->load->view('dashboard/templates/shared', $data);						
 	}
 	
 	function logout()

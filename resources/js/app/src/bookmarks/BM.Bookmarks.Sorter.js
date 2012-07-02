@@ -12,7 +12,8 @@ BM.Bookmarks.Sorter = (function() {
 			more : false,
 			max : 15,
 			last : 0,
-			counter : 0	
+			counter : 0,
+			list : {}	
 		},
 		filters = {
 			active : {
@@ -37,7 +38,10 @@ BM.Bookmarks.Sorter = (function() {
 				bookmarks.more = false,
 				bookmarks.max = 15,
 				bookmarks.last = 0,
-				bookmarks.counter = 0;				
+				bookmarks.counter = 0,
+				bookmarks.list = {};				
+				
+				d.trigger('reset-bookmark-nav-history');
 				
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
@@ -64,6 +68,19 @@ BM.Bookmarks.Sorter = (function() {
 				}
 				
 				bookmarks.cache = r;
+				console.log('bookmarks cache: ', bookmarks.cache);
+				console.log('current bookmark count: ', bookmarks.cache.length, ' max bookmark to show: ', bookmarks.max);
+				console.log('pages: ', Math.ceil(bookmarks.cache.length / bookmarks.max));
+				console.log('slicing: ',bookmarks.cache.slice(bookmarks.last,1 * 15));
+				var len = bookmarks.cache.length;
+				var pageCount = Math.ceil(len / bookmarks.max);
+				for (var i = 1; i < pageCount + 1; i++) {
+					var it = i * bookmarks.max;
+					bookmarks.list[i] = bookmarks.cache.slice(bookmarks.last,it);
+					bookmarks.last = it;
+				}
+				console.log('bookmarks cache: ', bookmarks.cache);
+				console.log('bookmarks list: ',bookmarks.list);
 				// var rest = r;
 				// if (r.length > 15) {
 					// rest = r.slice(0,15)
@@ -78,35 +95,44 @@ BM.Bookmarks.Sorter = (function() {
 				//console.log(byFolder, byTag, r);
 			},
 			showBookmarks : function() {
-				var	r = bookmarks.cache,
-					len = bookmarks.cache.length;
-				if (bookmarks.last > len) {
-					d.trigger('more-bookmarks-available', [false]);
-					
-					return;
-				}
-				if (len > bookmarks.max) {
-					bookmarks.counter += 1;
-					var maxy = 	bookmarks.counter * bookmarks.max;				
-					r = bookmarks.cache.slice(bookmarks.last,maxy);
-					bookmarks.last = maxy;
-					bookmarks.more = true;
-					if (bookmarks.last > len) {
-						bookmarks.more = false;
-						d.trigger('more-bookmarks-available', [false]);
-					} else {
-						bookmarks.more = true;
-						d.trigger('more-bookmarks-available', [true]);						
-					}					
+				// var	r = bookmarks.cache,
+					// len = bookmarks.cache.length;
+				// if (bookmarks.last > len) {
+					// d.trigger('more-bookmarks-available', [false]);
+// 					
+					// return;
+				// }
+				// if (len > bookmarks.max) {
+					// bookmarks.counter += 1;
+					// var maxy = 	bookmarks.counter * bookmarks.max;				
+					// r = bookmarks.cache.slice(bookmarks.last,maxy);
+					// bookmarks.last = maxy;
+					// bookmarks.more = true;
+					// if (bookmarks.last > len) {
+						// bookmarks.more = false;
+						// d.trigger('more-bookmarks-available', [false]);
+					// } else {
+						// bookmarks.more = true;
+						// d.trigger('more-bookmarks-available', [true]);						
+					// }					
+				// } else {
+					// bookmarks.more = false;
+					// d.trigger('more-bookmarks-available', [false]);							
+				// }
+				// bookmarks.list[bookmarks.counter] = r;
+				// bookmarks.active = r;
+// 		
+				// console.log('###');
+				// if (bookmarks.counter > 1) {
+					// d.trigger('show-bookmark-nav-history');
+				// }
+				if (bookmarks.cache.length == 0) {
+					d.trigger('reset-bookmark-nav-history');
+					BM.Bookmarks.View.showBookmarks([]);
 				} else {
-					bookmarks.more = false;
-					d.trigger('more-bookmarks-available', [false]);							
+					d.trigger('show-bookmark-nav-history');				
+					BM.Bookmarks.View.showBookmarks(bookmarks.list[1]);
 				}
-				
-				bookmarks.active = r;
-		
-				console.log('###');				
-				BM.Bookmarks.View.showBookmarks(bookmarks.active);
 			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];

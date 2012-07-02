@@ -40,7 +40,8 @@ BM.AppBoot = {
 		BM.Folders.init();
 		BM.Tags.init();
 		BM.Bookmarks.init();
-		BM.Mediator.init();					
+		BM.Mediator.init();	
+		BM.Searcher.init();				
 	},
 	end : function() {
 		

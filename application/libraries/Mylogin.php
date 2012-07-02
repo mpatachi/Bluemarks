@@ -56,13 +56,19 @@ class Mylogin {
 			'password' => $encryptedPassword,
 			'user_hash' => $specialHash
 		);
-		$query = $this->CI->db->insert('users', $data);
+		$query = $this->CI->db->insert($this->user_table, $data);
 		
 		if ($query) {
 			return TRUE;
 		}		
 	}
 	
+	/**
+	 * Change user information
+	 */
+	public function changeInfo($lastName, $email, $password) {
+		
+	} 
 	/**
 	 * Login and set session data
 	 * 

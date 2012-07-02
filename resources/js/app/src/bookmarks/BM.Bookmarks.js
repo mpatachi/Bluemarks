@@ -119,6 +119,7 @@ BM.Bookmarks = {
 		$.when(p.storingTags, p.storingFolders, p.storingBookmarsk).done(function() {
 			BM.Bookmarks.View.init();
 			BM.Bookmarks.View.AddBookmark.init();
+			BM.Bookmarks.View.EditBookmark.init();
 			d.trigger('remove-main-loading');
 		});
 		me.getBookmarks();

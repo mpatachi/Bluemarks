@@ -36,8 +36,8 @@
 							<div class='form-inline toolbar-item'>
 								<div class="control-group">
 								    <div class="controls">
-											<div class="input-append searchbar">
-												<input class="span4 search-input" size="16" type="text"><button class="btn search-btn" type="button"><i class='icon-search'></i></button>
+											<div class="input-append omnibar">
+												<input id='omnibar-input' rel="popover" class="span4 omnibar-input" size="16" type="text"><a href='#' class="btn search-btn"><i class='icon-search'></i></a>
 											</div>
 									</div>
 								</div>							
@@ -56,9 +56,9 @@
 							<div class="btn-group account-group toolbar-item">
 								<a class="toolbar-text current-user" data-toggle="dropdown" href="#acccount-info"><span class="username">robert@yahoo.com</span><b class="caret"></b></a>
 								<ul class="dropdown-menu">
-								      <li><a href="#">Action</a></li>
-								      <li><a href="#">Another action</a></li>
-								      <li><a href="#">Something else here</a></li>
+								      <li><a href="#">Settings</a></li>
+								      <li><a href="#">Tools</a></li>
+								      <li><a href="#">Feedback</a></li>
 								      <li class="divider"></li>
 								      <li><a href="<?php echo site_url('logout'); ?>">Logout</a></li>
 								</ul>							
@@ -96,7 +96,7 @@
 						<li>
 							<div class="toolbar-item tags-action">
 								<a href='#' class='apply-tag-btn btn-special'>filter by tag</a>
-								<input class="span2 apply-tag-input" rel="popover" size="16" type="text" placeholder="type tag...">
+								<input class="span2 apply-tag-input" size="16" type="text" placeholder="type tag...">
 							</div>
 						</li>
 					</ul>					
@@ -107,8 +107,9 @@
 				</div>
 			</div> <!-- end right content -->
 		</div> <!-- end main content -->
+		<div id='bookmark-nav-history' data-page='1'></div>
 	</div> <!-- end mai app content -->
-	<div class="modal fade" id="add-bookmark-modal">
+	<div class="modal hide fade" id="add-bookmark-modal">
   		<div class="modal-header">
 	    	<a class="close" data-dismiss="modal">×</a>
 	    	<h3>Add bookmark</h3>
@@ -146,6 +147,58 @@
 	    	<a href="#" class="btn btn-primary modal-bookmark-add-confirm">add</a>
 	  	</div>
 	</div><!-- end add bookmark modal -->
+	<div class="modal hide fade" id="edit-bookmark-modal">
+  		<div class="modal-header">
+	    	<a class="close" data-dismiss="modal">×</a>
+	    	<h3>Edit bookmark</h3>
+	  	</div>
+  		<div class="modal-body"> 	
+  			<div class='control-group modal-title-group'>
+	    		<label>bookmark url:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-font'></i></span><!--
+  				 --><input type="text" class="span5 modal-bookmark-title">
+	  				<span class='help-inline help-message'></span>
+  				</div>
+  			</div>  					
+  			<div class='control-group modal-url-group'>
+	    		<label>bookmark url:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-globe'></i></span><!--
+  				 --><input type="text" class="span5 modal-bookmark-url">
+	  				<span class='help-inline help-message'></span>
+  				</div>
+  			</div>
+  			<div class='control-group modal-folder-group'>
+	    		<label>foldder:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-folder-open'></i></span><!--
+	  			 --><select class='span5 modal-bookmark-folder'>
+	  					<option value='null'>unsorted bookmarks</option>
+	  				</select>
+  					<span class='help-inline help-message'></span>
+  				</div>
+  			</div>
+  			<div class='control-group modal-tags-group'>
+	    		<label>tags:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-tags'></i></span><!--
+  				 --><input type="text" class="span3 modal-bookmark-tags">
+  					<span class='help-inline help-message'>Separate tags with commas</span>
+  				</div>
+  			</div>
+   			<div class='control-group modal-description-group'>
+	    		<label>description:</label>
+	    		<div class='input-prepend'>
+  				 	<textarea class='span5 modal-bookmark-description' row='6'></textarea>
+  				</div>
+  			</div>  			  			  			
+	  	</div>
+	  	<div class="modal-footer">
+	    	<a href="#" class="btn" data-dismiss="modal">close</a>
+	    	<a href="#" class="btn btn-primary modal-bookmark-save-confirm">save</a>
+	  	</div>
+	</div><!-- end edit bookmark modal -->	
 	<script type="text/javascript" src="<?php echo site_url('resources/js/app-all.js'); ?>"></script>
 </body>
 </html>
