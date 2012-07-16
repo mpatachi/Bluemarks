@@ -65,6 +65,8 @@ BM.Storage = (function() {
 			bookmarksByFolder : {
 				
 			},
+			//this needs to be removed
+			deletedBookmarks : [],
 			bookmarkRef : [],
 			foldersRef : [],
 			tagsRef : [],
@@ -144,13 +146,28 @@ BM.Storage = (function() {
 				
 				return retBookmark;			
 			},
-			storeAllBookmarks : function($list) {
+			storeAllBookmarks : function(list) {
 				var me = this;
-				var l = $list.length;
+				var l = list.length;
 				for (var i = 0; i< l; i++) {
-					me.storeBookmark($list[i]);
+					me.storeBookmark(list[i]);
 				}
 				BM.Promiser.g().storingBookmarsk.resolve();
+			},
+			/*
+			 * Deletes a bookmark and the related instances to it
+			 * 
+			 * @param object bookmark
+			 */
+			deleteBookmark : function(bookmark) {
+				var cur = bookmark.intId;
+				delete this.bookmarks[cur];
+				this.bookmarksByFolder[bookmark.folderId] = _.without(this.bookmarksByFolder[bookmark.folderId], cur);
+				var tags = bookmark.tags.split(',');
+				for (var i = 0, l = tags.length; i < l; i++) {
+					this.bookmarksByTag[tags[i]] = _.without(this.bookmarksByTag[tags[i]], cur);
+				}
+				console.log('done deleteting bookmark #storage.deleteBookmark');
 			},
 			storeTag : function($c) {
 				tagCount++;

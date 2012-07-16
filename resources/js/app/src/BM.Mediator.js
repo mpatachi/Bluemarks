@@ -158,7 +158,7 @@ BM.Mediator.Bookmarks = {
 		 */
 		d.on('sort-bookmarks', function(event) {
 			console.log('sorting bookmarks');
-			sorter.sortBookmarks();
+			sorter.sortBookmarks(sorter.showBookmarks);
 		});
 		/*
 		 * fires when we want to add a bookmark
@@ -183,17 +183,31 @@ BM.Mediator.Bookmarks = {
 		});
 		
 		d.on('add-bookmark-to-view', function(event, b) {
-			var cur;
-			if (foldersView.currentFolder == null) {
-				cur = 0;
-			}
+			var nav = $('#bookmark-nav-history');
+			var page = nav[0].dataset.page;
+			var bookmarkCount = nav[0].dataset.bookmarks;
 			if (foldersView.currentFolder == b.folderId) {
-				view.addBookmarkToView(b);
+				// view.addBookmarkToView(b);
+// 				
+				// if (bookmarkCount == 0) {
+					// $('#wall').find('.no-bookmarks').html('');
+				// } else if (bookmarkCount > 14) {
+// 					
+				// }
+				console.log('adding bookmark to view');
+				sorter.sortBookmarks(function() {
+					sorter.showBookmarksByPage(page)
+				});				
 			}
 		});
 		
 		d.on('show-bookmark-nav-history', function(event) {
 				view.showBookmarkNavHistory();
+		});
+		
+		d.on('setpage-bookmark-nav-history', function(event, page) {
+			var nav = $('#bookmark-nav-history');
+			nav[0].dataset.page = page;
 		});
 		
 		d.on('reset-bookmark-nav-history', function(event) {

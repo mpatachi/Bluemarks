@@ -27,7 +27,7 @@ BM.Bookmarks.Sorter = (function() {
 		return {
 			filters : filters,
 			bookmarks : bookmarks,
-			sortBookmarks : function() {
+			sortBookmarks : function(callback) {
 				var me = this;
 				var byFolder = [];
 				var byTag = [];
@@ -41,7 +41,7 @@ BM.Bookmarks.Sorter = (function() {
 				bookmarks.counter = 0,
 				bookmarks.list = {};				
 				
-				d.trigger('reset-bookmark-nav-history');
+				//d.trigger('reset-bookmark-nav-history');
 				
 				_(active.folder).each(function(f) {
 					var b = storage.bookmarksByFolder[f];
@@ -67,7 +67,10 @@ BM.Bookmarks.Sorter = (function() {
 					r = _.intersection(byF, byT);
 				}
 				
+				//bookmarks.cache = _.without(r, storage.deletedBookmarks);
 				bookmarks.cache = r;
+				bookmarks.cache.reverse(); //revert the array for the newest bookmarks;
+				
 				console.log('bookmarks cache: ', bookmarks.cache);
 				console.log('current bookmark count: ', bookmarks.cache.length, ' max bookmark to show: ', bookmarks.max);
 				console.log('pages: ', Math.ceil(bookmarks.cache.length / bookmarks.max));
@@ -91,7 +94,10 @@ BM.Bookmarks.Sorter = (function() {
 				// bookmarks.active = rest;
 // 				
 				// BM.Bookmarks.View.showBookmarks(rest);
-				this.showBookmarks();
+				if (callback != undefined) {
+					BM.e(callback);
+				}
+				//this.showBookmarks();
 				//console.log(byFolder, byTag, r);
 			},
 			showBookmarks : function() {
@@ -126,6 +132,7 @@ BM.Bookmarks.Sorter = (function() {
 				// if (bookmarks.counter > 1) {
 					// d.trigger('show-bookmark-nav-history');
 				// }
+				console.log('showing bookmarks');
 				if (bookmarks.cache.length == 0) {
 					d.trigger('reset-bookmark-nav-history');
 					BM.Bookmarks.View.showBookmarks([]);
@@ -133,6 +140,13 @@ BM.Bookmarks.Sorter = (function() {
 					d.trigger('show-bookmark-nav-history');				
 					BM.Bookmarks.View.showBookmarks(bookmarks.list[1]);
 				}
+			},
+			showBookmarksByPage : function(page) {
+				//d.trigger('show-bookmark-nav-history');
+				console.log('argumet passed page: ', page);
+				d.trigger('show-bookmark-nav-history');					
+				BM.Bookmarks.View.showBookmarks(bookmarks.list[page]);
+				d.trigger('setpage-bookmark-nav-history', page);	
 			},
 			activateFolder : function(id, callback) {
 				filters.active.folder = [];

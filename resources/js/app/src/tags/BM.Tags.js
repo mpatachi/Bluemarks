@@ -11,6 +11,8 @@ BM.Tags = {
 				if (callback != undefined) {
 					BM.e(callback);
 				}
+			} else {
+				BM.Promiser.g().gettingTags.resolve([]); //quick fix for not loading any tags
 			}
 		});
 	},

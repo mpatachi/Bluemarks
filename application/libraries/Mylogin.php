@@ -14,6 +14,8 @@ class Mylogin {
 	private function encryptPassword($password) {
 		//A simple hashing for now	
 		$encryptedPassword = sha1($password);
+		//the hashing should be
+		//$encryptedPassword = sha1($user_specific_hash . $password);
 		
 		return $encryptedPassword;
 	}
@@ -28,11 +30,11 @@ class Mylogin {
 	 * 
 	 */
 	private function userSpecificHash($password, $email) {
-		$subName = substr($email, 2, 6);
-		$subPass = substr($password, 0, 4);
+		$subName = substr($email, 1, 5);
+		$subPass = substr($password, 0, 5);
 		$randomString = $this->randomString(16);
-		$special = md5($subName + $randomString + $subPass);
-		
+		$special = md5($randomString . $subPass . $subName);
+
 		return $special;
 	}
 	
@@ -50,6 +52,7 @@ class Mylogin {
 		$this->CI =& get_instance();
 		$specialHash = $this->userSpecificHash($password, $email);
 		$encryptedPassword = $this->encryptPassword($password); 
+		
 		$data = array(
 			'username' => $name,
 			'email' => $email,
@@ -68,6 +71,12 @@ class Mylogin {
 	 */
 	public function changeInfo($lastName, $email, $password) {
 		
+	}
+	
+	public function changePassword($password) {
+		$encryptedPassword = $this->encryptPassword($password);
+		
+		return $encryptedPassword;
 	} 
 	/**
 	 * Login and set session data

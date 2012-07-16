@@ -6,18 +6,28 @@
 var BM = {};
 
 BM = {
+	/*
+	 * the environment
+	 * can be:
+	 * 		1. development
+	 * 		2. production
+	 */
+	environment : 'development',
+	thumbnails : 'not-active',
 	baseUri : function() {
 		var win = window.location;
 		//var origin = win.origin;
 		var hostname = win.hostname;
 		var protocol = win.protocol;
 		var origin = protocol + '//' + hostname;
-		
+		if (this.environment == 'development') {
+			origin += '/bluemarks';
+		}
 		return origin;		
 	},
 	apiUri : function() {
-		var api = this.baseUri() + '/bluemarks/api/';
-		
+		///var api = this.baseUri() + '/bluemarks/api/';
+		var api = this.baseUri() + '/api/';
 		return api;
 	},
 	p : function(command, callback, params) {

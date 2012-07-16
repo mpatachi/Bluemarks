@@ -56,7 +56,7 @@
 							<div class="btn-group account-group toolbar-item">
 								<a class="toolbar-text current-user" data-toggle="dropdown" href="#acccount-info"><span class="username">robert@yahoo.com</span><b class="caret"></b></a>
 								<ul class="dropdown-menu">
-								      <li><a href="#">Settings</a></li>
+								      <li><a href="#user-info-modal" data-toggle="modal">Settings</a></li>
 								      <li><a href="#">Tools</a></li>
 								      <li><a href="#">Feedback</a></li>
 								      <li class="divider"></li>
@@ -84,7 +84,7 @@
 						<input class="span2 add-new-folder" size="16" type="text" placeholder="type name...">
 					</div>	
 				</div>
-				<button id='show-more-bookmarks' class='btn'>show more</button>		
+				<!--<button id='show-more-bookmarks' class='btn'>show more</button>		-->
 			</div><!-- end left content -->
 			<div class='right-content'>
 				<div class='tags-toolbar'>
@@ -107,7 +107,7 @@
 				</div>
 			</div> <!-- end right content -->
 		</div> <!-- end main content -->
-		<div id='bookmark-nav-history' data-page='1'></div>
+		<div id='bookmark-nav-history' data-page='1' data-count='1'></div>
 	</div> <!-- end mai app content -->
 	<div class="modal hide fade" id="add-bookmark-modal">
   		<div class="modal-header">
@@ -152,9 +152,10 @@
 	    	<a class="close" data-dismiss="modal">×</a>
 	    	<h3>Edit bookmark</h3>
 	  	</div>
-  		<div class="modal-body"> 	
+  		<div class="modal-body">
+  			<input type='hidden' class='modal-edit-bookmark-id' />  	
   			<div class='control-group modal-title-group'>
-	    		<label>bookmark url:</label>
+	    		<label>bookmark title:</label>
 	    		<div class='input-prepend'>
 	    			<span class='add-on'><i class='icon-font'></i></span><!--
   				 --><input type="text" class="span5 modal-bookmark-title">
@@ -165,7 +166,7 @@
 	    		<label>bookmark url:</label>
 	    		<div class='input-prepend'>
 	    			<span class='add-on'><i class='icon-globe'></i></span><!--
-  				 --><input type="text" class="span5 modal-bookmark-url">
+  				 --><input type="text" class="span5 modal-bookmark-url disabled" readonly="readonly">
 	  				<span class='help-inline help-message'></span>
   				</div>
   			</div>
@@ -198,7 +199,41 @@
 	    	<a href="#" class="btn" data-dismiss="modal">close</a>
 	    	<a href="#" class="btn btn-primary modal-bookmark-save-confirm">save</a>
 	  	</div>
-	</div><!-- end edit bookmark modal -->	
+	</div><!-- end edit bookmark modal -->
+	<div class="modal hide fade" id="user-info-modal">
+  		<div class="modal-header">
+	    	<a class="close" data-dismiss="modal">×</a>
+	    	<h3>User settings</h3>
+	  	</div>
+  		<div class="modal-body"> 			
+  			<div class='control-group modal-curpassword-group'>
+	    		<label>current password:</label>
+	    		<div class='input-prepend'>
+	    			<span class='add-on'><i class='icon-lock'></i></span><!--
+  				 --><input type="password" class="span3 modal-user-curpassword" placeholder="First your current password...">
+					<span class='help-inline help-message'></span>  				
+  				</div>
+  			</div>
+  			<div class='control-group modal-newpassword-group'>
+	    		<label>new password:</label>
+	    		<div class='input-prepend'>
+  				 	<input type="password" class="span3 modal-user-newpassword" placeholder="your new password please...">
+  					<span class='help-inline help-message'></span>
+  				</div>
+  			</div>
+  			<div class='control-group modal-repassword-group'>
+	    		<label>retype new password:</label>
+	    		<div class='input-prepend'>
+  				 	<input type="password" class="span3 modal-user-repassword" placeholder="retype password...">
+  					<span class='help-inline help-message'>retype your new password</span>
+  				</div>
+  			</div>    			    			  			  			
+	  	</div>
+	  	<div class="modal-footer">
+	    	<a href="#" class="btn" data-dismiss="modal">close</a>
+	    	<a href="#" class="btn btn-primary modal-user-change-confirm">save</a>
+	  	</div>
+	</div><!-- end user settings modal -->		
 	<script type="text/javascript" src="<?php echo site_url('resources/js/app-all.js'); ?>"></script>
 </body>
 </html>

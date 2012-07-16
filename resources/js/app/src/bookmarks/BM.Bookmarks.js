@@ -16,6 +16,8 @@ BM.Bookmarks = {
 				if (callback != undefined) {
 					BM.e(callback);
 				}
+			} else {
+				BM.Promiser.g().gettingBookmarks.resolve([]);
 			}
 		});
 	},
@@ -91,16 +93,41 @@ BM.Bookmarks = {
 			}	
 		}, params);
 		
-		var params2 = {
-			url : baseUrl
+		if (BM.thumbnails == 'active') {
+			var params2 = {
+				url : baseUrl
+			};
+			BM.p('thumbs/save', function(response) {
+				if (response.status === 'ok') {
+					console.log(response.msg);
+				} else {
+					console.log(response.msg);
+				}
+			}, params2);
+		}
+	},
+	deleteBookmark : function(id) {
+		console.log('##');
+		if (id == null || id == undefined) return;
+		console.log('####');
+		var storage = BM.Storage.g();
+		var instance = storage.bookmarks[id].bookmark;
+		
+		var param = {
+			id : instance.real.id
 		};
-		BM.p('thumbs/save', function(response) {
-			if (response.status === 'ok') {
-				console.log(response.msg);
+		
+		BM.p('bookmarks/delete', function(response) {
+			if (response.status == 'ok') {
+				$(document).trigger('done-delete-bookmark', [id]);
+				//delete storage.bookmarks[id];
+				storage.deleteBookmark(instance.proxy);
+				storage.deletedBookmarks.push(parseInt(id,10));
+				console.log('deleted bookmark with id: ', id);
 			} else {
-				console.log(response.msg);
+				
 			}
-		}, params2);
+		}, param);
 	},
 	init : function() {
 		var me = this,

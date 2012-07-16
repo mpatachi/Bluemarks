@@ -46,8 +46,11 @@ BM.Searcher = {
 			content : function() {
 				var r = me.results;
 				var html = [];
+				if (r.length == 0) {
+					html.push('<p>no results</p>');
+				}
 				for (var i = 0, l = r.length; i < l; i++) {
-					html.push("<a href='#' class='search-result'>" + r[i].name + "</a><br />");
+					html.push("<a href='" + r[i].url + "' class='search-result' target='_blank'>" + r[i].name + "</a><div class='search-separator'></div>");
 				}
 
 				return html.join('');

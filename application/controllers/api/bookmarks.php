@@ -63,8 +63,8 @@ class Bookmarks extends REST_Controller
 	
 	function update_post($id, $name, $description, $url, $image, $typeId, $directoryId, $noteId) {
 		$checkUrl = $this
-								->bookmark_model
-								->checkBookmarkUrl($url);
+						->bookmark_model
+						->checkBookmarkUrl($url);
 		if($checkUrl) {
 			$action = $this
 						->bookmark_model
@@ -80,10 +80,10 @@ class Bookmarks extends REST_Controller
 		}			
 	}
 		
-	function delete_post($id) {
+	function delete_post() {
 		$action = $this
 					->bookmark_model
-					->deleteBookmark($id);
+					->deleteBookmark($this->post('id'));
 		
 		if($action) {
 			$this->response(array('status' => 'ok', 'msg' => 'Bookmark deleted successfuly.'), 200);

@@ -127,14 +127,20 @@ class Bookmark_model extends CI_Model {
 	 * @return bool
 	 */
 	public function deleteBookmark($bId) {
-		$newData = array('deleted', 1);
-		
+		// $newData = array('deleted' => 1);
+// 		
+		// $action = $this
+					// ->db
+					// ->where('id', $bId)
+					// ->where('userId', $this->userId)
+					// ->where('deleted', 0)
+					// ->update('bookmarks', $newData);
+
 		$action = $this
 					->db
 					->where('id', $bId)
 					->where('userId', $this->userId)
-					->where('deleted', 0)
-					->update('bookmarks', $newData);
+					->delete('bookmarks');
 		
 		if($action) {
 			return TRUE;	

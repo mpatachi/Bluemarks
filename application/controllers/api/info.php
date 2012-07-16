@@ -24,5 +24,28 @@ class Info extends REST_Controller
         {
            $this->response(array('status' => 'error', 'msg' => 'Couldn\'t find any information!'), 404);
         }
+	}
+	
+	function check_password_post() {
+		$pass = $this->post('password');
+		$action = $this->user_model->checkPassword($pass);
+
+		if ($action) {
+			$this->response(array('status' => 'ok', 'msg' => 'Password correct.'), 200); // 200 being the HTTP response code
+		} else {
+			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t get password!'), 200); // 200 being the HTTP response code
+		}
+	}
+	
+	function change_password_post() {
+		$pass = $this->post('password');
+		$action = $this->user_model->changePassword($pass);
+		
+		if ($action) {
+			$this->mylogin->logout();
+			$this->response(array('status' => 'ok', 'msg' => 'Password changed.'), 200); // 200 being the HTTP response code
+		} else {
+			$this->response(array('status' => 'error', 'msg' => 'Couldn\'t change password!'), 200); // 200 being the HTTP response code
+		}
 	}		
 }

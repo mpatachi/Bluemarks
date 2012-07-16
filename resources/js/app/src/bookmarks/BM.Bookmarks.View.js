@@ -40,9 +40,11 @@ BM.Bookmarks.View = {
 		var i = 0;
 		_(list).each(function(obj) {
 			i++;
-			var item = "<a href='#' data-list='" + obj + "' data-page='" + i + "'></a>";
+			//var item = "<a href='#' data-list='" + obj + "' data-page='" + i + "'></a>";
+			var item = "<a href='#' data-page='" + i + "'></a>";
 			html.push(item);
 		});
+		nav[0].dataset.count = i;
 		nav.html(html.join(''));
 	},
 	resetBookmarkNavHistory : function() {
@@ -50,23 +52,29 @@ BM.Bookmarks.View = {
 		nav.html('');
 	},
 	showBookmarks : function(list, callback) {
+		//quick fix should be removed
+		var baseUrl = BM.baseUri();
+		list = _.without(list, BM.Storage.g().deletedBookmarks);
+		
 		var t = BM.Templater.Bookmarks,
 			bHolder = t.bookmarksList(),
 			bHolderParent = bHolder.parent(),
 			html = [],
 			bookmarks = BM.Storage.g().bookmarks,
-			i = list.length;
+			l = list.length;
+
 		bHolder.detach();
-		bHolder.empty();	
-		if (i == 0) {
-			bHolder.html("<p class='no-bookmarks'>looks like there is no bookmarks</p>");
+		bHolder.empty();
+		$('#bookmark-nav-history')[0].dataset.bookmarks = l;	
+		if (l == 0) {
+			bHolder.html("<p class='no-bookmarks'>looks like there are no bookmarks</p>");
 			bHolderParent.append(bHolder);
 			return;
 		}
-		for (; i > 0; i--) {
-			var bookmark = bookmarks[list[i-1]].bookmark.proxy,		
-				//img = "<img src='../resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
-				img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='' alt=''>",
+		for (var i = 0; i < l; i++) {
+			var bookmark = bookmarks[list[i]].bookmark.proxy,		
+				img = "<img class='bookmark-thumb' data-original='" + baseUrl + "/resources/img/default_thumb.jpg' src='" + baseUrl + "/resources/img/default_thumb.jpg' alt=''>",
+				//img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='' alt=''>",
 				title = "<h5>" + bookmark.name + "</h5>",
 				buttons = "<div class='action-group'><a href='#' data-id='" + bookmark.intId + "' class='action-group-btn delete' title='delete'><i class='icon-trash'></i></a><div class='btn-group-right'><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn edit' title='edit'><i class='icon-pencil'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn share' title='share'><i class='icon-share-alt'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn mark' title='mark'><i class='icon-ok'></i></a></div></div>";
 			html.push("<li draggable='true' class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + buttons + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a></li>");
@@ -77,22 +85,30 @@ BM.Bookmarks.View = {
 		 * check if the thumbnail has loaded
 		 * if not set the default image
 		 */
-		var wall = bHolder.find('.bookmark-thumb');
-		for (i = 0, l = wall.length; i < l; i++) {
-			wall[i].src = wall[i].dataset.original;
-			$(wall[i]).error(function() {
-				console.log(this);
-				this.src = '/bluemarks/resources/img/default_thumb.jpg';
-			});
-		}				
+		// var wall = bHolder.find('.bookmark-thumb');
+		// for (var k = 0, l = wall.length; k < l; k++) {
+			// wall[k].src = wall[k].dataset.original;
+			// $(wall[k]).error(function() {
+				// this.src = '/bluemarks/resources/img/default_thumb.jpg';
+			// });
+		// }				
 	},
 	addBookmarkToView : function(bookmark) { 
-		var	img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' alt=''>",
+		//var	img = "<img class='bookmark-thumb' data-original='http://192.168.75.128/thumber/resources/img/" + bookmark.image + "_thumb.jpg' src='' alt=''>",
+		var img = "<img class='bookmark-thumb' data-original='" + baseUrl + "/resources/img/default_thumb.jpg' src='" + baseUrl + "/resources/img/default_thumb.jpg' alt=''>",
 			title = "<h5>" + bookmark.name + "</h5>",
 			buttons = "<div class='action-group'><a href='#' data-id='" + bookmark.intId + "' class='action-group-btn delete' title='delete'><i class='icon-trash'></i></a><div class='btn-group-right'><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn edit' title='edit'><i class='icon-pencil'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn share' title='share'><i class='icon-share-alt'></i></a><a data-id='" + bookmark.intId + "' href='#' class='action-group-btn mark' title='mark'><i class='icon-ok'></i></a></div></div>";
-			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + buttons + "</a></li>";
+			html = "<li class='span2' bookmark-id='" + bookmark.intId + "' bookmark-folder='" + bookmark.folderId + "' bookmark-tag='" + bookmark.tags + "' bookmark-type='" + bookmark.typeId + "' >" + buttons + "<a href='" + bookmark.url + "' target='_blank' class='thumbnail'>" + img + title + "</a></li>";
 		var $obj = $(html);
+		
 		BM.Templater.Bookmarks.bookmarksList().prepend($obj);
+		var nav = $('#bookmark-nav-history')[0];
+		nav = nav[0].dataset.count + 1;
+		// var temp = $obj.find('.bookmark-thumb');
+		// temp[0].src = temp[0].dataset.original;
+		// $obj.error(function() {
+			// this.src = '/bluemarks/resources/img/default_thumb.jpg';
+		// });
 	},
 	bindHandlers : function() {
 		var me = this,
@@ -103,6 +119,8 @@ BM.Bookmarks.View = {
 			wall = $('#wall'),
 			editModal = $('#edit-bookmark-modal'),
 			storage = BM.Storage.g();
+			sorter = BM.Bookmarks.Sorter.g();
+			
 		d.on('show-root-folders', function() {
 			me.listBookmarks();
 		});
@@ -123,14 +141,25 @@ BM.Bookmarks.View = {
 			editModal.find('.modal-bookmark-title').val(bookmark.proxy.name);
 			editModal.find('.modal-bookmark-url').val(bookmark.proxy.url);
 			editModal.find('.modal-bookmark-tags').val(bookmark.proxy.tags);
-			editModal.find('.modal-bookmark-folder').val(this.dataset.id);
+			editModal.find('.modal-bookmark-folder').val(bookmark.proxy.folderId);
 			editModal.find('.modal-bookmark-description').val(bookmark.real.description);
+			editModal.find('.modal-edit-bookmark-id').val(this.dataset.id);
 			return false;
 		});
+		wall.on('click', '.delete', function() {
+			console.log('bla');
+			BM.Bookmarks.deleteBookmark(this.dataset.id);
+			d.trigger('sort-bookmarks');
+			return false;
+		});
+		
 		$('#bookmark-nav-history').on('click', 'a', function() {
-			var array = this.dataset.list.split(',');
+			//var array = this.dataset.list.split(',');
+			var page = this.dataset.page;
+			var array = sorter.bookmarks.list[page];
+			me.currentWallPage = page;
+			$(this).parent()[0].dataset.page = page;
 			me.showBookmarks(array);
-			$(this).parent()[0].dataset.page = this.dataset.page;
 			return false;
 		});
 		$('#show-more-bookmarks').on('click', function() {

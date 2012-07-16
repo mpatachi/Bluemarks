@@ -15,6 +15,43 @@ BM.AppBoot = {
 			}			
 		});
 	},
+	// changePassword : function() {
+		// var me = this;
+		// var pass;
+		// $('.modal-user-change-confirm').on('click', function() {
+			// var newpass = $('.modal-user-newpassword').val();
+			// var repass = $('.modal-user-repassword').val();
+			// var curpass = $('.modal-user-curpassword').val();
+			// var param = {
+				// password : curpass
+			// };
+// 			
+			// BM.p('info/check_password', function(r) {
+				// if (r.status == 'ok') {
+					// if (newpass != repass) {
+						// $('.modal-repassword-group').find('.help-message').text('password does not match');
+					// } else {
+						// var param2 = {
+							// password : newpass
+						// };
+						// BM.p('info/change_password', function(res) {
+							// if (res.status == 'ok') {
+								// window.location.reload();
+							// }
+						// }, param2);
+					// }
+					// $('.modal-curpassword-group').find('.help-message').text('');
+				// } else {
+					// $('.modal-curpassword-group').find('.help-message').text('wrong password');
+					// newpass.val('');
+					// repass.val('');
+					// $('.modal-repassword-group').find('.help-message').text('retype password');
+				// }
+			// }, param);
+// 			
+			// return false;
+		// });
+	// },
 	displayUser : function() {
 		var holder = $('.current-user .username');
 		holder.text(this.user.email);
@@ -41,7 +78,9 @@ BM.AppBoot = {
 		BM.Tags.init();
 		BM.Bookmarks.init();
 		BM.Mediator.init();	
-		BM.Searcher.init();				
+		BM.Searcher.init();
+		
+		//me.changePassword();				
 	},
 	end : function() {
 		
