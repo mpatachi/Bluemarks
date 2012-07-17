@@ -1,2 +1,2 @@
-web1: #web component, number 1
-	php_extensions: [mcrypt, mysqli, mysql, mbstring, curl]  
+web1:
+  php_extensions: [mcrypt, mysqli, mysql, mbstring, curl]  
