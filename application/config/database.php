@@ -41,9 +41,12 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'root';
-$db['default']['password'] = '';
+//$db['default']['hostname'] = 'localhost';
+$db['default']['hostname'] = 'tunnel.pagodabox.com';
+//$db['default']['username'] = 'root';
+$db['default']['username'] = 'faith';
+//$db['default']['password'] = '';
+$db['default']['password'] = 'wavucsyn';
 $db['default']['database'] = 'bluemarks_db';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';

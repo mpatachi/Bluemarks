@@ -15,7 +15,8 @@
 |
 */
 //$config['base_url']	= 'http://192.168.0.176/bluemarks/';
-$config['base_url']	= 'http://localhost/bluemarks/';
+//$config['base_url']	= 'http://localhost/bluemarks/';
+$config['base_url']	= 'http://bluemarks.pagodabox.com/';
 /*
 |--------------------------------------------------------------------------
 | Index File
